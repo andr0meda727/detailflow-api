@@ -11,18 +11,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="77103cc4-7ce8-4b68-8c05-692d8e6a0e9b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Core/DTOs/Common/ApiResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/DTOs/Inventory/InventoryDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Mappings/BookingMapper.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Models/Vehicle.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Infrastructure/Identity/JwtTokenGenerator.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Booking.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/BookingService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/BookingStatus.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Client.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Inventory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/InventoryCategory.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Payment.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Service.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/StripeEvent.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/Studio.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/StudioSubscription.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/SubscriptionPlan.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Models/User.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/BookingModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/BookingServiceModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/BookingStatusModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/ClientModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/InventoryCategoryModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/InventoryModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/PaymentModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/ServiceModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/StripeEventModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/StudioModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/StudioSubscriptionModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/SubscriptionPlanModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/UserModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/Models/VehicleModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Infrastructure/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Class1.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/Api.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Api.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/Api.http" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Api.http" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Core.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Core.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Infrastructure/Class1.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Mappings/BookingMapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Mappings/BookingMapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Models/Vehicle.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Models/Vehicle.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Infrastructure/Infrastructure.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Infrastructure/Infrastructure.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tests/Tests.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tests/UnitTest1.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IntegrationTests/IntegrationTests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/IntegrationTests/IntegrationTests.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,22 +58,30 @@
   <component name="DpaMonitoringSettings">
     <option name="firstShow" value="false" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JSON File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "andr0meda727"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;andr0meda727&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/andr0meda727/detailflow-api.git",
-    "accountId": "c40cbd4b-0852-470f-9ed3-93fbc5c02d81"
+    "accountId": "594d482c-481f-49eb-a519-82cf688ec50f"
   }
 }]]></component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/b178a025dec62c331cd4b19b802649597d1c88a41c3fcea338bb02be873f1a/BaseModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Controllers/BookingsController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Extensions/ServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Filters/ValidationFilter.cs" root0="FORCE_HIGHLIGHTING" />
@@ -64,6 +98,19 @@
     <setting file="file://$PROJECT_DIR$/Core/Exceptions/NotFoundException.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Interfaces/IBookingService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Mappings/BookingMapper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Booking.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/BookingService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/BookingStatus.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Client.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Inventory.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/InventoryCategory.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Payment.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Service.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/StripeEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/Studio.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/StudioSubscription.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/SubscriptionPlan.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Models/User.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Models/Vehicle.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Services/BookingService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Validators/CreateBookingRequestValidator.cs" root0="FORCE_HIGHLIGHTING" />
@@ -73,6 +120,19 @@
     <setting file="file://$PROJECT_DIR$/Infrastructure/Data/Migrations/Mig.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Extensions/ServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Identity/JwtTokenGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingServiceModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingStatusModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/ClientModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/InventoryCategoryModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/InventoryModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/PaymentModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/ServiceModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StripeEventModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StudioModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StudioSubscriptionModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/SubscriptionPlanModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/VehicleModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Repositories/IRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Services/StripeService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/IntegrationTests/UnitTest1.cs" root0="FORCE_HIGHLIGHTING" />
@@ -91,34 +151,56 @@
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="39WUC9y7DhEXsIkfGdiwR4yetXt" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.Api: http.executor&quot;: &quot;Run&quot;,
-    &quot;.NET Launch Settings Profile.detailflow_api: http.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.Api | #1.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.detailflow_api | #1.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.Api: http.executor": "Run",
+    ".NET Launch Settings Profile.detailflow_api: http.executor": "Run",
+    "HTTP Request.Api | #1.executor": "Run",
+    "HTTP Request.detailflow_api | #1.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "HotReloadSettingsPage",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;GitIgnore&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "GitIgnore"
     ]
   }
-}</component>
+}]]></component>
+  <component name="RunDashboard">
+    <option name="configurationStatuses">
+      <map>
+        <entry key="HttpClient.HttpRequestRunConfigurationType">
+          <value>
+            <map>
+              <entry key="Api | #1" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="RunManager" selected=".NET Launch Settings Profile.Api: http">
     <configuration name="Api | #1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/Api/Api.http" executionIdentifier="#1" runType="Run single request">
       <method v="2" />
@@ -233,6 +315,7 @@
       <option name="presentableId" value="Default" />
       <updated>1770811190427</updated>
       <workItem from="1770811191544" duration="4995000" />
+      <workItem from="1770826959245" duration="6878000" />
     </task>
     <task id="LOCAL-00001" summary="Add basic structure for Api">
       <option name="closed" value="true" />
@@ -272,5 +355,9 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

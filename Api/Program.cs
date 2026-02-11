@@ -1,3 +1,6 @@
+using DotNetEnv;
+using Supabase;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -25,7 +28,7 @@ app.MapGet("/weatherforecast", () =>
                 new WeatherForecast
                 (
                     DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
+                    Random.Shared.Next(-20, 55), 
                     summaries[Random.Shared.Next(summaries.Length)]
                 ))
             .ToArray();
@@ -33,9 +36,21 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast");
 
+Env.Load();
+
+var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
+var key = Environment.GetEnvironmentVariable("SUPABASE_KEY");
+var options = new Supabase.SupabaseOptions
+{
+    AutoConnectRealtime = true
+};
+var supabase = new Supabase.Client(url, key, options);
+await supabase.InitializeAsync();
+
+    
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    
 }
