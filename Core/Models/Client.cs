@@ -10,4 +10,9 @@ public class Client
     public string? Nip { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

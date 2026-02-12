@@ -16,4 +16,10 @@ public class StudioSubscription
     public DateTime? TrialEnd { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public SubscriptionPlan? Plan { get; set; }
+    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public ICollection<StripeEvent> StripeEvents { get; set; } = new List<StripeEvent>();
 }

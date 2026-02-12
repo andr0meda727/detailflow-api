@@ -10,4 +10,9 @@ public class Vehicle
     public string LicensePlate { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public Client? Client { get; set; }
+    public Studio? Studio { get; set; }
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

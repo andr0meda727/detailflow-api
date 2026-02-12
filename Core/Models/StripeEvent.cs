@@ -12,4 +12,8 @@ public class StripeEvent
     public DateTime? ProcessedAt { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public StudioSubscription? Subscription { get; set; }
 }

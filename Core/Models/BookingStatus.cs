@@ -6,4 +6,7 @@ public class BookingStatus
     public string Name { get; set; } = string.Empty;
     public string? Color { get; set; }
     public int SortOrder { get; set; }
+
+    // Relationships
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

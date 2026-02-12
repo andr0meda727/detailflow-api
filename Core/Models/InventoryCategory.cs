@@ -7,4 +7,8 @@ public class InventoryCategory
     public string Name { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public ICollection<Inventory> InventoryItems { get; set; } = new List<Inventory>();
 }

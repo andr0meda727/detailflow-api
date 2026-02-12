@@ -16,4 +16,8 @@ public class Payment
     public string? FailureMessage { get; set; }
     public DateTime? PaidAt { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public StudioSubscription? Subscription { get; set; }
 }

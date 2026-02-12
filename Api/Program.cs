@@ -1,11 +1,13 @@
-using DotNetEnv;
-using Supabase;
+using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Add Infrastructure (Database, Repositories)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -36,18 +38,6 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast");
 
-Env.Load();
-
-var url = Environment.GetEnvironmentVariable("SUPABASE_URL");
-var key = Environment.GetEnvironmentVariable("SUPABASE_KEY");
-var options = new Supabase.SupabaseOptions
-{
-    AutoConnectRealtime = true
-};
-var supabase = new Supabase.Client(url, key, options);
-await supabase.InitializeAsync();
-
-    
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

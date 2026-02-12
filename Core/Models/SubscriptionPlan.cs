@@ -19,4 +19,7 @@ public class SubscriptionPlan
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public ICollection<StudioSubscription> StudioSubscriptions { get; set; } = new List<StudioSubscription>();
 }

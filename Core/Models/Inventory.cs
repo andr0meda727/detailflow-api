@@ -13,4 +13,8 @@ public class Inventory
     public int? Capacity { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    // Relationships
+    public Studio? Studio { get; set; }
+    public InventoryCategory? Category { get; set; }
 }
