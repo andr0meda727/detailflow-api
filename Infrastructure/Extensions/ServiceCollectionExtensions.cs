@@ -10,9 +10,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var cs = configuration.GetConnectionString("DefaultConnection");
+        
         // Add DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(cs));
 
         // Add repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -20,3 +22,4 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
+

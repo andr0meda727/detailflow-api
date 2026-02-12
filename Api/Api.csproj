@@ -8,10 +8,8 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DotNetEnv" Version="3.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0" />
-        <PackageReference Include="Supabase" Version="1.1.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,8 +19,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Core\Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-      <ProjectReference Include="..\IntegrationTests\IntegrationTests.csproj" />
-      <ProjectReference Include="..\UnitTests\UnitTests.csproj" />
     </ItemGroup>
 
 </Project>
