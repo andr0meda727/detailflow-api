@@ -1,4 +1,7 @@
 ﻿using Infrastructure.Data;
+using Core.Interfaces;
+using Core.Interfaces.Repositories;
+using Core.Services;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +21,10 @@ public static class ServiceCollectionExtensions
 
         // Add repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        
+        // Add tenant context
+        services.AddScoped<ITenantContext, TenantContext>();
 
         return services;
     }
