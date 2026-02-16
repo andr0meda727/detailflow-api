@@ -16,4 +16,10 @@ public class BookingService(
         var bookings = await bookingRepository.GetAllWithDetailsAsync();
         return bookings.Select(mapper.MapBookingToResponse).ToList();
     }
+
+    public async Task<BookingResponseDto> GetBookingByIdAsync(Guid id)
+    {
+        var booking = await bookingRepository.GetByIdAsync(id);
+        return (booking != null ? mapper.MapBookingToResponse(booking) : null) ?? throw new Exception("Booking not found");
+    }
 }

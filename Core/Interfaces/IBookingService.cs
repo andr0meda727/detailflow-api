@@ -2,7 +2,8 @@
 
 namespace Core.Interfaces;
 
-public interface IBookingService
+public interface IBookingService 
 {
     Task<List<BookingResponseDto>> GetAllBookingsAsync();
+    Task<BookingResponseDto?> GetBookingByIdAsync(Guid id);
 }
