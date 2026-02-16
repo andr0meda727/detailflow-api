@@ -1,6 +1,17 @@
-﻿namespace Api.Controllers;
+﻿using Core.DTOs.Bookings;
+using Core.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
-public class BookingsController
+namespace Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class BookingsController(IBookingService bookingService) : ControllerBase
 {
-    
+    [HttpGet]
+    public async Task<ActionResult<List<BookingResponseDto>>> GetAllBookings()
+    {
+        var bookings = await bookingService.GetAllBookingsAsync();
+        return Ok(bookings);
+    }
 }

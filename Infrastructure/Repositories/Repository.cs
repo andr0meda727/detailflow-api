@@ -1,4 +1,5 @@
 using Infrastructure.Data;
+using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -6,28 +7,28 @@ namespace Infrastructure.Repositories;
 public class Repository<T>(ApplicationDbContext context) : IRepository<T>
     where T : class
 {
-    private readonly DbSet<T> _dbSet = context.Set<T>();
+    protected readonly DbSet<T> DbSet = context.Set<T>();
 
     public async Task<T?> GetByIdAsync(Guid id)
     {
-        return await _dbSet.FindAsync(id);
+        return await DbSet.FindAsync(id);
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await DbSet.ToListAsync();
     }
 
     public async Task<T> AddAsync(T entity)
     {
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
         await context.SaveChangesAsync();
         return entity;
     }
 
     public async Task UpdateAsync(T entity)
     {
-        _dbSet.Update(entity);
+        DbSet.Update(entity);
         await context.SaveChangesAsync();
     }
 
@@ -36,13 +37,13 @@ public class Repository<T>(ApplicationDbContext context) : IRepository<T>
         var entity = await GetByIdAsync(id);
         if (entity != null)
         {
-            _dbSet.Remove(entity);
+            DbSet.Remove(entity);
             await context.SaveChangesAsync();
         }
     }
 
     public async Task<bool> ExistsAsync(Guid id)
     {
-        return await _dbSet.FindAsync(id) != null;
+        return await DbSet.FindAsync(id) != null;
     }
 }

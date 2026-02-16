@@ -14,5 +14,5 @@ public class Vehicle
     // Relationships
     public Client? Client { get; set; }
     public Studio? Studio { get; set; }
-    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<Booking> Bookings { get; init; } = new List<Booking>();
 }

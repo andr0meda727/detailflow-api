@@ -1,6 +1,12 @@
-﻿namespace Core.Mappings;
+using Core.DTOs.Bookings;
+using Core.Interfaces.Mappings;
+using Core.Models;
+using Riok.Mapperly.Abstractions;
 
-public class BookingMapper
+namespace Core.Mappings;
+
+[Mapper]
+public partial class BookingMapper : IBookingMapper
 {
-    //Mapperly
+    public partial BookingResponseDto MapBookingToResponse(Booking booking);
 }

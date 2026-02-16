@@ -1,9 +1,10 @@
+using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext) : DbContext(options)
 {
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<BookingService> BookingServices { get; set; }
@@ -25,6 +26,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema("d");
+
+        modelBuilder.Entity<Booking>()
+            .HasQueryFilter(b => b.StudioId == tenantContext.StudioId);
 
         // Table names MUST match actual database tables
         modelBuilder.Entity<Booking>().ToTable("booking");
