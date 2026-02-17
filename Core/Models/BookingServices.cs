@@ -1,8 +1,7 @@
 namespace Core.Models;
 
-public class BookingService
+public class BookingServices
 {
-    public Guid Id { get; set; }
     public Guid BookingId { get; set; }
     public Guid ServiceId { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -7,7 +7,7 @@ namespace Infrastructure.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext) : DbContext(options)
 {
     public DbSet<Booking> Bookings { get; set; }
-    public DbSet<BookingService> BookingServices { get; set; }
+    public DbSet<BookingServices> BookingServices { get; set; }
     public DbSet<BookingStatus> BookingStatuses { get; set; }
     public DbSet<Client> Clients { get; set; }
     public DbSet<Inventory> Inventory { get; set; }
@@ -32,7 +32,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         // Table names MUST match actual database tables
         modelBuilder.Entity<Booking>().ToTable("booking");
-        modelBuilder.Entity<BookingService>().ToTable("booking_service");
+        modelBuilder.Entity<BookingServices>().ToTable("booking_service");
         modelBuilder.Entity<BookingStatus>().ToTable("booking_status");
         modelBuilder.Entity<Client>().ToTable("client");
         modelBuilder.Entity<Inventory>().ToTable("inventory");
@@ -48,7 +48,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         // Primary keys (explicit)
         modelBuilder.Entity<Booking>().HasKey(x => x.Id);
-        modelBuilder.Entity<BookingService>().HasKey(x => x.Id);
+        modelBuilder.Entity<BookingServices>().HasKey(x => new { x.BookingId, x.ServiceId });
         modelBuilder.Entity<BookingStatus>().HasKey(x => x.Id);
         modelBuilder.Entity<Client>().HasKey(x => x.Id);
         modelBuilder.Entity<Inventory>().HasKey(x => x.Id);
@@ -79,9 +79,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
         });
 
-        modelBuilder.Entity<BookingService>(entity =>
+        modelBuilder.Entity<BookingServices>(entity =>
         {
-            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BookingId).HasColumnName("booking_id");
             entity.Property(e => e.ServiceId).HasColumnName("service_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
@@ -324,14 +323,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.SetNull);
 
         // BookingService (join) -> Booking
-        modelBuilder.Entity<BookingService>()
+        modelBuilder.Entity<BookingServices>()
             .HasOne(x => x.Booking)
             .WithMany(x => x.BookingServices)
             .HasForeignKey(x => x.BookingId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // BookingService (join) -> Service
-        modelBuilder.Entity<BookingService>()
+        modelBuilder.Entity<BookingServices>()
             .HasOne(x => x.Service)
             .WithMany(x => x.BookingServices)
             .HasForeignKey(x => x.ServiceId)
