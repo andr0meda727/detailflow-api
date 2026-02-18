@@ -30,6 +30,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Booking>()
             .HasQueryFilter(b => b.StudioId == tenantContext.StudioId);
 
+        modelBuilder.Entity<Client>()
+            .HasQueryFilter(c => c.StudioId == tenantContext.StudioId);
+
         // Table names MUST match actual database tables
         modelBuilder.Entity<Booking>().ToTable("booking");
         modelBuilder.Entity<BookingService>().ToTable("booking_service");
@@ -48,7 +51,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         // Primary keys (explicit)
         modelBuilder.Entity<Booking>().HasKey(x => x.Id);
-        modelBuilder.Entity<BookingService>().HasKey(x => x.Id);
+        modelBuilder.Entity<BookingService>().HasKey(x => new { x.BookingId, x.ServiceId });
         modelBuilder.Entity<BookingStatus>().HasKey(x => x.Id);
         modelBuilder.Entity<Client>().HasKey(x => x.Id);
         modelBuilder.Entity<Inventory>().HasKey(x => x.Id);
@@ -81,7 +84,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<BookingService>(entity =>
         {
-            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BookingId).HasColumnName("booking_id");
             entity.Property(e => e.ServiceId).HasColumnName("service_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");

@@ -1,9 +1,8 @@
 namespace Core.DTOs.Bookings;
 
-public class ClientInfoDto
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string? Email { get; set; }
-    public string? Phone { get; set; }
-}
+public record ClientInfoDto (
+    Guid Id,
+    string Name,
+    string? Email,
+    string? Phone
+);

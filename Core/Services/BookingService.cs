@@ -2,12 +2,12 @@ using Core.DTOs.Bookings;
 using Core.Interfaces;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 
 namespace Core.Services;
 
 public class BookingService(
     IBookingRepository bookingRepository,
-    ITenantContext tenantContext,
     IBookingMapper mapper)
     : IBookingService
 {

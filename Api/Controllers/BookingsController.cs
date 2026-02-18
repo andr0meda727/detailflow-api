@@ -1,5 +1,6 @@
 ﻿using Core.DTOs.Bookings;
 using Core.Interfaces;
+using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

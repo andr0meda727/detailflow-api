@@ -1,5 +1,6 @@
 ﻿using Core.Interfaces;
 using Core.Interfaces.Mappings;
+using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,6 +19,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingService, BookingService>();
 
         services.AddSingleton<IBookingMapper, BookingMapper>();
+
+        services.AddScoped<IClientsService, ClientsService>();
+
+        services.AddSingleton<IClientMapper, ClientMapper>();
+
+
 
         var supabaseUrl = configuration["Supabase:Url"]
                           ?? throw new InvalidOperationException("Supabase URL is missing!");

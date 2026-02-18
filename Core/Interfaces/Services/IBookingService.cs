@@ -1,6 +1,6 @@
 ﻿using Core.DTOs.Bookings;
 
-namespace Core.Interfaces;
+namespace Core.Interfaces.Services;
 
 public interface IBookingService
 {
