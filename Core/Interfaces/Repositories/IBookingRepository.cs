@@ -8,4 +8,6 @@ public interface IBookingRepository : IRepository<Booking>
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null);
+
+    Task<Booking?> GetByIdWithDetailsAsync(Guid id);
 }

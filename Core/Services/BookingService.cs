@@ -2,13 +2,13 @@ using Core.DTOs.Bookings;
 using Core.Interfaces;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 using Core.Models;
 
 namespace Core.Services;
 
 public class BookingService(
     IBookingRepository bookingRepository,
-    IBookingServicesRepository bookingServicesRepository,
     ITenantContext tenantContext,
     IBookingMapper mapper)
     : IBookingService
@@ -24,14 +24,14 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> GetBookingByIdAsync(Guid id)
     {
-        var booking = await bookingRepository.GetByIdAsync(id);
-        return booking != null ? mapper.MapBookingToResponse(booking) : new BookingResponseDto();
+        var booking = await bookingRepository.GetByIdWithDetailsAsync(id);
+        return booking == null ? null : mapper.MapBookingToResponse(booking);
     }
 
     public async Task<BookingResponseDto?> AddBooking(BookingCreateDto bookingData)
     {
         var now = DateTime.UtcNow;
-        
+
         var bookingGuid = Guid.NewGuid();
 
         var booking = new Booking

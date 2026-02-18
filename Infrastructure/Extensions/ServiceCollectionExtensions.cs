@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var cs = configuration.GetConnectionString("DefaultConnection");
-        
+
         // Add DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(cs));
@@ -22,11 +22,12 @@ public static class ServiceCollectionExtensions
         // Add repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IBookingRepository, BookingRepository>();
-        
+        services.AddScoped<IClientRepository, ClientRepository>();
+
+
         // Add tenant context
         services.AddScoped<ITenantContext, TenantContext>();
 
         return services;
     }
 }
-

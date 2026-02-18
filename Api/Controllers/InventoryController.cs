@@ -1,5 +1,6 @@
 using Core.Models;
 using Core.Interfaces;
+using Core.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
