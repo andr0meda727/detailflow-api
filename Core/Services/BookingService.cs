@@ -9,6 +9,7 @@ namespace Core.Services;
 
 public class BookingService(
     IBookingRepository bookingRepository,
+    ITenantContext tenantContext,
     IBookingMapper mapper)
     : IBookingService
 {
@@ -23,8 +24,8 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> GetBookingByIdAsync(Guid id)
     {
-        var booking = await bookingRepository.GetByIdAsync(id);
-        return booking != null ? mapper.MapBookingToResponse(booking) : new BookingResponseDto();
+        var booking = await bookingRepository.GetByIdWithDetailsAsync(id);
+        return booking == null ? null : mapper.MapBookingToResponse(booking);
     }
 
     public async Task<BookingResponseDto?> AddBooking(BookingCreateDto bookingData)

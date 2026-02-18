@@ -8,12 +8,13 @@ namespace Core.Mappings;
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public partial class BookingMapper : IBookingMapper
 {
-    [MapProperty(nameof(Booking.Status.Name), nameof(BookingResponseDto.Status))]
-    [MapProperty(nameof(Booking.Status.Color), nameof(BookingResponseDto.StatusColor))]
+    [MapProperty("Status.Name", nameof(BookingResponseDto.Status))]
+    [MapProperty("Status.Color", nameof(BookingResponseDto.StatusColor))]
     [MapProperty(nameof(Booking.BookingServices), nameof(BookingResponseDto.Services))]
     public partial BookingResponseDto MapBookingToResponse(Booking booking);
 
-    private List<string> MapServices(ICollection<BookingService> services)
+
+    private List<string> MapServices(ICollection<BookingServices> services)
     {
         return services
             .Select(s => s.Service?.Name ?? "Unknown service")

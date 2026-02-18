@@ -43,4 +43,16 @@ public class BookingRepository(ApplicationDbContext context)
             .OrderBy(b => b.ScheduledAt)
             .ToListAsync();
     }
+
+    public async Task<Booking?> GetByIdWithDetailsAsync(Guid id)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Include(b => b.Vehicle)
+            .Include(b => b.Client)
+            .Include(b => b.Status)
+            .Include(b => b.BookingServices)
+                .ThenInclude(bs => bs.Service)
+            .FirstOrDefaultAsync(b => b.Id == id);
+    }
 }
