@@ -10,5 +10,5 @@ public class Service
 
     // Relationships
     public Studio? Studio { get; set; }
-    public ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
+    public ICollection<BookingServices> BookingServices { get; set; } = new List<BookingServices>();
 }

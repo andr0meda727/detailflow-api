@@ -4,5 +4,8 @@ namespace Core.Interfaces.Repositories;
 
 public interface IBookingRepository : IRepository<Booking>
 {
-    Task<List<Booking>> GetAllWithDetailsAsync();
+    Task<List<Booking>> GetAllWithDetailsAsync(
+        bool? isCompleted = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null);
 }

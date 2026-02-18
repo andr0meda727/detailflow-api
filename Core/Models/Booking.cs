@@ -26,5 +26,5 @@ public class Booking
     public BookingStatus? Status { get; set; }
     public User? CreatedByUser { get; set; }
 
-    public ICollection<BookingService> BookingServices { get; set; } = new List<BookingService>();
+    public ICollection<BookingServices> BookingServices { get; set; } = new List<BookingServices>();
 }
