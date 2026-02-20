@@ -29,4 +29,12 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
 
         return Ok(client);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<ClientResponseDto>> Create([FromBody] CreateClientDto dto)
+    {
+        var result = await clientsService.AddClientAsync(dto);
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
 }

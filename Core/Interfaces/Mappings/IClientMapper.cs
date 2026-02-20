@@ -6,4 +6,5 @@ namespace Core.Interfaces.Mappings;
 public interface IClientMapper
 {
     public ClientResponseDto MapClientToResponse(Client client);
+    public Client MapToEntity(CreateClientDto dto);
 }

@@ -21,17 +21,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
 
+    private Guid CurrentStudioId => tenantContext.StudioId;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.HasDefaultSchema("d");
 
-        modelBuilder.Entity<Booking>()
-            .HasQueryFilter(b => b.StudioId == tenantContext.StudioId);
+        modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Client>().HasQueryFilter(c => c.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Vehicle>().HasQueryFilter(v => v.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId);
 
-        modelBuilder.Entity<BookingServices>()
-            .HasQueryFilter(bs => bs.Booking.StudioId == tenantContext.StudioId);
+        modelBuilder.Entity<BookingServices>().HasQueryFilter(bs => bs.Booking.StudioId == CurrentStudioId);
 
         // Table names MUST match actual database tables
         modelBuilder.Entity<Booking>().ToTable("booking");

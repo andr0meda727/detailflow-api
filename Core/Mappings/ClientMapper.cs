@@ -10,4 +10,13 @@ namespace Core.Mappings;
 public partial class ClientMapper : IClientMapper
 {
     public partial ClientResponseDto MapClientToResponse(Client client);
+
+    [MapperIgnoreTarget(nameof(Client.Id))]
+    [MapperIgnoreTarget(nameof(Client.StudioId))]
+    [MapperIgnoreTarget(nameof(Client.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Client.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Client.Vehicles))]
+    [MapperIgnoreTarget(nameof(Client.Studio))]
+    [MapperIgnoreTarget(nameof(Client.Bookings))]
+    public partial Client MapToEntity(CreateClientDto dto);
 }
