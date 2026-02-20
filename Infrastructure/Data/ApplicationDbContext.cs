@@ -30,6 +30,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Booking>()
             .HasQueryFilter(b => b.StudioId == tenantContext.StudioId);
 
+        modelBuilder.Entity<BookingServices>()
+            .HasQueryFilter(bs => bs.Booking.StudioId == tenantContext.StudioId);
+
         // Table names MUST match actual database tables
         modelBuilder.Entity<Booking>().ToTable("booking");
         modelBuilder.Entity<BookingServices>().ToTable("booking_service");

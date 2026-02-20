@@ -11,7 +11,9 @@ public class ClientsService(
 {
     public async Task<List<ClientResponseDto>> GetAllClientsAsync(string? search)
     {
-        throw new NotImplementedException();
+        var clients = await clientRepository.GetAllWithVehiclesAsync(search);
+
+        return clients.Select(mapper.MapClientToResponse).ToList();
     }
 
     public async Task<ClientResponseDto?> GetClientByIdAsync(Guid id)
