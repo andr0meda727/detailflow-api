@@ -10,6 +10,7 @@ public class Client
     public string? Nip { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
     // Relationships
     public Studio? Studio { get; set; }

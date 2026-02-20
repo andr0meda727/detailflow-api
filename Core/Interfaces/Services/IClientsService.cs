@@ -8,4 +8,5 @@ public interface IClientsService
     Task<ClientResponseDto?> GetClientByIdAsync(Guid id);
     Task<ClientResponseDto> AddClientAsync(CreateClientDto dto);
     Task<ClientResponseDto?> UpdateClientAsync(Guid id, CreateClientDto dto);
+    Task<bool> DeleteClientAsync(Guid id);
 }

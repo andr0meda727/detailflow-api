@@ -30,7 +30,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.HasDefaultSchema("d");
 
         modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Client>().HasQueryFilter(c => c.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
         modelBuilder.Entity<Vehicle>().HasQueryFilter(v => v.StudioId == CurrentStudioId);
         modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId);
 
@@ -110,6 +110,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.Nip).HasColumnName("nip");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
         });
 
         modelBuilder.Entity<Inventory>(entity =>

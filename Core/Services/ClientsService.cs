@@ -53,4 +53,17 @@ public class ClientsService(
 
         return await GetClientByIdAsync(client.Id);
     }
+
+    public async Task<bool> DeleteClientAsync(Guid id)
+    {
+        var client = await clientRepository.GetByIdAsync(id);
+
+        if (client == null) return false;
+
+        client.IsDeleted = true;
+        client.UpdatedAt = DateTime.UtcNow;
+
+        await clientRepository.UpdateAsync(client);
+        return true;
+    }
 }

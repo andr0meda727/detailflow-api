@@ -51,4 +51,14 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await clientsService.DeleteClientAsync(id);
+
+        if (!deleted) return NotFound($"Client {id} doesn't exist");
+
+        return NoContent();
+    }
 }
