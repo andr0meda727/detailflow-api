@@ -19,4 +19,13 @@ public partial class ClientMapper : IClientMapper
     [MapperIgnoreTarget(nameof(Client.Studio))]
     [MapperIgnoreTarget(nameof(Client.Bookings))]
     public partial Client MapToEntity(CreateClientDto dto);
+
+    [MapperIgnoreTarget(nameof(Client.Id))]
+    [MapperIgnoreTarget(nameof(Client.StudioId))]
+    [MapperIgnoreTarget(nameof(Client.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Client.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Client.Vehicles))]
+    [MapperIgnoreTarget(nameof(Client.Bookings))]
+    [MapperIgnoreTarget(nameof(Client.Studio))]
+    public partial void UpdateClient(CreateClientDto dto, Client client);
 }

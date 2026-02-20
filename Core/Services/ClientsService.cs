@@ -38,4 +38,19 @@ public class ClientsService(
 
         return mapper.MapClientToResponse(addedClient);
     }
+
+    public async Task<ClientResponseDto?> UpdateClientAsync(Guid id, CreateClientDto dto)
+    {
+        var client = await clientRepository.GetByIdAsync(id);
+
+        if (client == null) return null;
+
+        mapper.UpdateClient(dto, client);
+
+        client.UpdatedAt = DateTime.UtcNow;
+
+        await clientRepository.UpdateAsync(client);
+
+        return await GetClientByIdAsync(client.Id);
+    }
 }

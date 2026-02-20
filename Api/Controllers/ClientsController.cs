@@ -1,5 +1,6 @@
 using Core.DTOs.Clients;
 using Core.Interfaces.Services;
+using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,5 +37,18 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
         var result = await clientsService.AddClientAsync(dto);
 
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<ClientResponseDto>> Update(Guid id, [FromBody] CreateClientDto dto)
+    {
+        var result = await clientsService.UpdateClientAsync(id, dto);
+
+        if (result == null)
+        {
+            return NotFound($"Client {id} doesn't exist");
+        }
+
+        return Ok(result);
     }
 }
