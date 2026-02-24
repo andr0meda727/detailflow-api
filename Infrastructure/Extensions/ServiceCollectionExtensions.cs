@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IClientRepository, ClientRepository>();
+        services.AddScoped<IInventoryRepository, InventoryRepository>();
 
 
         // Add tenant context

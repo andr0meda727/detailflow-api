@@ -57,7 +57,23 @@ public class BookingService(
                 CreatedAt = now
             }).ToList()
         };
+        
+        Console.WriteLine(booking.Id);
+        Console.WriteLine(booking.StudioId);
+        Console.WriteLine(booking.VehicleId);
+        Console.WriteLine(booking.ClientId);
+        Console.WriteLine(booking.StatusId);
 
+        Console.WriteLine(booking.ScheduledAt);
+        Console.WriteLine(booking.CompletedAt);
+
+        Console.WriteLine(booking.TotalPrice);
+        Console.WriteLine(booking.Notes);
+
+        Console.WriteLine(booking.CreatedBy);
+        Console.WriteLine(booking.CreatedAt);
+        Console.WriteLine(booking.UpdatedAt);
+        
         var addedBooking = await bookingRepository.AddAsync(booking);
         return mapper.MapBookingToResponse(addedBooking);
     }

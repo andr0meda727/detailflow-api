@@ -1,6 +1,5 @@
-using Core.Models;
-using Core.Interfaces;
-using Core.Interfaces.Repositories;
+using Core.DTOs.Inventory;
+using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,12 +8,33 @@ namespace Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class InventoryController(IRepository<Inventory> inventoryRepo) : ControllerBase
+public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Inventory>>> Get()
+    public async Task<ActionResult<List<InventoryResponseDto>>> GetAllASync()
     {
-        var items = await inventoryRepo.GetAllAsync();
+        var items = await inventoryService.GetAllAsync();
         return Ok(items);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<InventoryResponseDto>> GetInventoryById(Guid id)
+    {
+        var item = await inventoryService.GetByIdAsync(id);
+        return Ok(item);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<InventoryResponseDto>> CreateInventory(InventoryCreateDto inventoryData)
+    {
+        var addedItem = await inventoryService.AddInventory(inventoryData);
+        return Ok(addedItem);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<InventoryResponseDto>> UpdateInventory(Guid id, InventoryCreateDto inventoryData)
+    {
+        var updatedItem = await inventoryService.EditInventory(id, inventoryData);
+        return Ok(updatedItem);
     }
 }

@@ -21,8 +21,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBookingMapper, BookingMapper>();
 
         services.AddScoped<IClientsService, ClientsService>();
+        services.AddScoped<IInventoryService, InventoryService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
+        services.AddSingleton<IInventoryMapper, InventoryMapper>();
 
 
 
