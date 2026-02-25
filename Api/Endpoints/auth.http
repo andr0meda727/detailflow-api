@@ -10,4 +10,8 @@ Content-Type: application/json
   "password": "dishuj"
 }
 
+> {%
+    client.global.set("auth_token", response.body.access_token);
+%}
+
 ###
