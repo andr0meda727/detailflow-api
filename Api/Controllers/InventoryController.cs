@@ -11,9 +11,9 @@ namespace Api.Controllers;
 public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<InventoryResponseDto>>> GetAllASync()
+    public async Task<ActionResult<List<InventoryResponseDto>>> GetAllASync([FromQuery] bool? isLowStock)
     {
-        var items = await inventoryService.GetAllAsync();
+        var items = await inventoryService.GetAllAsync(isLowStock);
         return Ok(items);
     }
 

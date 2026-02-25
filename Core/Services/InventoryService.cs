@@ -13,9 +13,12 @@ public class InventoryService(
     IInventoryMapper mapper)
     : IInventoryService
 {
-    public async Task<List<InventoryResponseDto>> GetAllAsync()
+    public async Task<List<InventoryResponseDto>> GetAllAsync(bool? isLowStock = null)
     {
-        var inventory = await inventoryRepository.GetAllAsync();
+        var inventory = isLowStock == true
+            ? await inventoryRepository.GetLowStockAsync()
+            : await inventoryRepository.GetAllAsync();
+
         return inventory.Select(mapper.MapInventoryToResponse).ToList();
     }
 

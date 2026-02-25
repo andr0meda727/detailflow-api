@@ -4,5 +4,5 @@ namespace Core.Interfaces.Repositories;
 
 public interface IInventoryRepository : IRepository<Inventory>
 {
-
+    Task<IEnumerable<Inventory>> GetLowStockAsync();
 }
