@@ -1,6 +1,7 @@
 ﻿using Core.DTOs.Bookings;
 using Core.Interfaces;
 using Core.Interfaces.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,10 +37,13 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<BookingResponseDto>> CreateBooking(BookingCreateDto bookingData)
-    {
+    public async Task<ActionResult<BookingResponseDto>> CreateBooking(
+        [FromBody] BookingCreateDto bookingData) {
         var addedBooking = await bookingService.AddBooking(bookingData);
-        return Ok(addedBooking);
+
+        if (addedBooking == null) return BadRequest("Couldn't add booking.");
+
+        return CreatedAtAction(nameof(GetBookingById), new { id = addedBooking.Id }, addedBooking);
     }
 
     [HttpPut("{id:guid}")]

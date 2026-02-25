@@ -13,8 +13,22 @@ public partial class BookingMapper : IBookingMapper
     [MapProperty(nameof(Booking.BookingServices), nameof(BookingResponseDto.Services))]
     public partial BookingResponseDto MapBookingToResponse(Booking booking);
 
+    [MapperIgnoreTarget(nameof(Booking.Id))]
+    [MapperIgnoreTarget(nameof(Booking.StudioId))]
+    [MapperIgnoreTarget(nameof(Booking.CompletedAt))]
+    [MapperIgnoreTarget(nameof(Booking.TotalPrice))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Booking.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Booking.Studio))]
+    [MapperIgnoreTarget(nameof(Booking.Vehicle))]
+    [MapperIgnoreTarget(nameof(Booking.Client))]
+    [MapperIgnoreTarget(nameof(Booking.Status))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedByUser))]
+    [MapperIgnoreTarget(nameof(Booking.BookingServices))]
+    public partial Booking MapCreateDtoToBooking(BookingCreateDto dto);
 
-    private List<string> MapServices(ICollection<BookingServices> services)
+    private static List<string> MapServices(ICollection<BookingServices> services)
     {
         return services
             .Select(s => s.Service?.Name ?? "Unknown service")
