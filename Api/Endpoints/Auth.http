@@ -1,6 +1,8 @@
 @projectUrl = https://spsquzkwqikbwdrrkpqy.supabase.co
 @anonKey = sb_publishable_0e54D14bUH3Hu2D_9IFlCg_eYZA86NZ
 
+### Logging
+
 POST {{projectUrl}}/auth/v1/token?grant_type=password
 apikey: {{anonKey}}
 Content-Type: application/json
@@ -13,5 +15,3 @@ Content-Type: application/json
 > {%
     client.global.set("auth_token", response.body.access_token);
 %}
-
-###
