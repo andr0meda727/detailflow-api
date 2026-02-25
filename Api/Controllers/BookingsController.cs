@@ -48,9 +48,12 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
     [HttpPut("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<BookingResponseDto>> UpdateBooking(Guid id, BookingCreateDto bookingData)
+    public async Task<ActionResult<BookingResponseDto>> UpdateBooking(Guid id, [FromBody] BookingCreateDto bookingData)
     {
         var editedBooking = await bookingService.EditBooking(id, bookingData);
+
+        if (editedBooking == null) return NotFound("Booking not found.");
+
         return Ok(editedBooking);
     }
 }

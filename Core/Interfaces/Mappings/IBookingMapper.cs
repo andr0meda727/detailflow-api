@@ -7,4 +7,5 @@ public interface IBookingMapper
 {
     public BookingResponseDto MapBookingToResponse(Booking booking);
     public Booking MapCreateDtoToBooking(BookingCreateDto dto);
+    void UpdateBooking(BookingCreateDto dto, Booking booking);
 }

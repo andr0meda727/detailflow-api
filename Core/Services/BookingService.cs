@@ -63,29 +63,28 @@ public class BookingService(
     {
         var now = DateTime.UtcNow;
 
-        var booking = new Booking
+        var existingBooking = await bookingRepository.GetByIdWithDetailsAsync(id, trackChanges: true);
+        if (existingBooking == null) return null;
+
+        mapper.UpdateBooking(bookingData, existingBooking);
+
+        existingBooking.UpdatedAt = now;
+        existingBooking.TotalPrice = (long)Math.Round(bookingData.Price * 100);
+
+        existingBooking.BookingServices.Clear();
+
+        foreach (var serviceId in bookingData.ServiceIds)
         {
-            Id = id,
-            StudioId = tenantContext.StudioId,
-            VehicleId = bookingData.VehicleId,
-            ClientId = bookingData.ClientId,
-            StatusId = bookingData.StatusId,
-            ScheduledAt = bookingData.ScheduledAt,
-            Notes = bookingData.Notes,
-            UpdatedAt = now,
-
-            // adjust this conversion to your money format
-            TotalPrice = (long)Math.Round(bookingData.Price),
-
-            BookingServices = bookingData.ServiceIds.Select(serviceId => new BookingServices
+            existingBooking.BookingServices.Add(new BookingServices
             {
                 BookingId = id,
                 ServiceId = serviceId,
                 CreatedAt = now
-            }).ToList()
-        };
+            });
+        }
 
-        await bookingRepository.UpdateAsync(booking);
-        return mapper.MapBookingToResponse(booking);
+        await bookingRepository.UpdateAsync(existingBooking);
+        var withDetails = await bookingRepository.GetByIdWithDetailsAsync(id);
+        return withDetails == null ? null : mapper.MapBookingToResponse(withDetails);
     }
 }

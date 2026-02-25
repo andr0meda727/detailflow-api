@@ -44,15 +44,21 @@ public class BookingRepository(ApplicationDbContext context)
             .ToListAsync();
     }
 
-    public async Task<Booking?> GetByIdWithDetailsAsync(Guid id)
+    public async Task<Booking?> GetByIdWithDetailsAsync(Guid id, bool trackChanges = false)
     {
-        return await DbSet
-            .AsNoTracking()
+        var query =  DbSet
             .Include(b => b.Vehicle)
             .Include(b => b.Client)
             .Include(b => b.Status)
             .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.Service)
-            .FirstOrDefaultAsync(b => b.Id == id);
+            .AsQueryable();
+
+        if (!trackChanges)
+        {
+            query = query.AsNoTracking();
+        }
+
+        return await query.FirstOrDefaultAsync(b => b.Id == id);
     }
 }

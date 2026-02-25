@@ -34,4 +34,19 @@ public partial class BookingMapper : IBookingMapper
             .Select(s => s.Service?.Name ?? "Unknown service")
             .ToList();
     }
+
+    [MapperIgnoreTarget(nameof(Booking.Id))]
+    [MapperIgnoreTarget(nameof(Booking.StudioId))]
+    [MapperIgnoreTarget(nameof(Booking.CompletedAt))]
+    [MapperIgnoreTarget(nameof(Booking.TotalPrice))]
+    [MapperIgnoreTarget(nameof(Booking.Client))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Booking.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Booking.Studio))]
+    [MapperIgnoreTarget(nameof(Booking.Vehicle))]
+    [MapperIgnoreTarget(nameof(Booking.Status))]
+    [MapperIgnoreTarget(nameof(Booking.CreatedByUser))]
+    [MapperIgnoreTarget(nameof(Booking.BookingServices))]
+    public partial void UpdateBooking(BookingCreateDto dto, Booking booking);
 }
