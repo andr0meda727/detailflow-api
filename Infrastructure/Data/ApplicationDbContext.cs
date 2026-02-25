@@ -34,7 +34,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
         modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
         modelBuilder.Entity<Vehicle>().HasQueryFilter(v => v.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId);
-        modelBuilder.Entity<BookingServices>().HasQueryFilter(bs => bs.Booking.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId || s.StudioId == null);
     }
 }

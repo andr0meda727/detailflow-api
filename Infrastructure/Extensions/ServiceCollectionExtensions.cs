@@ -24,7 +24,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IClientRepository, ClientRepository>();
 
-
         // Add tenant context
         services.AddScoped<ITenantContext, TenantContext>();
 

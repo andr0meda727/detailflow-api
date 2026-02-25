@@ -1,5 +1,4 @@
 using Infrastructure.Data;
-using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 

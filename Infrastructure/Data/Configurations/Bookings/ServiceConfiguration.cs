@@ -16,6 +16,7 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         builder.Property(e => e.Name).HasColumnName("name");
         builder.Property(e => e.CreatedAt).HasColumnName("created_at");
         builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(e => e.IsActive).HasColumnName("is_active");
 
 
         builder.HasOne(x => x.Studio)
