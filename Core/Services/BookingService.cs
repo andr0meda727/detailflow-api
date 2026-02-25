@@ -28,7 +28,7 @@ public class BookingService(
         return booking == null ? null : mapper.MapBookingToResponse(booking);
     }
 
-    public async Task<BookingResponseDto?> AddBooking(BookingCreateDto bookingData)
+    public async Task<BookingResponseDto?> AddBookingAsync(BookingCreateDto bookingData)
     {
         var now = DateTime.UtcNow;
         var bookingGuid = Guid.NewGuid();
@@ -59,7 +59,7 @@ public class BookingService(
         return bookingWithDetails == null ? null : mapper.MapBookingToResponse(bookingWithDetails);
     }
 
-    public async Task<BookingResponseDto?> EditBooking(Guid id, BookingCreateDto bookingData)
+    public async Task<BookingResponseDto?> EditBookingAsync(Guid id, BookingCreateDto bookingData)
     {
         var now = DateTime.UtcNow;
 
@@ -86,5 +86,16 @@ public class BookingService(
         await bookingRepository.UpdateAsync(existingBooking);
         var withDetails = await bookingRepository.GetByIdWithDetailsAsync(id);
         return withDetails == null ? null : mapper.MapBookingToResponse(withDetails);
+    }
+
+    public async Task<bool> DeleteBookingAsync(Guid id)
+    {
+        var booking = await bookingRepository.GetByIdAsync(id);
+
+        if (booking == null) return false;
+
+        await bookingRepository.DeleteAsync(id);
+
+        return true;
     }
 }

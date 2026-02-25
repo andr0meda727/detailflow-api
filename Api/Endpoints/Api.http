@@ -102,3 +102,7 @@ Authorization: Bearer {{auth_token}}
   "price": 350.00,
   "notes": "Edytowana wizyta: klient domówił dodatkowe zabezpieczenie lakieru."
 }
+
+###
+DELETE {{Api_HostAddress}}/api/bookings/93c6878c-25ff-4abf-9e8c-c2051f827758
+Authorization: Bearer {{auth_token}}
