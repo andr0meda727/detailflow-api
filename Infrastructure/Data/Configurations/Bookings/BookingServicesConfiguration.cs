@@ -4,25 +4,38 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations.Bookings;
 
-public class BookingServicesConfiguration : IEntityTypeConfiguration<BookingServices>
+public class BookingServiceConfiguration : IEntityTypeConfiguration<BookingServices>
 {
     public void Configure(EntityTypeBuilder<BookingServices> builder)
     {
-        builder.ToTable("booking_service");
-        builder.HasKey(x => new { x.BookingId, x.ServiceId });
+        builder
+            .HasKey(e => new { e.BookingId, e.ServiceId })
+            .HasName("booking_service_pkey");
 
-        builder.Property(e => e.BookingId).HasColumnName("booking_id");
-        builder.Property(e => e.ServiceId).HasColumnName("service_id");
-        builder.Property(e => e.CreatedAt).HasColumnName("created_at");
+        builder
+            .ToTable("booking_service", "d");
 
-        builder.HasOne(x => x.Booking)
-            .WithMany(x => x.BookingServices)
-            .HasForeignKey(x => x.BookingId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(e => e.BookingId)
+            .HasColumnName("booking_id");
 
-        builder.HasOne(x => x.Service)
-            .WithMany(x => x.BookingServices)
-            .HasForeignKey(x => x.ServiceId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(e => e.ServiceId)
+            .HasColumnName("service_id");
+
+        builder.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("created_at");
+
+        builder
+            .HasOne(d => d.Booking)
+            .WithMany(p => p.BookingServices)
+            .HasForeignKey(d => d.BookingId)
+            .HasConstraintName("booking_service_booking_id_fkey");
+
+        builder
+            .HasOne(d => d.Service)
+            .WithMany(p => p.BookingServices)
+            .HasForeignKey(d => d.ServiceId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("booking_service_service_id_fkey");
     }
 }

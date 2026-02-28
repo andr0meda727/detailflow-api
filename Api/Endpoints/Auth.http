@@ -8,10 +8,35 @@ apikey: {{anonKey}}
 Content-Type: application/json
 
 {
-  "email": "dis@stream.pl",
-  "password": "dishuj"
+  "email": "kubawk003@wp.pl",
+  "password": "haslohaslo"
 }
 
 > {%
     client.global.set("auth_token", response.body.access_token);
 %}
+
+### Sign up
+
+POST {{projectUrl}}/auth/v1/signup
+apikey: {{anonKey}}
+Content-Type: application/json
+
+{
+  "email": "kubawk003@wp.pl",
+  "password": "haslohaslo",
+  "data": {
+    "first_name": "Kuba",
+    "last_name": "W"
+  }
+}
+
+### Zaproszenie pracownika przez Właściciela (Twoje API)
+POST {{Api_HostAddress}}/api/users/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "email": "pracownik.jan@gmail.com",
+  "role": 2
+}

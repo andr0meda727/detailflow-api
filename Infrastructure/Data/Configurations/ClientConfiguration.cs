@@ -8,22 +8,50 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
 {
     public void Configure(EntityTypeBuilder<Client> builder)
     {
-        builder.ToTable("client");
-        builder.HasKey(x => x.Id);
+        builder.HasKey(e => e.Id)
+            .HasName("client_pkey");
 
-        builder.Property(e => e.Id).HasColumnName("id");
-        builder.Property(e => e.StudioId).HasColumnName("studio_id");
-        builder.Property(e => e.Name).HasColumnName("name");
-        builder.Property(e => e.Email).HasColumnName("email");
-        builder.Property(e => e.Phone).HasColumnName("phone");
-        builder.Property(e => e.Nip).HasColumnName("nip");
-        builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-        builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-        builder.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+        builder
+            .ToTable("client", "d");
 
-        builder.HasOne(x => x.Studio)
-            .WithMany(x => x.Clients)
-            .HasForeignKey(x => x.StudioId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder
+            .HasIndex(e => e.Phone, "client_phone_key")
+            .IsUnique();
+
+        builder.Property(e => e.Id)
+            .HasDefaultValueSql("gen_random_uuid()")
+            .HasColumnName("id");
+
+        builder.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("created_at");
+
+        builder.Property(e => e.Email)
+            .HasColumnName("email");
+
+        builder.Property(e => e.IsDeleted)
+            .HasColumnName("is_deleted");
+
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
+
+        builder.Property(e => e.Nip)
+            .HasColumnName("nip");
+
+        builder.Property(e => e.Phone)
+            .HasColumnName("phone");
+
+        builder.Property(e => e.StudioId)
+            .HasColumnName("studio_id");
+
+        builder.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("updated_at");
+
+        builder
+            .HasOne(d => d.Studio)
+            .WithMany(p => p.Clients)
+            .HasForeignKey(d => d.StudioId)
+            .HasConstraintName("client_studio_id_fkey");
     }
 }

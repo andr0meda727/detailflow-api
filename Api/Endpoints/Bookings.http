@@ -8,7 +8,7 @@ Accept: application/json
 
 ### GET Booking
 
-GET {{Api_HostAddress}}/api/bookings/73d89609-3cc1-447b-902b-e25f35bb56ec
+GET {{Api_HostAddress}}/api/bookings/e9e796da-d062-4cf3-b9a1-aab6e757c9b2
 Authorization: Bearer {{auth_token}}
 Accept: application/json
 
@@ -32,7 +32,7 @@ Content-Type: application/json
 
 ### PUT Booking
 
-PUT {{Api_HostAddress}}/api/bookings/93c6878c-25ff-4abf-9e8c-c2051f827758
+PUT {{Api_HostAddress}}/api/bookings/73d89609-3cc1-447b-902b-e25f35bb56ec
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
@@ -51,6 +51,6 @@ Content-Type: application/json
 
 ### DELETE Booking
 
-DELETE {{Api_HostAddress}}/api/bookings/93c6878c-25ff-4abf-9e8c-c2051f827758
+DELETE {{Api_HostAddress}}/api/bookings/73d89609-3cc1-447b-902b-e25f35bb56ec
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json

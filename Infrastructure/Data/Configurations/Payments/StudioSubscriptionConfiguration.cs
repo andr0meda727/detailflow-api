@@ -8,32 +8,73 @@ public class StudioSubscriptionConfiguration : IEntityTypeConfiguration<StudioSu
 {
     public void Configure(EntityTypeBuilder<StudioSubscription> builder)
     {
-        builder.ToTable("studio_subscription");
-        builder.HasKey(x => x.Id);
+        builder
+            .HasKey(e => e.Id)
+            .HasName("studio_subscription_pkey");
 
-        builder.Property(e => e.Id).HasColumnName("id");
-        builder.Property(e => e.StudioId).HasColumnName("studio_id");
-        builder.Property(e => e.PlanId).HasColumnName("plan_id");
-        builder.Property(e => e.StripeSubscriptionId).HasColumnName("stripe_subscription_id");
-        builder.Property(e => e.StripeStatus).HasColumnName("stripe_status");
-        builder.Property(e => e.CurrentPeriodStart).HasColumnName("current_period_start");
-        builder.Property(e => e.CurrentPeriodEnd).HasColumnName("current_period_end");
-        builder.Property(e => e.CancelAtPeriodEnd).HasColumnName("cancel_at_period_end");
-        builder.Property(e => e.CanceledAt).HasColumnName("canceled_at");
-        builder.Property(e => e.EndedAt).HasColumnName("ended_at");
-        builder.Property(e => e.TrialStart).HasColumnName("trial_start");
-        builder.Property(e => e.TrialEnd).HasColumnName("trial_end");
-        builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-        builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        builder
+            .ToTable("studio_subscription", "d");
 
-        builder.HasOne(x => x.Studio)
-            .WithMany(x => x.StudioSubscriptions)
-            .HasForeignKey(x => x.StudioId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder
+            .HasIndex(e => e.StripeSubscriptionId, "studio_subscription_stripe_subscription_id_key")
+            .IsUnique();
 
-        builder.HasOne(x => x.Plan)
-            .WithMany(x => x.StudioSubscriptions)
-            .HasForeignKey(x => x.PlanId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(e => e.Id)
+            .HasDefaultValueSql("gen_random_uuid()")
+            .HasColumnName("id");
+
+        builder.Property(e => e.CancelAtPeriodEnd)
+            .HasColumnName("cancel_at_period_end");
+
+        builder.Property(e => e.CanceledAt)
+            .HasColumnName("canceled_at");
+
+        builder.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("created_at");
+
+        builder.Property(e => e.CurrentPeriodEnd)
+            .HasColumnName("current_period_end");
+
+        builder.Property(e => e.CurrentPeriodStart)
+            .HasColumnName("current_period_start");
+
+        builder.Property(e => e.EndedAt)
+            .HasColumnName("ended_at");
+
+        builder.Property(e => e.PlanId)
+            .HasColumnName("plan_id");
+
+        builder.Property(e => e.StripeStatus)
+            .HasColumnName("stripe_status");
+
+        builder.Property(e => e.StripeSubscriptionId)
+            .HasColumnName("stripe_subscription_id");
+
+        builder.Property(e => e.StudioId)
+            .HasColumnName("studio_id");
+
+        builder.Property(e => e.TrialEnd)
+            .HasColumnName("trial_end");
+
+        builder.Property(e => e.TrialStart)
+            .HasColumnName("trial_start");
+
+        builder.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("updated_at");
+
+        builder
+            .HasOne(d => d.Plan)
+            .WithMany(p => p.StudioSubscriptions)
+            .HasForeignKey(d => d.PlanId)
+            .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("studio_subscription_plan_id_fkey");
+
+        builder
+            .HasOne(d => d.Studio)
+            .WithMany(p => p.StudioSubscriptions)
+            .HasForeignKey(d => d.StudioId)
+            .HasConstraintName("studio_subscription_studio_id_fkey");
     }
 }

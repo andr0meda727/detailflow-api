@@ -8,12 +8,28 @@ public class BookingStatusConfiguration : IEntityTypeConfiguration<BookingStatus
 {
     public void Configure(EntityTypeBuilder<BookingStatus> builder)
     {
-        builder.ToTable("booking_status");
-        builder.HasKey(x => x.Id);
+        builder
+            .HasKey(e => e.Id)
+            .HasName("booking_status_pkey");
 
-        builder.Property(e => e.Id).HasColumnName("id");
-        builder.Property(e => e.Name).HasColumnName("name");
-        builder.Property(e => e.Color).HasColumnName("color");
-        builder.Property(e => e.SortOrder).HasColumnName("sort_order");
+        builder
+            .ToTable("booking_status", "d");
+
+        builder
+            .HasIndex(e => e.Name, "booking_status_name_key")
+            .IsUnique();
+
+        builder.Property(e => e.Id)
+            .HasDefaultValueSql("gen_random_uuid()")
+            .HasColumnName("id");
+
+        builder.Property(e => e.Color)
+            .HasColumnName("color");
+
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
+
+        builder.Property(e => e.SortOrder)
+            .HasColumnName("sort_order");
     }
 }

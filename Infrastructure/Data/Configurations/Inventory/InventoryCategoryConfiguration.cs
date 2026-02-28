@@ -8,18 +8,35 @@ public class InventoryCategoryConfiguration : IEntityTypeConfiguration<Inventory
 {
     public void Configure(EntityTypeBuilder<InventoryCategory> builder)
     {
-        builder.ToTable("inventory_category");
-        builder.HasKey(x => x.Id);
+        builder
+            .HasKey(e => e.Id)
+            .HasName("inventory_category_pkey");
 
-        builder.Property(e => e.Id).HasColumnName("id");
-        builder.Property(e => e.StudioId).HasColumnName("studio_id");
-        builder.Property(e => e.Name).HasColumnName("name");
-        builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-        builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        builder
+            .ToTable("inventory_category", "d");
 
-        builder.HasOne(x => x.Studio)
-            .WithMany(x => x.InventoryCategories)
-            .HasForeignKey(x => x.StudioId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(e => e.Id)
+            .HasDefaultValueSql("gen_random_uuid()")
+            .HasColumnName("id");
+
+        builder.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("created_at");
+
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
+
+        builder.Property(e => e.StudioId)
+            .HasColumnName("studio_id");
+
+        builder.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("updated_at");
+
+        builder
+            .HasOne(d => d.Studio)
+            .WithMany(p => p.InventoryCategories)
+            .HasForeignKey(d => d.StudioId)
+            .HasConstraintName("inventory_category_studio_id_fkey");
     }
 }
