@@ -1,10 +1,11 @@
 using Api.Extensions;
 using Api.Middleware;
 using Infrastructure.Extensions;
+using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // Add Infrastructure (Database, Repositories)
@@ -13,15 +14,22 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Add Application Services
 builder.Services.AddApplicationServices(builder.Configuration);
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Use Tenant Context Middleware (BEFORE routing and endpoints)
 app.UseTenantContext();
