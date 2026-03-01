@@ -31,13 +31,6 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> AddBookingAsync(BookingCreateDto bookingData)
     {
-        var vehicle = await vehicleRepository.GetByIdAsync(bookingData.VehicleId);
-
-        if (vehicle == null || vehicle.ClientId != bookingData.ClientId)
-        {
-            throw new InvalidOperationException("The selected vehicle does not exist or does not belong to the specified customer.");
-        }
-
         var booking = mapper.MapCreateDtoToBooking(bookingData);
 
         booking.CreatedBy = tenantContext.UserId;
@@ -60,14 +53,11 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> EditBookingAsync(Guid id, BookingCreateDto bookingData)
     {
-        var now = DateTime.UtcNow;
-
         var existingBooking = await bookingRepository.GetByIdWithDetailsAsync(id, trackChanges: true);
         if (existingBooking == null) return null;
 
         mapper.UpdateBooking(bookingData, existingBooking);
 
-        existingBooking.UpdatedAt = now;
         existingBooking.TotalPrice = (long)Math.Round(bookingData.Price * 100);
 
         existingBooking.BookingServices.Clear();
@@ -76,9 +66,7 @@ public class BookingService(
         {
             existingBooking.BookingServices.Add(new BookingServices
             {
-                BookingId = id,
                 ServiceId = serviceId,
-                CreatedAt = now
             });
         }
 

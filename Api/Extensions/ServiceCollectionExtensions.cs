@@ -1,14 +1,14 @@
-﻿using Core.DTOs.Bookings;
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
 using Core.Validators.Bookings;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+
 
 namespace Api.Extensions;
 
@@ -30,8 +30,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
 
+        services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddFluentValidationAutoValidation();
-        services.AddScoped<IValidator<BookingCreateDto>, BookingCreateDtoValidator>();
 
 
         var supabaseUrl = configuration["Supabase:Url"]
