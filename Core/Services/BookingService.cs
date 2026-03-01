@@ -9,6 +9,7 @@ namespace Core.Services;
 
 public class BookingService(
     IBookingRepository bookingRepository,
+    IVehicleRepository vehicleRepository,
     ITenantContext tenantContext,
     IBookingMapper mapper)
     : IBookingService
@@ -30,25 +31,23 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> AddBookingAsync(BookingCreateDto bookingData)
     {
-        var now = DateTime.UtcNow;
-        var bookingGuid = Guid.NewGuid();
+        var vehicle = await vehicleRepository.GetByIdAsync(bookingData.VehicleId);
+
+        if (vehicle == null || vehicle.ClientId != bookingData.ClientId)
+        {
+            throw new InvalidOperationException("The selected vehicle does not exist or does not belong to the specified customer.");
+        }
 
         var booking = mapper.MapCreateDtoToBooking(bookingData);
 
-        booking.Id = bookingGuid;
-        booking.StudioId = tenantContext.StudioId;
         booking.CreatedBy = tenantContext.UserId;
-        booking.CreatedAt = now;
-        booking.UpdatedAt = now;
         booking.TotalPrice = (long)Math.Round(bookingData.Price * 100);
 
         if (bookingData.ServiceIds.Any())
         {
             booking.BookingServices = bookingData.ServiceIds.Select(serviceId => new BookingServices
             {
-                BookingId = bookingGuid,
                 ServiceId = serviceId,
-                CreatedAt = now
             }).ToList();
         }
 
