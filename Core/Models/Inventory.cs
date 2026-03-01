@@ -1,20 +1,28 @@
-namespace Core.Models;
+﻿namespace Core.Models;
 
 public class Inventory
 {
     public Guid Id { get; set; }
+
     public Guid StudioId { get; set; }
+
     public Guid? CategoryId { get; set; }
-    public string Name { get; set; } = string.Empty;
+
+    public string Name { get; set; } = null!;
+
     public string? Description { get; set; }
-    public string Unit { get; set; } = string.Empty;
-    public int Stock { get; set; }
-    public int? MinStock { get; set; }
-    public int? Capacity { get; set; }
+
+    public string Unit { get; set; } = null!;
+
+    public decimal Stock { get; set; }
+
+    public decimal? MinStock { get; set; }
+
     public DateTime CreatedAt { get; set; }
+
     public DateTime UpdatedAt { get; set; }
 
-    // Relationships
-    public Studio? Studio { get; set; }
     public InventoryCategory? Category { get; set; }
+
+    public Studio Studio { get; set; } = null!;
 }

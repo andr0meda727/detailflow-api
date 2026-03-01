@@ -1,5 +1,4 @@
 ﻿using Core.DTOs.Bookings;
-using Core.Interfaces;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +11,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 {
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetAllBookings(
+    public async Task<ActionResult<List<BookingResponseDto>>> GetAll(
         [FromQuery] bool? isCompleted = null,
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
@@ -28,7 +27,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
     [HttpGet("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<BookingResponseDto>> GetBookingById(Guid id)
+    public async Task<ActionResult<BookingResponseDto>> GetById(Guid id)
     {
         var bookings = await bookingService.GetBookingByIdAsync(id);
         return Ok(bookings);
@@ -36,17 +35,34 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<BookingResponseDto>> CreateBooking(BookingCreateDto bookingData)
-    {
-        var addedBooking = await bookingService.AddBooking(bookingData);
-        return Ok(addedBooking);
+    public async Task<ActionResult<BookingResponseDto>> Create(
+        [FromBody] BookingCreateDto bookingData) {
+        var addedBooking = await bookingService.AddBookingAsync(bookingData);
+
+        if (addedBooking == null) return BadRequest("Couldn't add booking.");
+
+        return CreatedAtAction(nameof(GetById), new { id = addedBooking.Id }, addedBooking);
     }
 
     [HttpPut("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<BookingResponseDto>> UpdateBooking(Guid id, BookingCreateDto bookingData)
+    public async Task<ActionResult<BookingResponseDto>> Update(Guid id, [FromBody] BookingCreateDto bookingData)
     {
-        var editedBooking = await bookingService.EditBooking(id, bookingData);
+        var editedBooking = await bookingService.EditBookingAsync(id, bookingData);
+
+        if (editedBooking == null) return NotFound("Booking not found.");
+
         return Ok(editedBooking);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await bookingService.DeleteBookingAsync(id);
+
+        if (!deleted) return NotFound($"Booking {id} doesn't exist");
+
+        return NoContent();
     }
 }

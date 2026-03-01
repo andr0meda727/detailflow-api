@@ -8,5 +8,4 @@ public class InventoryCreateDto
     public string Unit { get; set; } = string.Empty;
     public int Stock { get; set; }
     public int? MinStock { get; set; }
-    public int? Capacity { get; set; }
 }

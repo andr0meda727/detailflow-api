@@ -9,5 +9,5 @@ public interface IBookingRepository : IRepository<Booking>
         DateTime? fromDate = null,
         DateTime? toDate = null);
 
-    Task<Booking?> GetByIdWithDetailsAsync(Guid id);
+    Task<Booking?> GetByIdWithDetailsAsync(Guid id, bool trackChanges = false);
 }

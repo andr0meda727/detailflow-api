@@ -1,0 +1,44 @@
+@Api_HostAddress = http://localhost:5174/
+
+### GET All inventory
+
+GET {{Api_HostAddress}}/api/inventory
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### GET Low stock only
+
+GET {{Api_HostAddress}}/api/inventory?isLowStock=true
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### POST Inventory
+
+POST {{Api_HostAddress}}/api/inventory
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "categoryId": "db5b9a9e-9f69-4054-87a6-8baedda28921",
+  "name": "Szampon szpontex 1L",
+  "description": "Wysokiej jakości szampon o zapachu wiśniowym",
+  "unit": "Litr",
+  "stock": 50,
+  "minStock": 10
+}
+
+### PUT Inventory
+
+PUT {{Api_HostAddress}}/api/inventory/dbe38f2d-847d-4708-8c6d-ca76e76d4a74
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "categoryId": "c8496ded-93df-40a3-9d95-713a5fde6d07",
+  "name": "Szampon szpontex update",
+  "description": "Zaktualizowany opis szamponu",
+  "unit": "Litr",
+  "stock": 150,
+  "minStock": 20
+}

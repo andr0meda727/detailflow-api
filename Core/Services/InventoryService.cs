@@ -42,7 +42,6 @@ public class InventoryService(
             Unit = inventoryData.Unit,
             Stock = inventoryData.Stock,
             MinStock = inventoryData.MinStock,
-            Capacity = inventoryData.Capacity,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -65,7 +64,6 @@ public class InventoryService(
             Unit = inventoryData.Unit,
             Stock = inventoryData.Stock,
             MinStock = inventoryData.MinStock,
-            Capacity = inventoryData.Capacity,
             UpdatedAt = now
         };
 

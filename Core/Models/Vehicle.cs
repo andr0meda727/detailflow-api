@@ -3,16 +3,26 @@
 public class Vehicle
 {
     public Guid Id { get; set; }
+
     public Guid ClientId { get; set; }
+
     public Guid StudioId { get; set; }
+
     public string? Brand { get; set; }
+
     public string? Model { get; set; }
-    public string LicensePlate { get; set; } = string.Empty;
+
+    public string LicensePlate { get; set; } = null!;
+
     public DateTime CreatedAt { get; set; }
+
     public DateTime UpdatedAt { get; set; }
 
-    // Relationships
-    public Client? Client { get; set; }
-    public Studio? Studio { get; set; }
-    public ICollection<Booking> Bookings { get; init; } = new List<Booking>();
+    public bool IsDeleted { get; set; }
+
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public Client Client { get; set; } = null!;
+
+    public Studio Studio { get; set; } = null!;
 }

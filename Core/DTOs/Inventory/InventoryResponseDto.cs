@@ -3,11 +3,10 @@
 public record InventoryResponseDto(
     Guid Id,
     Guid StudioId,
-    Guid CategoryId,
+    string? CategoryName,
     string Name,
     string? Description,
     string Unit,
     int Stock,
-    int? MinStock,
-    int? Capacity
+    int? MinStock
 );

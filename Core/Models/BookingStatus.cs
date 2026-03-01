@@ -1,12 +1,14 @@
-namespace Core.Models;
+﻿namespace Core.Models;
 
 public class BookingStatus
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+
+    public string Name { get; set; } = null!;
+
     public string? Color { get; set; }
+
     public int SortOrder { get; set; }
 
-    // Relationships
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

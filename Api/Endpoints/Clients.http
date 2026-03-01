@@ -1,0 +1,51 @@
+@Api_HostAddress = http://localhost:5174/
+
+### GET All Clients
+
+GET {{Api_HostAddress}}/api/clients/
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### GET Client
+
+GET {{Api_HostAddress}}/api/clients/d8e6b8b2-8fc0-4ac8-b750-2af1779c826a
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### GET Client with search
+
+GET {{Api_HostAddress}}/api/clients?search=audi
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### POST Client
+
+POST {{Api_HostAddress}}/api/clients
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "name": "testtest",
+  "email": "a@example.com",
+  "phone": "500 600 750",
+  "nip": "1234567890"
+}
+
+### PUT Client
+
+PUT {{Api_HostAddress}}/api/clients/d8e6b8b2-8fc0-4ac8-b750-2af1779c826a
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "name": "changed",
+  "email": "a_new@example.com",
+  "phone": "999 888 777",
+  "nip": "1234567890"
+}
+
+### DELETE Client
+
+DELETE {{Api_HostAddress}}/api/clients/8c242132-328c-4358-9f7c-819de32ffa7a
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
