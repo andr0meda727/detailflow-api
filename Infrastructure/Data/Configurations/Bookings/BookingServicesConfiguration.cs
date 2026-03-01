@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Configurations.Bookings;
 
-public class BookingServiceConfiguration : IEntityTypeConfiguration<BookingServices>
+public class BookingServicesConfiguration : IEntityTypeConfiguration<BookingServices>
 {
     public void Configure(EntityTypeBuilder<BookingServices> builder)
     {
@@ -24,6 +24,10 @@ public class BookingServiceConfiguration : IEntityTypeConfiguration<BookingServi
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");
+
+        builder.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("updated_at");
 
         builder
             .HasOne(d => d.Booking)

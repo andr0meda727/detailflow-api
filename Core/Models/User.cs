@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class User
+namespace Core.Models;
+
+public class User : IAuditableEntity
 {
     public Guid Id { get; set; }
 

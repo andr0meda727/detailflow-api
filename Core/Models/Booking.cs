@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Booking
+namespace Core.Models;
+
+public class Booking : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 

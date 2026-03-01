@@ -1,9 +1,11 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
+
+namespace Core.Models;
 
 /// <summary>
-/// Table contains services that studio can choose for booking purposes. Every studio is filled with default services (studio_id null). But there is option to add its own service, in this situation the studio_id is equal to id of the studio that add this service.
+/// Table contains services that studio can choose for booking purposes. The studio can add its own new services.
 /// </summary>
-public class Service
+public class Service : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 
@@ -13,7 +15,7 @@ public class Service
 
     public DateTime UpdatedAt { get; set; }
 
-    public Guid? StudioId { get; set; }
+    public Guid StudioId { get; set; }
 
     public bool IsActive { get; set; }
 

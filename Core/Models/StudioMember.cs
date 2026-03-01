@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class StudioMember
+namespace Core.Models;
+
+public class StudioMember : IAuditableEntity, ITenantEntity
 {
     public Guid UserId { get; set; }
 
@@ -9,6 +11,8 @@ public class StudioMember
     public long RoleId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public Role Role { get; set; } = null!;
 

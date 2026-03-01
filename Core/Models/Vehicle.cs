@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Vehicle
+namespace Core.Models;
+
+public class Vehicle : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 

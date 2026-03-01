@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Inventory
+namespace Core.Models;
+
+public class Inventory : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 

@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
-
+        services.AddScoped<IVehicleRepository, VehicleRepository>();
 
         // Add tenant context
         services.AddScoped<ITenantContext, TenantContext>();
