@@ -26,9 +26,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IClientsService, ClientsService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IServicesService, ServicesService>();
+        services.AddScoped<IVehiclesService, VehiclesService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
+        services.AddSingleton<IServiceMapper, ServiceMapper>();
+        services.AddSingleton<IVehicleMapper, VehicleMapper>();
 
         services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddFluentValidationAutoValidation();
