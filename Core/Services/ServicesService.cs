@@ -8,7 +8,6 @@ namespace Core.Services;
 
 public class ServicesService(
     IServiceRepository serviceRepository,
-    ITenantContext tenantContext,
     IServiceMapper mapper) : IServicesService
 {
     public async Task<List<ServiceResponseDto>> GetAllAsync()
@@ -21,12 +20,6 @@ public class ServicesService(
     {
         var service = mapper.MapToEntity(dto);
 
-        service.Id = Guid.NewGuid();
-        service.StudioId = tenantContext.StudioId;
-        service.IsActive = true;
-        service.CreatedAt = DateTime.UtcNow;
-        service.UpdatedAt = DateTime.UtcNow;
-
         var addedService = await serviceRepository.AddAsync(service);
         return mapper.MapServiceToResponse(addedService);
     }
@@ -35,13 +28,12 @@ public class ServicesService(
     {
         var service = await serviceRepository.GetByIdAsync(id);
 
-        if (service == null || !service.IsActive)
+        if (service == null)
         {
             return false;
         }
 
         service.IsActive = false;
-        service.UpdatedAt = DateTime.UtcNow;
 
         await serviceRepository.UpdateAsync(service);
         return true;

@@ -17,7 +17,7 @@ public class Service : IAuditableEntity, ITenantEntity
 
     public Guid StudioId { get; set; }
 
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
 
     public ICollection<BookingServices> BookingServices { get; set; } = new List<BookingServices>();
 

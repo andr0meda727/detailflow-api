@@ -50,7 +50,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
         modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
         modelBuilder.Entity<Vehicle>().HasQueryFilter(v => !v.IsDeleted && v.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Service>().HasQueryFilter(s => s.IsActive && s.StudioId == CurrentStudioId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
