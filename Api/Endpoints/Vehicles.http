@@ -1,0 +1,32 @@
+@Api_HostAddress = http://localhost:5174
+
+### GET All Vehicles
+GET {{Api_HostAddress}}/api/vehicle
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### GET Vehicles for specific Client
+GET {{Api_HostAddress}}/api/vehicle?clientId=8c242132-328c-4358-9f7c-819de32ffa7a
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### SEARCH Vehicles by string
+GET {{Api_HostAddress}}/api/vehicle?search=audi
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### POST Create Vehicle
+POST {{Api_HostAddress}}/api/vehicle
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "Corolla",
+  "licensePlate": "KR 12345",
+  "clientId": "8c242132-328c-4358-9f7c-819de32ffa7a"
+}
+
+### DELETE Vehicle
+DELETE {{Api_HostAddress}}/api/vehicle/aa53ebe4-157b-4615-8df4-c1e9b201106a
+Authorization: Bearer {{auth_token}}
