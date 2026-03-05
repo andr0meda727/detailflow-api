@@ -1,0 +1,40 @@
+@Api_HostAddress = http://localhost:5174/
+
+### GET All inventory categories
+
+GET {{Api_HostAddress}}/api/inventory-categories
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### GET Intenvory category
+
+GET {{Api_HostAddress}}/api/inventory-categories/c8496ded-93df-40a3-9d95-713a5fde6d07
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### POST Inventory categories
+
+POST {{Api_HostAddress}}/api/inventory-categories
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Chemia v10"
+}
+
+### PUT Inventory category
+
+PUT {{Api_HostAddress}}/api/inventory-categories/40a2a987-f271-4b5f-92b5-3e96a0dbdb74
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Chemia v12"
+}
+
+
+### DELETE Inventory category
+DELETE {{Api_HostAddress}}/api/inventory-categories/40a2a987-f271-4b5f-92b5-3e96a0dbdb74
+Authorization: Bearer {{auth_token}}

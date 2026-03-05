@@ -26,11 +26,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IClientsService, ClientsService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryCategoriesService, InventoryCategoriesService>();
         services.AddScoped<IServicesService, ServicesService>();
         services.AddScoped<IVehiclesService, VehiclesService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
+        services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();
         services.AddSingleton<IServiceMapper, ServiceMapper>();
         services.AddSingleton<IVehicleMapper, VehicleMapper>();
 
