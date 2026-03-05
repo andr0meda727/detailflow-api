@@ -25,6 +25,10 @@ public class StudioMemberConfiguration : IEntityTypeConfiguration<StudioMember>
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");
 
+        builder.Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("now()")
+            .HasColumnName("updated_at");
+
         builder.Property(e => e.RoleId)
             .HasColumnName("role_id");
 

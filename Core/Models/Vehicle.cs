@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Vehicle
+namespace Core.Models;
+
+public class Vehicle : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 
@@ -18,7 +20,7 @@ public class Vehicle
 
     public DateTime UpdatedAt { get; set; }
 
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 

@@ -1,23 +1,53 @@
 ﻿using Core.DTOs.Bookings;
+using Core.Interfaces.Repositories;
 using FluentValidation;
 
 namespace Core.Validators.Bookings;
 
 public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
 {
-    public BookingCreateDtoValidator()
+    private readonly IVehicleRepository _vehicleRepository;
+
+    public BookingCreateDtoValidator(IVehicleRepository vehicleRepository)
     {
-        RuleFor(x => x.VehicleId).NotEmpty().WithMessage("Pojazd jest wymagany.");
-        RuleFor(x => x.ClientId).NotEmpty().WithMessage("Klient jest wymagany.");
-        RuleFor(x => x.StatusId).NotEmpty().WithMessage("Status jest wymagany.");
+        _vehicleRepository = vehicleRepository;
 
-        RuleFor(x => x.ServiceIds)
-            .NotEmpty().WithMessage("Musisz wybrać przynajmniej jedną usługę.");
+        RuleFor(x => x.ClientId)
+            .NotEmpty().WithMessage("ID klienta jest wymagane.");
 
-        RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Cena nie może być ujemna.");
+        RuleFor(x => x.StatusId)
+            .NotEmpty().WithMessage("Musisz wybrać status rezerwacji."); // Chyba ze bez wyboru robimy
 
         RuleFor(x => x.Notes)
-            .MaximumLength(2000).WithMessage("Notatki są zbyt długie.");
+            .MaximumLength(2000).WithMessage("Notatki są za długie (maksymalnie 2000 znaków).");
+
+        RuleFor(x => x.Price)
+            .GreaterThanOrEqualTo(0).WithMessage("Cena nie może być ujemna.")
+            .LessThan(1000000).WithMessage("Cena przekracza dozwolony limit systemu.");
+
+        RuleFor(x => x.ServiceIds)
+            .NotEmpty().WithMessage("Musisz wybrać przynajmniej jedną usługę.")
+            .Must(services => services.Count <= 20).WithMessage("Możesz wybrać maksymalnie 20 usług na raz.");
+
+
+        RuleFor(x => x.ScheduledAt)
+            .NotEmpty().WithMessage("Data planowanej rezerwacji jest wymagana.")
+            .GreaterThan(DateTime.UtcNow.AddMinutes(-10))
+            .WithMessage("Data rezerwacji nie może być w przeszłości.");
+
+
+        RuleFor(x => x.VehicleId)
+            .NotEmpty().WithMessage("Musisz podać ID pojazdu.")
+            .MustAsync(BeOwnedByClientAsync)
+            .WithMessage("Wybrany pojazd nie istnieje lub nie należy do podanego klienta.");
+    }
+
+    private async Task<bool> BeOwnedByClientAsync(BookingCreateDto dto, Guid vehicleId, CancellationToken cancellationToken)
+    {
+        if (dto.ClientId == Guid.Empty || vehicleId == Guid.Empty) return false;
+
+        var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
+
+        return vehicle != null && vehicle.ClientId == dto.ClientId;
     }
 }

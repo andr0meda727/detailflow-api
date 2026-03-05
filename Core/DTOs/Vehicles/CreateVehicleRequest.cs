@@ -1,6 +1,8 @@
-﻿namespace Core.DTOs.Vehicles;
+namespace Core.DTOs.Vehicles;
 
-public class CreateVehicleRequest
-{
-    
-}
+public record CreateVehicleRequest(
+    Guid ClientId,
+    string LicensePlate,
+    string? Brand,
+    string? Model
+);

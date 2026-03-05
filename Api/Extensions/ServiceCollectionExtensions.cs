@@ -1,14 +1,15 @@
-﻿using Core.DTOs.Bookings;
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
 using Core.Validators.Bookings;
 using FluentValidation;
-using FluentValidation.AspNetCore;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+
 
 namespace Api.Extensions;
 
@@ -26,13 +27,22 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IClientsService, ClientsService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryCategoriesService, InventoryCategoriesService>();
+        services.AddScoped<IServicesService, ServicesService>();
+        services.AddScoped<IVehiclesService, VehiclesService>();
+
+        services.AddScoped<IEmployeesService, EmployeesService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
+        services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();
+        services.AddSingleton<IServiceMapper, ServiceMapper>();
+        services.AddSingleton<IVehicleMapper, VehicleMapper>();
 
+        services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddFluentValidationAutoValidation();
-        services.AddScoped<IValidator<BookingCreateDto>, BookingCreateDtoValidator>();
 
+        services.AddHttpClient<IAuthService, SupabaseAuthService>();
 
         var supabaseUrl = configuration["Supabase:Url"]
                           ?? throw new InvalidOperationException("Supabase URL is missing!");

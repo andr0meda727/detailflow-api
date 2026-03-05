@@ -8,8 +8,9 @@ namespace Core.Services;
 
 public class ClientsService(
     IClientRepository clientRepository,
-    ITenantContext tenantContext,
-    IClientMapper mapper) : IClientsService
+    IClientMapper mapper,
+    IVehicleRepository vehicleRepository,
+    IVehicleMapper vehicleMapper) : IClientsService
 {
     public async Task<List<ClientResponseDto>> GetAllClientsAsync(string? search)
     {
@@ -30,11 +31,17 @@ public class ClientsService(
         var client = mapper.MapToEntity(dto);
 
         client.Id = Guid.NewGuid();
-        client.StudioId = tenantContext.StudioId;
-        client.CreatedAt = DateTime.UtcNow;
-        client.UpdatedAt = DateTime.UtcNow;
 
         var addedClient = await clientRepository.AddAsync(client);
+
+        if (dto.Vehicle != null)
+        {
+            var vehicleEntity = vehicleMapper.MapToEntity(dto.Vehicle);
+
+            vehicleEntity.ClientId = addedClient.Id;
+
+            await vehicleRepository.AddAsync(vehicleEntity);
+        }
 
         return mapper.MapClientToResponse(addedClient);
     }
@@ -46,8 +53,6 @@ public class ClientsService(
         if (client == null) return null;
 
         mapper.UpdateClient(dto, client);
-
-        client.UpdatedAt = DateTime.UtcNow;
 
         await clientRepository.UpdateAsync(client);
 
@@ -61,7 +66,6 @@ public class ClientsService(
         if (client == null) return false;
 
         client.IsDeleted = true;
-        client.UpdatedAt = DateTime.UtcNow;
 
         await clientRepository.UpdateAsync(client);
         return true;

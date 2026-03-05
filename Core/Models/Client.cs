@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Client
+namespace Core.Models;
+
+public class Client : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
 

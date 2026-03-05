@@ -25,14 +25,14 @@ Content-Type: application/json
   "serviceIds": [
     "0b771b6b-da24-477f-b06d-ab1b48179f08"
   ],
-  "scheduledAt": "2026-02-25T10:00:00Z",
-  "price": 250.50,
-  "notes": "Pierwsza wizyta, proszę o dokładne mycie felg."
+  "scheduledAt": "2026-03-25T10:00:00Z",
+  "price": 420,
+  "notes": "TEST"
 }
 
 ### PUT Booking
 
-PUT {{Api_HostAddress}}/api/bookings/73d89609-3cc1-447b-902b-e25f35bb56ec
+PUT {{Api_HostAddress}}/api/bookings/be890dfc-611d-4dbb-b332-061584db0d29
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
@@ -44,7 +44,7 @@ Content-Type: application/json
     "7eb61d22-a006-40ac-a2d8-25e05a793a59",
     "0b771b6b-da24-477f-b06d-ab1b48179f08"
   ],
-  "scheduledAt": "2026-02-28T12:00:00Z",
+  "scheduledAt": "2026-04-28T12:00:00Z",
   "price": 350.00,
   "notes": "Edytowana wizyta: klient domówił dodatkowe zabezpieczenie lakieru."
 }

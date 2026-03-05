@@ -25,27 +25,44 @@ Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 {
-  "name": "testtest",
+  "name": "usunezaraz",
   "email": "a@example.com",
-  "phone": "500 600 750",
+  "phone": "500 600 755",
   "nip": "1234567890"
 }
 
 ### PUT Client
 
-PUT {{Api_HostAddress}}/api/clients/d8e6b8b2-8fc0-4ac8-b750-2af1779c826a
+PUT {{Api_HostAddress}}/api/clients/9000b8fc-2f1f-470c-9fd9-3793f0edbffb
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 {
-  "name": "changed",
+  "name": "usuneteraz",
   "email": "a_new@example.com",
-  "phone": "999 888 777",
+  "phone": "999 888 776",
   "nip": "1234567890"
 }
 
 ### DELETE Client
 
-DELETE {{Api_HostAddress}}/api/clients/8c242132-328c-4358-9f7c-819de32ffa7a
+DELETE {{Api_HostAddress}}/api/clients/9000b8fc-2f1f-470c-9fd9-3793f0edbffb
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
+
+
+### Creating client with the vehicle
+POST {{Api_HostAddress}}/api/clients
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "name": "Anna Nowak (Z autem)",
+  "email": "anna@example.com",
+  "phone": "987654311",
+  "vehicle": {
+    "brand": "Audi",
+    "model": "A30",
+    "licensePlate": "TKI 00000"
+  }
+}

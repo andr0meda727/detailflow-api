@@ -1,0 +1,20 @@
+@Api_HostAddress = http://localhost:5174
+
+### GET All Services
+GET {{Api_HostAddress}}/api/service
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### POST Create Service
+POST {{Api_HostAddress}}/api/service
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "test"
+}
+
+
+### DELETE Service
+DELETE {{Api_HostAddress}}/api/service/64b9c53d-f5f4-4621-8af1-daeb8a4f9638
+Authorization: Bearer {{auth_token}}

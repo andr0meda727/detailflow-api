@@ -1,4 +1,5 @@
 using Core.Interfaces;
+using Core.Interfaces.Audit;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,6 +50,46 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
         modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
         modelBuilder.Entity<Vehicle>().HasQueryFilter(v => !v.IsDeleted && v.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Service>().HasQueryFilter(s => s.StudioId == CurrentStudioId || s.StudioId == null);
+        modelBuilder.Entity<Service>().HasQueryFilter(s => s.IsActive && s.StudioId == CurrentStudioId);
+        modelBuilder.Entity<InventoryCategory>().HasQueryFilter(ic => ic.StudioId == CurrentStudioId);
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified);
+
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in entries)
+        {
+            if (entry.Entity is IAuditableEntity auditable)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    auditable.CreatedAt = now;
+                    auditable.UpdatedAt = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    auditable.UpdatedAt = now;
+                    entry.Property(nameof(IAuditableEntity.CreatedAt)).IsModified = false;
+                }
+            }
+
+            if (entry.Entity is ITenantEntity tenantEntity)
+            {
+                if (entry.State == EntityState.Added && CurrentStudioId != Guid.Empty)
+                {
+                    tenantEntity.StudioId = CurrentStudioId;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(nameof(ITenantEntity.StudioId)).IsModified = false;
+                }
+            }
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

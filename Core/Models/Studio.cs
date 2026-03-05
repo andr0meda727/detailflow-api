@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Core.Interfaces.Audit;
 
-public class Studio
+namespace Core.Models;
+
+public class Studio : IAuditableEntity
 {
     public Guid Id { get; set; }
 
@@ -24,7 +26,7 @@ public class Studio
 
     public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 
-    public virtual ICollection<InventoryCategory> InventoryCategories { get; set; } = new List<InventoryCategory>();
+    public ICollection<InventoryCategory> InventoryCategories { get; set; } = new List<InventoryCategory>();
 
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
