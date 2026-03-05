@@ -27,6 +27,18 @@ Content-Type: application/json
   "clientId": "8c242132-328c-4358-9f7c-819de32ffa7a"
 }
 
+### PUT Vehicle
+PUT {{Api_HostAddress}}/api/vehicle/aa53ebe4-157b-4615-8df4-c1e9b201106a
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "brand": "Toyota",
+  "model": "Corolla v12",
+  "licensePlate": "KR 12346",
+  "clientId": "8c242132-328c-4358-9f7c-819de32ffa7a"
+}
+
 ### DELETE Vehicle
 DELETE {{Api_HostAddress}}/api/vehicle/aa53ebe4-157b-4615-8df4-c1e9b201106a
 Authorization: Bearer {{auth_token}}

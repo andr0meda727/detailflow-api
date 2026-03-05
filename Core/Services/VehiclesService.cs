@@ -9,7 +9,6 @@ namespace Core.Services;
 public class VehiclesService(
     IVehicleRepository vehicleRepository,
     IClientRepository clientRepository,
-    ITenantContext tenantContext,
     IVehicleMapper mapper) : IVehiclesService
 {
     public async Task<List<VehicleInfoDto>> GetAllAsync(Guid? clientId = null, string? search = null)
@@ -28,27 +27,33 @@ public class VehiclesService(
 
         var vehicle = mapper.MapToEntity(dto);
 
-        vehicle.Id = Guid.NewGuid();
-        vehicle.StudioId = tenantContext.StudioId;
-        vehicle.IsDeleted = false;
-        vehicle.CreatedAt = DateTime.UtcNow;
-        vehicle.UpdatedAt = DateTime.UtcNow;
-
         var addedVehicle = await vehicleRepository.AddAsync(vehicle);
         return mapper.MapVehicleToResponse(addedVehicle);
+    }
+
+    public async Task<VehicleInfoDto?> UpdateVehicleAsync(Guid id, CreateVehicleRequest dto)
+    {
+        var vehicle = await vehicleRepository.GetByIdAsync(id);
+
+        if (vehicle == null) return null;
+
+        mapper.UpdateVehicle(dto, vehicle);
+
+        await vehicleRepository.UpdateAsync(vehicle);
+
+        return mapper.MapVehicleToResponse(vehicle);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
         var vehicle = await vehicleRepository.GetByIdAsync(id);
 
-        if (vehicle == null || vehicle.IsDeleted)
+        if (vehicle == null)
         {
             return false;
         }
 
         vehicle.IsDeleted = true;
-        vehicle.UpdatedAt = DateTime.UtcNow;
 
         await vehicleRepository.UpdateAsync(vehicle);
         return true;

@@ -32,6 +32,19 @@ public class VehicleController(IVehiclesService vehiclesService) : ControllerBas
         return Ok(addedVehicle);
     }
 
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<VehicleInfoDto>> Update(Guid id, [FromBody] CreateVehicleRequest dto)
+    {
+        var result = await vehiclesService.UpdateVehicleAsync(id, dto);
+
+        if (result == null)
+        {
+            return NotFound($"Vehicle {id} doesn't exist");
+        }
+
+        return Ok(result);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

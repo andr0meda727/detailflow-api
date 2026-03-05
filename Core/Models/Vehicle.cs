@@ -20,7 +20,7 @@ public class Vehicle : IAuditableEntity, ITenantEntity
 
     public DateTime UpdatedAt { get; set; }
 
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 

@@ -7,4 +7,5 @@ public interface IVehicleMapper
 {
     VehicleInfoDto MapVehicleToResponse(Vehicle vehicle);
     Vehicle MapToEntity(CreateVehicleRequest dto);
+    void UpdateVehicle(CreateVehicleRequest dto, Vehicle vehicle);
 }
