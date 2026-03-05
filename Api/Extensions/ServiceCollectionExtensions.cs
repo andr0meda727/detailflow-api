@@ -5,6 +5,7 @@ using Core.Mappings;
 using Core.Services;
 using Core.Validators.Bookings;
 using FluentValidation;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -30,6 +31,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IServicesService, ServicesService>();
         services.AddScoped<IVehiclesService, VehiclesService>();
 
+        services.AddScoped<IEmployeesService, EmployeesService>();
+
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
         services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();
@@ -39,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddFluentValidationAutoValidation();
 
+        services.AddHttpClient<IAuthService, SupabaseAuthService>();
 
         var supabaseUrl = configuration["Supabase:Url"]
                           ?? throw new InvalidOperationException("Supabase URL is missing!");
