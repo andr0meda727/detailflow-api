@@ -8,7 +8,9 @@ namespace Core.Services;
 
 public class ClientsService(
     IClientRepository clientRepository,
-    IClientMapper mapper) : IClientsService
+    IClientMapper mapper,
+    IVehicleRepository vehicleRepository,
+    IVehicleMapper vehicleMapper) : IClientsService
 {
     public async Task<List<ClientResponseDto>> GetAllClientsAsync(string? search)
     {
@@ -28,7 +30,18 @@ public class ClientsService(
     {
         var client = mapper.MapToEntity(dto);
 
+        client.Id = Guid.NewGuid();
+
         var addedClient = await clientRepository.AddAsync(client);
+
+        if (dto.Vehicle != null)
+        {
+            var vehicleEntity = vehicleMapper.MapToEntity(dto.Vehicle);
+
+            vehicleEntity.ClientId = addedClient.Id;
+
+            await vehicleRepository.AddAsync(vehicleEntity);
+        }
 
         return mapper.MapClientToResponse(addedClient);
     }

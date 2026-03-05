@@ -19,6 +19,6 @@ public partial class VehicleMapper : IVehicleMapper
     [MapperIgnoreTarget(nameof(Vehicle.Client))]
     [MapperIgnoreTarget(nameof(Vehicle.Studio))]
     public partial Vehicle MapToEntity(CreateVehicleRequest dto);
-
+    public partial Vehicle MapToEntity(CreateClientVehicleDto dto);
     public partial void UpdateVehicle(CreateVehicleRequest dto, Vehicle vehicle);
 }
