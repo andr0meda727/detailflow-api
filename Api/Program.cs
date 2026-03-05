@@ -29,10 +29,10 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
-// Use Tenant Context Middleware (BEFORE routing and endpoints)
 app.UseTenantContext();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

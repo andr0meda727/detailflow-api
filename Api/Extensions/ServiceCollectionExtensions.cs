@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using System.Security.Claims;
+using Core.Interfaces;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
 using Core.Mappings;
@@ -63,7 +64,10 @@ public static class ServiceCollectionExtensions
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("OwnerOnly", policy => policy.RequireClaim(ClaimTypes.Role, "1"));
+        });
 
         return services;
     }

@@ -10,7 +10,9 @@ namespace Api.Controllers;
 [Authorize]
 public class EmployeesController(IEmployeesService employeesService) : ControllerBase
 {
-    [HttpPost("invite")] // Adres: /api/employees/invite
+
+    [HttpPost("invite")]
+    [Authorize(Policy = "OwnerOnly")]
     public async Task<IActionResult> InviteEmployee([FromBody] InviteEmployeeDto dto)
     {
         await employeesService.InviteEmployeeAsync(dto);
