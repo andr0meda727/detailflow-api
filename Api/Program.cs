@@ -16,7 +16,12 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
