@@ -28,6 +28,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+else
+{
+    // app.UseHsts(); allow it later for prod
+    // app.UseExceptionHandler();
+}
 
 app.UseHttpsRedirection();
 
