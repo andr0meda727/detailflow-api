@@ -9,7 +9,6 @@ namespace Core.Services;
 
 public class InventoryService(
     IInventoryRepository inventoryRepository,
-    ITenantContext tenantContext,
     IInventoryMapper mapper)
     : IInventoryService
 {
@@ -34,16 +33,12 @@ public class InventoryService(
 
         var inventoryItem = new Inventory
         {
-            Id = Guid.NewGuid(),
-            StudioId = tenantContext.StudioId,
             CategoryId = inventoryData.CategoryId,
             Name = inventoryData.Name,
             Description = inventoryData.Description,
             Unit = inventoryData.Unit,
             Stock = inventoryData.Stock,
             MinStock = inventoryData.MinStock,
-            CreatedAt = now,
-            UpdatedAt = now
         };
 
         var addedInventory = await inventoryRepository.AddAsync(inventoryItem);
@@ -57,14 +52,12 @@ public class InventoryService(
         var inventoryItem = new Inventory
         {
             Id = id,
-            StudioId = tenantContext.StudioId,
             CategoryId = inventoryData.CategoryId,
             Name = inventoryData.Name,
             Description = inventoryData.Description,
             Unit = inventoryData.Unit,
             Stock = inventoryData.Stock,
             MinStock = inventoryData.MinStock,
-            UpdatedAt = now
         };
 
         await inventoryRepository.UpdateAsync(inventoryItem);
