@@ -1,0 +1,171 @@
+@Api_HostAddress = http://localhost:5174
+@projectUrl = https://spsquzkwqikbwdrrkpqy.supabase.co
+@anonKey = sb_publishable_0e54D14bUH3Hu2D_9IFlCg_eYZA86NZ
+
+### Rejestracja nowego właściciela studia
+POST {{Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "zuziamajczyk@gmail.com",
+  "password": "Haslo1234!",
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "studio": {
+    "name": "elo elo",
+    "address": "ul. Krakowska 1, 30-001 Kraków"
+  }
+}
+
+### Rejestracja — email już zajęty (oczekiwany: 409 EMAIL_TAKEN)
+POST {{Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "owner@detailflow.pl",
+  "password": "Haslo1234!",
+  "firstName": "Jan",
+  "lastName": "Kowalski",
+  "studio": {
+    "name": "Drugie Studio",
+    "address": "ul. Warszawska 1"
+  }
+}
+
+### Rejestracja — brak wymaganych pól (oczekiwany: 400)
+POST {{Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": "",
+  "firstName": "",
+  "lastName": "",
+  "studio": {
+    "name": ""
+  }
+}
+
+
+### Zaproszenie nowego pracownika (nie istnieje w systemie)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+
+{
+  "email": "zuziamajczyk@gmail.com",
+  "roleId": 2
+}
+
+
+### Zaproszenie istniejącego użytkownika (Owner innego studia lub były pracownik)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+#X-Studio-Id: jakies inne niz to powyzej
+
+{
+  "email": "zuziamajczyk@gmail.com",
+  "roleId": 3
+}
+
+### EDGE CASE — self-invite (oczekiwany: 409 SELF_INVITE)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "owner@detailflow.pl",
+  "roleId": 3
+}
+
+### EDGE CASE — użytkownik już jest pracownikiem tego studia (oczekiwany: 409 ALREADY_MEMBER)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "pracownik.jan@gmail.com",
+  "roleId": 3
+}
+
+### EDGE CASE — aktywne zaproszenie już istnieje (oczekiwany: 409 INVITATION_PENDING)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "drugie.zaproszenie@gmail.com",
+  "roleId": 3
+}
+
+### EDGE CASE — próba zaproszenia na rolę Owner (oczekiwany: 409 CANNOT_INVITE_OWNER) (mozna np 2 ownerow moze byc)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "nowy.owner@gmail.com",
+  "roleId": 1
+}
+
+### EDGE CASE — nieprawidłowy format email (oczekiwany: 400 walidacja)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "to-nie-jest-email",
+  "roleId": 3
+}
+
+### EDGE CASE — brak autoryzacji (oczekiwany: 401)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+
+{
+  "email": "pracownik@gmail.com",
+  "roleId": 3
+}
+
+### EDGE CASE — zalogowany jako pracownik, nie Owner (oczekiwany: 403)
+POST {{Api_HostAddress}}/api/employees/invite
+Content-Type: application/json
+Authorization: Bearer {{employee_auth_token}}
+X-Studio-Id: {{studio_id}}
+
+{
+  "email": "kolejny@gmail.com",
+  "roleId": 3
+}
+
+### Ponowne wysłanie zaproszenia (resend)
+POST {{Api_HostAddress}}/api/employees/invite/{{invitation_id}}/resend
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+### EDGE CASE — resend już zaakceptowanego zaproszenia (oczekiwany: 400 ALREADY_ACCEPTED)
+POST {{Api_HostAddress}}/api/employees/invite/{{accepted_invitation_id}}/resend
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+### EDGE CASE — resend zaproszenia z innego studia (oczekiwany: 400 FORBIDDEN)
+POST {{Api_HostAddress}}/api/employees/invite/{{other_studio_invitation_id}}/resend
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+### EDGE CASE — resend nieistniejącego zaproszenia (oczekiwany: 404 NOT_FOUND)
+POST {{Api_HostAddress}}/api/employees/invite/00000000-0000-0000-0000-000000000000/resend
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: {{studio_id}}
+
+### GET Invitation
+GET {{Api_HostAddress}}/api/invitations/015793e0-328a-47bc-b91e-ce2f531397fd
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}

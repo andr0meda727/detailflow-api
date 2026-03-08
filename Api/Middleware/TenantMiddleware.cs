@@ -42,6 +42,10 @@ public class TenantMiddleware(RequestDelegate next)
         {
             SetTenantContextAndClaims(context, tenantContext, activeMembership, userInDb.Id);
         }
+        else
+        {
+            tenantContext.SetUserOnly(userInDb.Id);
+        }
 
         await next(context);
     }

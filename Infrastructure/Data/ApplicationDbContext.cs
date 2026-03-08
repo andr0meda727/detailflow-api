@@ -38,8 +38,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<User> Users { get; set; }
 
     public DbSet<Vehicle> Vehicles { get; set; }
+    public DbSet<StudioInvitation> StudioInvitations { get; set; }
 
-    private Guid CurrentStudioId => tenantContext.StudioId;
+    private Guid? CurrentStudioId => tenantContext.StudioId;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,11 +48,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        modelBuilder.Entity<Booking>().HasQueryFilter(b => b.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Client>().HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Vehicle>().HasQueryFilter(v => !v.IsDeleted && v.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Service>().HasQueryFilter(s => s.IsActive && s.StudioId == CurrentStudioId);
-        modelBuilder.Entity<InventoryCategory>().HasQueryFilter(ic => ic.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Booking>()
+            .HasQueryFilter(b => CurrentStudioId == null || b.StudioId == CurrentStudioId.Value);
+        modelBuilder.Entity<Client>()
+            .HasQueryFilter(c => !c.IsDeleted && (CurrentStudioId == null || c.StudioId == CurrentStudioId.Value));
+        modelBuilder.Entity<Vehicle>()
+            .HasQueryFilter(v => !v.IsDeleted && (CurrentStudioId == null || v.StudioId == CurrentStudioId.Value));
+        modelBuilder.Entity<Service>()
+            .HasQueryFilter(s => s.IsActive && (CurrentStudioId == null || s.StudioId == CurrentStudioId.Value));
+        modelBuilder.Entity<InventoryCategory>()
+            .HasQueryFilter(ic => CurrentStudioId == null || ic.StudioId == CurrentStudioId.Value);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -79,9 +85,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
             if (entry.Entity is ITenantEntity tenantEntity)
             {
-                if (entry.State == EntityState.Added && CurrentStudioId != Guid.Empty)
+                if (entry.State == EntityState.Added && CurrentStudioId.HasValue)
                 {
-                    tenantEntity.StudioId = CurrentStudioId;
+                    tenantEntity.StudioId = CurrentStudioId.Value;
                 }
                 else if (entry.State == EntityState.Modified)
                 {

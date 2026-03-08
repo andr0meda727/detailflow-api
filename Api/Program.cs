@@ -16,23 +16,46 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+else
+{
+    // app.UseHsts(); allow it later for prod
+    // app.UseExceptionHandler();
+}
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCors("Frontend");
 
-// Use Tenant Context Middleware (BEFORE routing and endpoints)
+app.UseAuthentication();
+
 app.UseTenantContext();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

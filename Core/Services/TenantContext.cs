@@ -4,17 +4,23 @@ namespace Core.Services;
 
 public class TenantContext : ITenantContext
 {
-    private Guid _studioId;
+    private bool _isSet;
+    public Guid? StudioId { get; private set; }
     public Guid? UserId { get; private set; }
-
-    public Guid StudioId => _studioId != Guid.Empty 
-        ? _studioId 
-        : throw new InvalidOperationException("StudioId wasn't set. Check middleware.");
-
 
     public void SetTenant(Guid studioId, Guid? userId)
     {
-        _studioId = studioId;
+        if (_isSet) return;
+
+        StudioId = studioId;
+        UserId = userId;
+        _isSet = true;
+    }
+
+    public void SetUserOnly(Guid userId)
+    {
+        if (_isSet) return;
+
         UserId = userId;
     }
 }

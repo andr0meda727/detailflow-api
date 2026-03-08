@@ -5,6 +5,7 @@
 GET {{Api_HostAddress}}/api/bookings
 Authorization: Bearer {{auth_token}}
 Accept: application/json
+#X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
 
 ### GET Booking
 
@@ -19,13 +20,13 @@ Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "vehicleId": "b0cc495f-83d9-4303-960a-be6ae071cb4f",
-  "clientId": "8c242132-328c-4358-9f7c-819de32ffa7a",
-  "statusId": "6aeadcad-a836-46fc-a445-3a3a832f49a4",
+  "vehicleId": "0f555578-5b29-40bc-af42-30b9791eba90",
+  "clientId": "b9a21b95-9d7b-49ca-98e2-180217e04bb4",
+  "statusId": "6aeadcad-a836-46fc-a445-3a3a832f49a3",
   "serviceIds": [
     "0b771b6b-da24-477f-b06d-ab1b48179f08"
   ],
-  "scheduledAt": "2026-03-25T10:00:00Z",
+  "scheduledAt": "2026-03-09T20:00:00Z",
   "price": 420,
   "notes": "TEST"
 }

@@ -1,10 +1,16 @@
-﻿using Core.Interfaces;
+﻿using System.Security.Claims;
+using Core.Constants;
+using Core.DTOs.Services;
+using Core.Interfaces;
 using Core.Interfaces.Mappings;
+using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
+using Core.Validators;
 using Core.Validators.Bookings;
 using FluentValidation;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +38,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IVehiclesService, VehiclesService>();
 
         services.AddScoped<IEmployeesService, EmployeesService>();
+        services.AddScoped<IInvitationService, InvitationService>();
+        services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
+        services.AddScoped<IStudioRepository, StudioRepository>();
+        services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
+
+        services.AddScoped<IOwnerRegistrationService, OwnerRegistrationService>();
+
+        services.AddScoped<IInvitationSender, InvitationSender>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
@@ -40,9 +54,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IVehicleMapper, VehicleMapper>();
 
         services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<RegisterOwnerDtoValidator>();
         services.AddFluentValidationAutoValidation();
 
-        services.AddHttpClient<IAuthService, SupabaseAuthService>();
+        services.AddScoped<IAuthService, SupabaseAuthService>();
 
         var supabaseUrl = configuration["Supabase:Url"]
                           ?? throw new InvalidOperationException("Supabase URL is missing!");
@@ -63,7 +78,10 @@ public static class ServiceCollectionExtensions
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("OwnerOnly", policy => policy.RequireClaim(ClaimTypes.Role, Roles.Owner.ToString()));
+        });
 
         return services;
     }
