@@ -14,4 +14,10 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await DbSet
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
 }
