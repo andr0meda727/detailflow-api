@@ -61,4 +61,18 @@ public class BookingRepository(ApplicationDbContext context)
 
         return await query.FirstOrDefaultAsync(b => b.Id == id);
     }
+
+    public async Task<List<Booking>> GetByStudioAndDateRangeAsync(
+        Guid studioId, DateTime dateFrom, DateTime dateTo)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Include(b => b.Client)
+            .Include(b => b.Status)
+            .Include(b => b.BookingServices).ThenInclude(bs => bs.Service)
+            .Where(b => b.StudioId == studioId
+                        && b.ScheduledAt >= dateFrom
+                        && b.ScheduledAt <= dateTo)
+            .ToListAsync();
+    }
 }

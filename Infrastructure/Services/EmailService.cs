@@ -66,4 +66,35 @@ public class EmailService(IConfiguration config) : IEmailService
             </html>
             """;
     }
+
+    public async Task SendReportEmailAsync(
+        string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes)
+    {
+        using var client = new SmtpClient(_host, _port);
+        client.EnableSsl = false;
+        client.Credentials = CredentialCache.DefaultNetworkCredentials;
+
+        var message = new MailMessage
+        {
+            From       = new MailAddress(_from, _fromName),
+            Subject    = $"Raport wizyt {dateFrom:dd.MM.yyyy}–{dateTo:dd.MM.yyyy}",
+            Body       = $"""
+                          <p>Cześć,</p>
+                          <p>Twój raport wizyt za okres <strong>{dateFrom:dd.MM.yyyy} — {dateTo:dd.MM.yyyy}</strong> jest gotowy.</p>
+                          <p>Znajdziesz go w załączniku.</p>
+                          """,
+            IsBodyHtml = true
+        };
+
+        message.To.Add(to);
+
+        var attachment = new Attachment(
+            new MemoryStream(pdfBytes),
+            $"raport_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.pdf",
+            "application/pdf");
+
+        message.Attachments.Add(attachment);
+
+        await client.SendMailAsync(message);
+    }
 }

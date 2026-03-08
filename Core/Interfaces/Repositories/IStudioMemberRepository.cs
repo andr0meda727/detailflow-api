@@ -6,4 +6,5 @@ public interface IStudioMemberRepository : IRepository<StudioMember>
 {
     Task<StudioMember?> GetByUserIdAndStudioAsync(Guid userId, Guid studioId);
     Task<StudioMember?> GetByUserEmailAndStudioAsync(string email, Guid studioId);
+    Task<List<StudioMember>> GetByUserIdWithStudioAsync(Guid userId);
 }

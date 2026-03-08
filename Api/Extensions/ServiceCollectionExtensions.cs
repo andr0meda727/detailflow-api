@@ -10,8 +10,10 @@ using Core.Services;
 using Core.Validators;
 using Core.Validators.Bookings;
 using FluentValidation;
+using Infrastructure.Consumers;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -46,6 +48,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOwnerRegistrationService, OwnerRegistrationService>();
 
         services.AddScoped<IInvitationSender, InvitationSender>();
+
+        services.AddScoped<IStudioService, StudioService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
@@ -82,6 +86,18 @@ public static class ServiceCollectionExtensions
         {
             options.AddPolicy("OwnerOnly", policy => policy.RequireClaim(ClaimTypes.Role, Roles.Owner.ToString()));
         });
+
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<GenerateBookingsReportConsumer>();
+
+            x.UsingInMemory((context, cfg) =>
+            {
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        services.AddScoped<IReportPdfService, ReportPdfService>();
 
         return services;
     }
