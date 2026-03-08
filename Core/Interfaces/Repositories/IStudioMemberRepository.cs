@@ -4,5 +4,6 @@ namespace Core.Interfaces.Repositories;
 
 public interface IStudioMemberRepository : IRepository<StudioMember>
 {
-
+    Task<StudioMember?> GetByUserIdAndStudioAsync(Guid userId, Guid studioId);
+    Task<StudioMember?> GetByUserEmailAndStudioAsync(string email, Guid studioId);
 }

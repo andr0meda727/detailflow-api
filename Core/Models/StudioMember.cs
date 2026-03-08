@@ -2,7 +2,7 @@
 
 namespace Core.Models;
 
-public class StudioMember : IAuditableEntity, ITenantEntity
+public class StudioMember : IAuditableEntity
 {
     public Guid UserId { get; set; }
 
