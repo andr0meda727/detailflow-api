@@ -1,0 +1,7 @@
+@Api_HostAddress = http://localhost:5174/
+
+### GET My studios
+
+GET {{Api_HostAddress}}/api/studios/my
+Authorization: Bearer {{auth_token}}
+Accept: application/json

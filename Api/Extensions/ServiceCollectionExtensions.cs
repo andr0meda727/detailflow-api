@@ -47,6 +47,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IInvitationSender, InvitationSender>();
 
+        services.AddScoped<IStudioService, StudioService>();
+
         services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IInventoryMapper, InventoryMapper>();
         services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();

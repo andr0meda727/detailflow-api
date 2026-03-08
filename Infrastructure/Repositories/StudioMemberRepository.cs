@@ -22,4 +22,13 @@ public class StudioMemberRepository(ApplicationDbContext context)
         return await DbSet.FirstOrDefaultAsync(sm =>
             sm.UserId == userId && sm.StudioId == studioId);
     }
+
+    public async Task<List<StudioMember>> GetByUserIdWithStudioAsync(Guid userId)
+    {
+        return await DbSet
+            .Include(m => m.Studio)
+            .Include(m => m.Role)
+            .Where(m => m.UserId == userId)
+            .ToListAsync();
+    }
 }

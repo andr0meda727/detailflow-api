@@ -29,6 +29,14 @@ public class TenantMiddleware(RequestDelegate next)
             return;
         }
 
+        var path = context.Request.Path.Value ?? "";
+        if (path.StartsWith("/api/studios/my", StringComparison.OrdinalIgnoreCase))
+        {
+            tenantContext.SetUserOnly(userInDb.Id);
+            await next(context);
+            return;
+        }
+
         var requestedStudioId = GetRequestedStudioId(context.Request);
         var (isSuccess, activeMembership, statusCode, errorMessage) = ResolveActiveMembership(userInDb, requestedStudioId);
 
