@@ -10,4 +10,7 @@ public interface IBookingRepository : IRepository<Booking>
         DateTime? toDate = null);
 
     Task<Booking?> GetByIdWithDetailsAsync(Guid id, bool trackChanges = false);
+
+    Task<List<Booking>> GetByStudioAndDateRangeAsync(
+        Guid studioId, DateTime dateFrom, DateTime dateTo);
 }

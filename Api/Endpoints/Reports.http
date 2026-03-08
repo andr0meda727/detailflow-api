@@ -1,0 +1,12 @@
+@Api_HostAddress = http://localhost:5174
+
+### Report
+POST {{Api_HostAddress}}/api/reports/bookings
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+
+{
+  "dateFrom": "2025-01-01T00:00:00Z",
+  "dateTo": "2026-12-31T23:59:59Z"
+}
