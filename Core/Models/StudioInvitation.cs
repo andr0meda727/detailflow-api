@@ -2,7 +2,7 @@ using Core.Interfaces.Audit;
 
 namespace Core.Models;
 
-public class StudioInvitation : IAuditableEntity
+public class StudioInvitation : IAuditableEntity, ITenantEntity
 {
     public Guid Id { get; set; }
     public Guid StudioId { get; set; }
