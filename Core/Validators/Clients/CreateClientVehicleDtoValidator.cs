@@ -23,9 +23,9 @@ public class CreateClientVehicleDtoValidator : AbstractValidator<CreateClientVeh
                 "Numer rejestracyjny zawiera niedozwolone znaki. Dozwolone są tylko litery, cyfry, spacje i myślniki.");
 
         RuleFor(x => x.Brand)
-            .MaximumLength(50).WithMessage("Marka pojazdu nie może przekraczać 100 znaków.")
+            .MaximumLength(50).WithMessage("Marka pojazdu nie może przekraczać 100 znaków.");
 
         RuleFor(x => x.Model)
-            .MaximumLength(50).WithMessage("Model pojazdu nie może przekraczać 100 znaków.")
+            .MaximumLength(50).WithMessage("Model pojazdu nie może przekraczać 100 znaków.");
     }
 }
