@@ -31,10 +31,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IVehicleRepository, VehicleRepository>();
         services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
-
+        services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
+        services.AddScoped<IStudioRepository, StudioRepository>();
 
         // Add tenant context
         services.AddScoped<ITenantContext, TenantContext>();
+
+
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }
