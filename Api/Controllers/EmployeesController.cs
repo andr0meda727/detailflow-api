@@ -15,7 +15,11 @@ public class EmployeesController(IEmployeesService employeesService) : Controlle
     [Authorize(Policy = "OwnerOnly")]
     public async Task<IActionResult> InviteEmployee([FromBody] InviteEmployeeDto dto)
     {
-        await employeesService.InviteEmployeeAsync(dto);
+        var result = await employeesService.InviteEmployeeAsync(dto);
+
+        if (!result.Success)
+            return Conflict(new { error = result.ErrorCode, message = result.ErrorMessage });
+
         return Ok(new { message = "Zaproszenie zostało wysłane pomyślnie!" });
     }
 }
