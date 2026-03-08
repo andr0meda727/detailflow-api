@@ -1,66 +1,91 @@
 using Core.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Supabase.Gotrue;
+using Supabase.Gotrue.Interfaces;
 
 namespace Infrastructure.Services;
 
 public class SupabaseAuthService : IAuthService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _supabaseUrl;
-    private readonly string _serviceRoleKey;
+    private readonly IGotrueAdminClient<User> _adminClient;
+    private readonly Supabase.Client _client;
 
-    // Zauważ: wstrzykujemy HttpClient, to najlepsza praktyka w .NET!
-    public SupabaseAuthService(HttpClient httpClient, IConfiguration config)
+    public SupabaseAuthService(IConfiguration config)
     {
-        _httpClient = httpClient;
-        _supabaseUrl = config["Supabase:Url"] ?? throw new ArgumentNullException("Brak Supabase Url");
-        _serviceRoleKey = config["Supabase:ServiceRoleKey"] ?? throw new ArgumentNullException("Brak Service Role Key");
-    }
+        var supabaseUrl = config["Supabase:Url"]
+            ?? throw new InvalidOperationException("Brak Supabase:Url");
+        var serviceRoleKey = config["Supabase:ServiceRoleKey"]
+            ?? throw new InvalidOperationException("Brak Supabase:ServiceRoleKey");
+        var anonKey = config["Supabase:Key"]
+                      ?? throw new InvalidOperationException("Brak Supabase:AnonKey");
 
-    public async Task<Guid> InviteUserAsync(string email, Guid studioId, long roleId)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_supabaseUrl}/auth/v1/invite");
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _serviceRoleKey);
-        request.Headers.Add("apikey", _serviceRoleKey);
-
-        // MAGIA JEST TUTAJ: Dodajemy obiekt "data"
-        request.Content = JsonContent.Create(new
+        _adminClient = new AdminClient(serviceRoleKey, new ClientOptions
         {
-            email = email,
-            data = new InviteMetadata
+            Url = $"{supabaseUrl}/auth/v1",
+            Headers = new Dictionary<string, string>
             {
-                StudioId = studioId,
-                RoleId = roleId
+                { "apikey", serviceRoleKey }
             }
         });
 
-        var response = await _httpClient.SendAsync(request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Nie udało się wysłać zaproszenia. Supabase zwróciło: {error}");
-        }
-
-        var responseJson = await response.Content.ReadAsStringAsync();
-        using var jsonDoc = JsonDocument.Parse(responseJson);
-        var userIdString = jsonDoc.RootElement.GetProperty("id").GetString();
-
-        return Guid.Parse(userIdString!);
+        _client = new Supabase.Client(supabaseUrl, anonKey);
     }
-}
 
-// Stwórzmy małą klasę specjalnie do tego payloadu zamiast obiektu anonimowego:
-public class InviteMetadata
-{
-    [JsonPropertyName("studio_id")]
-    public Guid StudioId { get; set; }
+    public async Task<Guid> InviteUserAsync(string email, string redirectUrl)
+    {
+        var options = new InviteUserByEmailOptions
+        {
+            RedirectTo = redirectUrl,
+        };
 
-    [JsonPropertyName("role_id")]
-    public long RoleId { get; set; }
+        var success = await _adminClient.InviteUserByEmail(email, options);
+
+        if (!success)
+            throw new InvalidOperationException($"Failed to send invitation to {email}");
+
+        var userId = await GetUserIdByEmailAsync(email);
+
+        if (userId == null)
+            throw new InvalidOperationException($"Failed to retrieve user ID for {email}");
+
+        return userId.Value;
+    }
+
+    public async Task<Guid> SignUpAsync(
+        string email, string password, string? firstName, string? lastName)
+    {
+        var session = await _client.Auth.SignUp(email, password, new SignUpOptions
+        {
+            Data = new Dictionary<string, object>
+            {
+                { "first_name", firstName },
+                { "last_name",  lastName  }
+            }
+        });
+
+        if (session?.User?.Id == null)
+            throw new InvalidOperationException("Nie udało się utworzyć konta.");
+
+        return Guid.Parse(session.User.Id);
+    }
+
+    public async Task<bool> UserExistsAsync(string email)
+    {
+        var result = await _adminClient.ListUsers(filter: email);
+
+        return result?.Users?.Any(u =>
+                   string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase)
+                   && u.EmailConfirmedAt != null)
+               ?? false;
+    }
+
+    private async Task<Guid?> GetUserIdByEmailAsync(string email)
+    {
+        var result = await _adminClient.ListUsers(filter: email);
+
+        var user = result?.Users?.FirstOrDefault(u =>
+            string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase));
+
+        return user?.Id != null ? Guid.Parse(user.Id) : null;
+    }
 }
