@@ -65,4 +65,26 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/complete")]
+    [Authorize]
+    public async Task<ActionResult<BookingResponseDto>> Complete(Guid id)
+    {
+        var completedBooking = await bookingService.CompleteBookingAsync(id);
+
+        if (completedBooking == null) return NotFound($"Booking {id} not found");
+
+        return Ok(completedBooking);
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    [Authorize]
+    public async Task<ActionResult<BookingResponseDto>> Cancel(Guid id)
+    {
+        var cancelledBooking = await bookingService.CancelBookingAsync(id);
+
+        if (cancelledBooking == null) return NotFound($"Booking {id} not found");
+
+        return Ok(cancelledBooking);
+    }
 }

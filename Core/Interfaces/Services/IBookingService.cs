@@ -14,4 +14,6 @@ public interface IBookingService
 
     Task<BookingResponseDto?> EditBookingAsync(Guid id, BookingCreateDto bookingData);
     Task<bool> DeleteBookingAsync(Guid id);
+    Task<BookingResponseDto?> CompleteBookingAsync(Guid id);
+    Task<BookingResponseDto?> CancelBookingAsync(Guid id);
 }
