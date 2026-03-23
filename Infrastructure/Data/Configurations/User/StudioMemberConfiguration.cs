@@ -21,6 +21,9 @@ public class StudioMemberConfiguration : IEntityTypeConfiguration<StudioMember>
         builder.Property(e => e.StudioId)
             .HasColumnName("studio_id");
 
+        builder.Property(e => e.IsActive)
+            .HasColumnName("is_active");
+
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");

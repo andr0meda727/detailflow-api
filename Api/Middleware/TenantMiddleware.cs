@@ -78,7 +78,7 @@ public class TenantMiddleware(RequestDelegate next)
     {
         if (requestedStudioId.HasValue)
         {
-            var membership = user.StudioMembers.FirstOrDefault(sm => sm.StudioId == requestedStudioId.Value);
+            var membership = user.StudioMembers.FirstOrDefault(sm => sm.StudioId == requestedStudioId.Value && sm.IsActive);
             if (membership == null)
             {
                 return (false, null, StatusCodes.Status403Forbidden, "You do not have access to this studio.");
