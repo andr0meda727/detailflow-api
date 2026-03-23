@@ -31,4 +31,13 @@ public class StudioMemberRepository(ApplicationDbContext context)
             .Where(m => m.UserId == userId)
             .ToListAsync();
     }
+
+    public async Task<List<StudioMember>> GetAllByStudioAsync(Guid studioId)
+    {
+        return await DbSet
+            .Include(sm => sm.User)
+            .Include(sm => sm.Role)
+            .Where(sm => sm.StudioId == studioId && sm.IsActive)
+            .ToListAsync();
+    }
 }
