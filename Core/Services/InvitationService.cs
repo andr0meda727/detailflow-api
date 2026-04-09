@@ -79,7 +79,8 @@ public class InvitationService(
         {
             UserId  = userId,
             StudioId = invitation.StudioId,
-            RoleId  = invitation.RoleId
+            RoleId  = invitation.RoleId,
+            IsActive = true
         });
 
         invitation.Status = InvitationStatus.Accepted;

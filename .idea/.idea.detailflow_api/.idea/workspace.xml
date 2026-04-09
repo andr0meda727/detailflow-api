@@ -27,9 +27,8 @@
   <component name="ChangeListManager">
     <list default="true" id="77103cc4-7ce8-4b68-8c05-692d8e6a0e9b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Api/Controllers/BookingsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Controllers/BookingsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Interfaces/Services/IBookingService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Interfaces/Services/IBookingService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Services/BookingService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/BookingService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Api/appsettings.Development.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Services/InvitationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/InvitationService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +40,6 @@
   </component>
   <component name="EmbeddingIndexingInfo">
     <option name="cachedIndexableFilesCount" value="10" />
-    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -372,7 +370,11 @@
       <workItem from="1772390625710" duration="258000" />
       <workItem from="1772473473618" duration="5592000" />
       <workItem from="1772551674550" duration="3466000" />
-      <workItem from="1773072084078" duration="4679000" />
+      <workItem from="1773072084078" duration="4703000" />
+      <workItem from="1773159117357" duration="2236000" />
+      <workItem from="1774894391488" duration="1562000" />
+      <workItem from="1775579115068" duration="2447000" />
+      <workItem from="1775748156990" duration="2057000" />
     </task>
     <task id="LOCAL-00001" summary="Add basic structure for Api">
       <option name="closed" value="true" />
@@ -390,7 +392,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771264810323</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Add CompleteBooking and CancelBooking endpoints with corresponding service methods">
+      <option name="closed" value="true" />
+      <created>1773090640631</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1773090640631</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -410,7 +420,8 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Add basic structure for Api" />
     <MESSAGE value="Add getbookingbyid endpoint" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add getbookingbyid endpoint" />
+    <MESSAGE value="Add CompleteBooking and CancelBooking endpoints with corresponding service methods" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add CompleteBooking and CancelBooking endpoints with corresponding service methods" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
