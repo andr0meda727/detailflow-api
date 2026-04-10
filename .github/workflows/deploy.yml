@@ -35,8 +35,27 @@ env:
   IMAGE_NAME: detaileed-backend
 
 jobs:
+  run-tests:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Run All Tests
+        run: dotnet test --configuration Release --no-restore
+
   build-and-push:
     name: Build and Push Docker image
+    needs: run-tests
     runs-on: ubuntu-latest
 
     steps:
