@@ -16,7 +16,7 @@ on:
       - 'Directory.Build.props'
       - 'Directory.Build.targets'
       - 'NuGet.config'
-      - '.github/workflows/pullrequest-test.yml'
+      - '.github/workflows/*.yml'
       - '!**/*.md'
       - '!docs/**'
 
