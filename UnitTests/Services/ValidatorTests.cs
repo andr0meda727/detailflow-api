@@ -223,10 +223,10 @@ public class BookingCreateDtoValidatorTests
     }
 
     [Test]
-    public async Task Validate_FailsWhenMoreThan20Services()
+    public async Task Validate_FailsWhenMoreThan30Services()
     {
         var dto = ValidDto();
-        dto.ServiceIds = Enumerable.Range(0, 21).Select(_ => Guid.NewGuid()).ToList();
+        dto.ServiceIds = Enumerable.Range(0, 31).Select(_ => Guid.NewGuid()).ToList();
         var result = await _validator.TestValidateAsync(dto);
         result.ShouldHaveValidationErrorFor(x => x.ServiceIds);
     }
