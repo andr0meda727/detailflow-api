@@ -17,9 +17,8 @@ on:
       - 'Directory.Build.targets'
       - 'NuGet.config'
       - '.github/workflows/pullrequest-test.yml'
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
+      - '!**/*.md'
+      - '!docs/**'
 
 jobs:
   unit-tests:
