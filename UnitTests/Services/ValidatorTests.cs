@@ -265,7 +265,7 @@ public class BookingCreateDtoValidatorTests
         var wrongVehicleId = Guid.NewGuid();
         dto.VehicleId = wrongVehicleId;
 
-        // Vehicle exists but belongs to different client
+        // Vehicle exists but belongs to different client (data is intentionally denormalized for archived bookings purposes)
         _vehicleRepository.GetByIdAsync(wrongVehicleId)
                           .Returns(new Vehicle { Id = wrongVehicleId, ClientId = Guid.NewGuid(), LicensePlate = "KR 99", StudioId = Guid.NewGuid() });
 
