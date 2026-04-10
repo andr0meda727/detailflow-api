@@ -3,7 +3,7 @@ name: PR Test Validation
 on:
   pull_request:
     branches:
-      - main
+      - master
     paths:
       - 'Api/**'
       - 'Core/**'

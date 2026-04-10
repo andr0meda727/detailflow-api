@@ -367,7 +367,7 @@ public class BookingServiceTests
         ScheduledAt = DateTime.UtcNow.AddDays(1),
         BookingServices = new List<BookingServices>(),
         Client = new Client { Id = Guid.NewGuid(), Name = "Test Client", Phone = "123456789", StudioId = Guid.NewGuid() },
-        Vehicle = new Vehicle { Id = Guid.NewGuid(), LicensePlate = "KR 1234", StudioId = Guid.NewGuid() },
+        Vehicle = new Vehicle { Id = Guid.NewGuid(), LicensePlate = "KR 12345", StudioId = Guid.NewGuid() },
         Status = new BookingStatus { Id = Guid.NewGuid(), Name = "Pending", Color = "#fff" }
     };
 
