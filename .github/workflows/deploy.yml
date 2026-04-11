@@ -35,6 +35,9 @@ env:
   IMAGE_NAME: detaileed-backend
 
 jobs:
+  # It shouldnt be neccassary to run the tests here (we have pullrequest-test workflow already), but I'm leaving it here,
+  # because we dont have the branch protection (it costs $$$)
+
   run-tests:
     name: Run Unit & Integration Tests
     runs-on: ubuntu-latest
