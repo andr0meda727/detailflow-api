@@ -1,3 +1,4 @@
+using Core.Constants;
 using Core.DTOs.Bookings;
 using Core.Interfaces;
 using Core.Interfaces.Mappings;
@@ -9,18 +10,16 @@ namespace Core.Services;
 
 public class BookingService(
     IBookingRepository bookingRepository,
-    IVehicleRepository vehicleRepository,
     ITenantContext tenantContext,
     IBookingMapper mapper)
     : IBookingService
-{ 
+{
     public async Task<List<BookingResponseDto>> GetAllBookingsAsync(
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null)
     {
         var bookings = await bookingRepository.GetAllWithDetailsAsync(isCompleted, fromDate, toDate);
-        
 
         return bookings.Select(mapper.MapBookingToResponse).ToList();
     }
@@ -91,15 +90,12 @@ public class BookingService(
     public async Task<BookingResponseDto?> CompleteBookingAsync(Guid id)
     {
         var booking = await bookingRepository.GetByIdWithDetailsAsync(id, trackChanges: true);
-        
         if (booking == null) return null;
 
-        // Ustawienie statusu na "Zakończona"
-        booking.StatusId = Guid.Parse("6f4f4496-dd44-4ad8-8021-37ef6b3279dd");
+        booking.StatusId = BookingStatusIds.Completed;
         booking.CompletedAt = DateTime.UtcNow;
 
         await bookingRepository.UpdateAsync(booking);
-        
         var updatedBooking = await bookingRepository.GetByIdWithDetailsAsync(id);
         return updatedBooking == null ? null : mapper.MapBookingToResponse(updatedBooking);
     }
@@ -107,14 +103,14 @@ public class BookingService(
     public async Task<BookingResponseDto?> CancelBookingAsync(Guid id)
     {
         var booking = await bookingRepository.GetByIdWithDetailsAsync(id, trackChanges: true);
-        
+
         if (booking == null) return null;
 
-        // Ustawienie statusu na "Anulowana"
-        booking.StatusId = Guid.Parse("d89cf9d3-ee24-481a-ac76-c5cb224f1c1a");
-        
+        booking.StatusId = BookingStatusIds.Cancelled;
+        booking.CompletedAt = DateTime.UtcNow;
+
         await bookingRepository.UpdateAsync(booking);
-        
+
         var updatedBooking = await bookingRepository.GetByIdWithDetailsAsync(id);
         return updatedBooking == null ? null : mapper.MapBookingToResponse(updatedBooking);
     }
