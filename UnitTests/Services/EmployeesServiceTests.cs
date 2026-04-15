@@ -251,6 +251,27 @@ public class EmployeesServiceTests
         Assert.ThrowsAsync<InvalidOperationException>(() => _sut.InviteEmployeeAsync(dto));
     }
 
+    [Test]
+    public async Task InviteEmployeeAsync_ReturnsSuccess_WhenUserWasPreviouslyRemovedFromStudio()
+    {
+        var email = "employee@studio.pl";
+        var dto = new InviteEmployeeDto { Email = email, RoleId = Roles.Employee };
+        var invitation = BuildInvitation(_studioId, email);
+
+        _userRepository.GetByIdAsync(_invitingUserId).Returns(BuildUser(_invitingUserId, "owner@studio.pl"));
+        _studioMemberRepository.GetByUserEmailAndStudioAsync(email, _studioId)
+            .Returns(BuildStudioMember(Guid.NewGuid(), _studioId, Roles.Employee, isActive: false));
+        _invitationRepository.GetPendingByEmailAndStudioAsync(email, _studioId).ReturnsNull();
+        _invitationRepository.AddAsync(Arg.Any<StudioInvitation>()).Returns(invitation);
+        _userRepository.GetUserByEmailAsync(email).Returns(BuildUser(Guid.NewGuid(), email));
+
+        var result = await _sut.InviteEmployeeAsync(dto);
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.ErrorCode, Is.Null);
+        await _invitationRepository.Received(1).AddAsync(Arg.Any<StudioInvitation>());
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────────────────────
@@ -262,11 +283,12 @@ public class EmployeesServiceTests
         IsActive = true
     };
 
-    private static StudioMember BuildStudioMember(Guid userId, Guid studioId, long roleId) => new()
+    private static StudioMember BuildStudioMember(Guid userId, Guid studioId, long roleId, bool isActive = true) => new()
     {
         UserId = userId,
         StudioId = studioId,
-        RoleId = roleId
+        RoleId = roleId,
+        IsActive = isActive
     };
 
     private static StudioInvitation BuildInvitation(Guid studioId, string email) => new()

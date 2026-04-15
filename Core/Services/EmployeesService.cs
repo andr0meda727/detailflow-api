@@ -30,7 +30,7 @@ public class EmployeesService(
         var existingMember = await studioMemberRepository
             .GetByUserEmailAndStudioAsync(dto.Email, studioId);
 
-        if (existingMember != null)
+        if (existingMember is { IsActive: true })
             return InviteResult.Fail("ALREADY_MEMBER",
                 existingMember.RoleId == dto.RoleId
                     ? "Ten użytkownik jest już pracownikiem tego studia."

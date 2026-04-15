@@ -14,7 +14,6 @@ namespace Unit.Services;
 public class BookingServiceTests
 {
     private IBookingRepository _bookingRepository;
-    private IVehicleRepository _vehicleRepository;
     private ITenantContext _tenantContext;
     private IBookingMapper _mapper;
     private BookingService _sut;
@@ -23,10 +22,9 @@ public class BookingServiceTests
     public void SetUp()
     {
         _bookingRepository = Substitute.For<IBookingRepository>();
-        _vehicleRepository = Substitute.For<IVehicleRepository>();
         _tenantContext = Substitute.For<ITenantContext>();
         _mapper = Substitute.For<IBookingMapper>();
-        _sut = new BookingService(_bookingRepository, _vehicleRepository, _tenantContext, _mapper);
+        _sut = new BookingService(_bookingRepository, _tenantContext, _mapper);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
