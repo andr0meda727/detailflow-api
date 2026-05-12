@@ -1,4 +1,5 @@
 using Core.DTOs.Auth;
+using Core.Validators.Studio;
 using FluentValidation;
 
 namespace Core.Validators;
@@ -25,9 +26,8 @@ public class RegisterOwnerDtoValidator : AbstractValidator<RegisterOwnerDto>
             .NotEmpty().WithMessage("Nazwisko jest wymagane.")
             .MaximumLength(50);
 
-        RuleFor(x => x.Studio).NotNull();
-        RuleFor(x => x.Studio.Name)
-            .NotEmpty().WithMessage("Nazwa studia jest wymagana.")
-            .MaximumLength(100);
+        RuleFor(x => x.Studio)
+            .NotNull()
+            .SetValidator(new CreateStudioDtoValidator());
     }
 }

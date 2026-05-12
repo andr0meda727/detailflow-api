@@ -27,8 +27,13 @@
   <component name="ChangeListManager">
     <list default="true" id="77103cc4-7ce8-4b68-8c05-692d8e6a0e9b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/Controllers/StudiosController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Controllers/StudiosController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Api/Middleware/TenantMiddleware.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Api/Middleware/TenantMiddleware.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Api/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Api/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Services/InvitationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/InvitationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Interfaces/Services/IStudioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Interfaces/Services/IStudioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Services/OwnerRegistrationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/OwnerRegistrationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Services/StudioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/StudioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Validators/RegisterOwnerDtoValidator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Validators/RegisterOwnerDtoValidator.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,25 +79,16 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/90a55ad71381b851634928f2b4a895b2615801c87ca6ebe16c4b1ff3699c/EntityFrameworkQueryableExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/b178a025dec62c331cd4b19b802649597d1c88a41c3fcea338bb02be873f1a/BaseModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/fc93f9613ce5192d12612ee1e55980988597b5d7aef66f40dd4b6898437a19/WebApplicationBuilder.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/httpRequests/2026-02-16T170951.200.json" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/.idea/.idea.detailflow_api/.idea/httpRequests/2026-02-16T171024.200.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Controllers/AuthController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Controllers/BookingsController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Extensions/ServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Filters/ValidationFilter.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Api/Program.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Constants/BookingStatuses.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/DTOs/Auth/LoginRequest.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/DTOs/Bookings/BookingCreateDto.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/DTOs/Clients/ClientDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/DTOs/Common/ApiResponse.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/DTOs/Inventory/InventoryDto.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/DTOs/Services/ServiceDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/DTOs/Vehicles/CreateVehicleRequest.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/DTOs/Vehicles/VehicleDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Exceptions/NotFoundException.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/Interfaces/IBookingService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/Interfaces/Repositories/IBookingServicesRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Mappings/BookingMapper.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Models/Booking.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Models/BookingStatus.cs" root0="FORCE_HIGHLIGHTING" />
@@ -108,30 +104,11 @@
     <setting file="file://$PROJECT_DIR$/Core/Models/User.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Models/Vehicle.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Core/Services/BookingService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Core/Validators/CreateBookingRequestValidator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Data/ApplicationDbContext.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Data/Configurations/BookingConfiguration.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Data/Interceptors/AuditableEntityInterceptor.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Data/Migrations/Mig.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Extensions/ServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Infrastructure/Identity/JwtTokenGenerator.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingServiceModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/BookingStatusModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/ClientModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/InventoryCategoryModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/InventoryModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/PaymentModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/ServiceModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StripeEventModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StudioModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/StudioSubscriptionModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/SubscriptionPlanModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Models/VehicleModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Repositories/BookingServicesRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Infrastructure/Services/StripeService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/IntegrationTests/UnitTest1.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/UnitTests/UnitTest1.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="HttpClientEndpointsTabState">
     <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;7010b65ffdcfc5e014b8f1065994eb0a9021d9e7&quot; value=&quot;###&amp;#10;GET http://localhost:5174/api/Bookings&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
@@ -374,7 +351,12 @@
       <workItem from="1773159117357" duration="2236000" />
       <workItem from="1774894391488" duration="1562000" />
       <workItem from="1775579115068" duration="2447000" />
-      <workItem from="1775748156990" duration="2057000" />
+      <workItem from="1775748156990" duration="2114000" />
+      <workItem from="1776095208056" duration="3425000" />
+      <workItem from="1776707818187" duration="1426000" />
+      <workItem from="1776957375740" duration="626000" />
+      <workItem from="1776959922416" duration="362000" />
+      <workItem from="1778601806600" duration="2149000" />
     </task>
     <task id="LOCAL-00001" summary="Add basic structure for Api">
       <option name="closed" value="true" />
@@ -400,7 +382,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773090640631</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="fix team func">
+      <option name="closed" value="true" />
+      <created>1775754998646</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1775754998646</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -421,7 +411,8 @@
     <MESSAGE value="Add basic structure for Api" />
     <MESSAGE value="Add getbookingbyid endpoint" />
     <MESSAGE value="Add CompleteBooking and CancelBooking endpoints with corresponding service methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add CompleteBooking and CancelBooking endpoints with corresponding service methods" />
+    <MESSAGE value="fix team func" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix team func" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

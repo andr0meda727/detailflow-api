@@ -30,7 +30,7 @@ public class TenantMiddleware(RequestDelegate next)
         }
 
         var path = context.Request.Path.Value ?? "";
-        if (path.StartsWith("/api/studios/my", StringComparison.OrdinalIgnoreCase))
+        if (IsUserScopedStudioRequest(context.Request, path))
         {
             tenantContext.SetUserOnly(userInDb.Id);
             await next(context);
@@ -72,6 +72,23 @@ public class TenantMiddleware(RequestDelegate next)
             return parsedId;
         }
         return null;
+    }
+
+    private static bool IsUserScopedStudioRequest(HttpRequest request, string path)
+    {
+        if (path.StartsWith("/api/studios/my", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (HttpMethods.IsPost(request.Method) &&
+            path.Equals("/api/studios", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return HttpMethods.IsPut(request.Method) &&
+               path.StartsWith("/api/studios/", StringComparison.OrdinalIgnoreCase);
     }
 
     private static (bool IsSuccess, StudioMember? Membership, int StatusCode, string ErrorMessage) ResolveActiveMembership(User user, Guid? requestedStudioId)
