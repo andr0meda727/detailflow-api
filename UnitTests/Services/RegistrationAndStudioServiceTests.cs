@@ -168,14 +168,16 @@ public class OwnerRegistrationServiceTests
 [TestFixture]
 public class StudioServiceTests
 {
+    private IStudioRepository _studioRepository;
     private IStudioMemberRepository _studioMemberRepository;
     private StudioService _sut;
 
     [SetUp]
     public void SetUp()
     {
+        _studioRepository = Substitute.For<IStudioRepository>();
         _studioMemberRepository = Substitute.For<IStudioMemberRepository>();
-        _sut = new StudioService(_studioMemberRepository);
+        _sut = new StudioService(_studioRepository, _studioMemberRepository);
     }
 
     [Test]
