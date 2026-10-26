@@ -27,6 +27,24 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(e => e.ClientId)
             .HasColumnName("client_id");
 
+        builder.Property(e => e.ClientName)
+            .HasColumnName("client_name");
+
+        builder.Property(e => e.ClientPhone)
+            .HasColumnName("client_phone");
+
+        builder.Property(e => e.ClientEmail)
+            .HasColumnName("client_email");
+
+        builder.Property(e => e.VehicleLicensePlate)
+            .HasColumnName("vehicle_license_plate");
+
+        builder.Property(e => e.VehicleBrand)
+            .HasColumnName("vehicle_brand");
+
+        builder.Property(e => e.VehicleModel)
+            .HasColumnName("vehicle_model");
+
         builder.Property(e => e.CompletedAt)
             .HasColumnName("completed_at");
 

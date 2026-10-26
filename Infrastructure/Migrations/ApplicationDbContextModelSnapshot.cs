@@ -30,9 +30,23 @@ namespace Infrastructure.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("ClientEmail")
+                        .HasColumnType("text")
+                        .HasColumnName("client_email");
+
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid")
                         .HasColumnName("client_id");
+
+                    b.Property<string>("ClientName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("client_name");
+
+                    b.Property<string>("ClientPhone")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("client_phone");
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
@@ -74,9 +88,22 @@ namespace Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<string>("VehicleBrand")
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_brand");
+
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid")
                         .HasColumnName("vehicle_id");
+
+                    b.Property<string>("VehicleLicensePlate")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_license_plate");
+
+                    b.Property<string>("VehicleModel")
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_model");
 
                     b.HasKey("Id")
                         .HasName("booking_pkey");

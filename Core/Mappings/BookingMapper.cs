@@ -25,6 +25,12 @@ public partial class BookingMapper : IBookingMapper
     [MapperIgnoreTarget(nameof(Booking.Client))]
     [MapperIgnoreTarget(nameof(Booking.Status))]
     [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Booking.ClientName))]
+    [MapperIgnoreTarget(nameof(Booking.ClientPhone))]
+    [MapperIgnoreTarget(nameof(Booking.ClientEmail))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleLicensePlate))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleBrand))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleModel))]
     [MapperIgnoreTarget(nameof(Booking.BookingServices))]
     public partial Booking MapCreateDtoToBooking(BookingCreateDto dto);
 
@@ -47,6 +53,12 @@ public partial class BookingMapper : IBookingMapper
     [MapperIgnoreTarget(nameof(Booking.Vehicle))]
     [MapperIgnoreTarget(nameof(Booking.Status))]
     [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Booking.ClientName))]
+    [MapperIgnoreTarget(nameof(Booking.ClientPhone))]
+    [MapperIgnoreTarget(nameof(Booking.ClientEmail))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleLicensePlate))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleBrand))]
+    [MapperIgnoreTarget(nameof(Booking.VehicleModel))]
     [MapperIgnoreTarget(nameof(Booking.BookingServices))]
     public partial void UpdateBooking(BookingCreateDto dto, Booking booking);
 }

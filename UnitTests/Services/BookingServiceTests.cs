@@ -5,6 +5,7 @@ using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Models;
 using Core.Services;
+using Crm.Contracts;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Shared.Kernel.Pagination;
@@ -17,6 +18,7 @@ public class BookingServiceTests
     private IBookingRepository _bookingRepository;
     private ITenantContext _tenantContext;
     private IBookingMapper _mapper;
+    private IClientDirectory _clientDirectory;
     private BookingService _sut;
     private static readonly PageRequest Page = new();
 
@@ -29,7 +31,12 @@ public class BookingServiceTests
         _bookingRepository = Substitute.For<IBookingRepository>();
         _tenantContext = Substitute.For<ITenantContext>();
         _mapper = Substitute.For<IBookingMapper>();
-        _sut = new BookingService(_bookingRepository, _tenantContext, _mapper);
+        _clientDirectory = Substitute.For<IClientDirectory>();
+        _clientDirectory.FindBookingPartiesAsync(Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(ci => new BookingParties(
+                new ClientSummary(ci.ArgAt<Guid>(0), "Jan Kowalski", "500600700", "jan@test.pl"),
+                new VehicleSummary(ci.ArgAt<Guid>(1), ci.ArgAt<Guid>(0), "KR 12345", "BMW", "3")));
+        _sut = new BookingService(_bookingRepository, _tenantContext, _mapper, _clientDirectory);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -145,6 +152,38 @@ public class BookingServiceTests
         var result = await _sut.AddBookingAsync(dto);
 
         Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public async Task AddBookingAsync_CopiesClientAndVehicleFromCrm()
+    {
+        var dto = BuildBookingCreateDto();
+        var booking = BuildBooking();
+
+        _mapper.MapCreateDtoToBooking(dto).Returns(booking);
+        _bookingRepository.AddAsync(Arg.Any<Booking>()).Returns(booking);
+
+        await _sut.AddBookingAsync(dto);
+
+        Assert.That(booking, Has.Property(nameof(Booking.ClientName)).EqualTo("Jan Kowalski")
+            .And.Property(nameof(Booking.ClientPhone)).EqualTo("500600700")
+            .And.Property(nameof(Booking.ClientEmail)).EqualTo("jan@test.pl")
+            .And.Property(nameof(Booking.VehicleLicensePlate)).EqualTo("KR 12345")
+            .And.Property(nameof(Booking.VehicleBrand)).EqualTo("BMW")
+            .And.Property(nameof(Booking.VehicleModel)).EqualTo("3"));
+    }
+
+    [Test]
+    public async Task AddBookingAsync_ReturnsNullAndSavesNothing_WhenCrmDoesNotKnowTheParties()
+    {
+        var dto = BuildBookingCreateDto();
+        _clientDirectory.FindBookingPartiesAsync(dto.ClientId, dto.VehicleId, Arg.Any<CancellationToken>())
+            .Returns((BookingParties?)null);
+
+        var result = await _sut.AddBookingAsync(dto);
+
+        Assert.That(result, Is.Null);
+        await _bookingRepository.DidNotReceive().AddAsync(Arg.Any<Booking>());
     }
 
     [Test]

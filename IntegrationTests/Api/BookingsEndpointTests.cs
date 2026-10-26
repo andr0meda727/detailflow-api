@@ -1,7 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Core.Constants;
+using Core.DTOs.Bookings;
 using IntegrationTests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.Api;
 
@@ -86,6 +90,33 @@ public class BookingsEndpointTests
         var response = await client.GetAsync("/api/bookings?fromDate=2026-02-01&toDate=2026-01-01");
 
         await AssertProblemAsync(response, HttpStatusCode.BadRequest, "INVALID_DATE_RANGE");
+    }
+
+    [Test]
+    public async Task Create_StoresClientAndVehicleSnapshot()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var response = await client.PostAsJsonAsync("/api/bookings", new BookingCreateDto
+        {
+            ClientId = _seed.StudioA.ClientId,
+            VehicleId = _seed.StudioA.VehicleId,
+            StatusId = BookingStatusIds.Created,
+            ScheduledAt = DateTime.UtcNow.AddDays(3),
+            ServiceIds = [_seed.StudioA.ServiceId],
+            Price = 150m
+        });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+        var id = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+
+        var tenant = new TenantContext();
+        tenant.SetTenant(_seed.StudioA.StudioId, null);
+        await using var db = PostgresFixture.CreateDbContext(tenant);
+        var booking = await db.Bookings.SingleAsync(b => b.Id == id);
+        Assert.That(booking.ClientName, Is.EqualTo("Jan"));
+        Assert.That(booking.ClientPhone, Is.EqualTo(_seed.SharedClientPhone));
+        Assert.That(booking.VehicleLicensePlate, Is.EqualTo("WA12345"));
     }
 
     private static async Task AssertProblemAsync(HttpResponseMessage response, HttpStatusCode status, string code)

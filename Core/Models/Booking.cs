@@ -13,6 +13,20 @@ public class Booking : IAuditableEntity, ITenantEntity
 
     public Guid ClientId { get; set; }
 
+    // Copies of the CRM client and vehicle, taken when the booking is saved.
+    // Bookings never join CRM tables, so CRM can live in another schema or service.
+    public string ClientName { get; set; } = null!;
+
+    public string ClientPhone { get; set; } = null!;
+
+    public string? ClientEmail { get; set; }
+
+    public string VehicleLicensePlate { get; set; } = null!;
+
+    public string? VehicleBrand { get; set; }
+
+    public string? VehicleModel { get; set; }
+
     public DateTime ScheduledAt { get; set; }
 
     public DateTime? CompletedAt { get; set; }

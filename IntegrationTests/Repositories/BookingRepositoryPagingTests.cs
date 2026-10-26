@@ -29,6 +29,9 @@ public class BookingRepositoryPagingTests
             {
                 ClientId = _seed.StudioA.ClientId,
                 VehicleId = _seed.StudioA.VehicleId,
+                ClientName = "Jan",
+                ClientPhone = _seed.SharedClientPhone,
+                VehicleLicensePlate = "WA12345",
                 StatusId = BookingStatusIds.Created,
                 ScheduledAt = start.AddHours(i),
                 BookingServices = { new BookingServices { ServiceId = _seed.StudioA.ServiceId } }

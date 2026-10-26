@@ -43,6 +43,9 @@ public sealed class TwoStudiosSeed
                 Id = studio.BookingId,
                 ClientId = studio.ClientId,
                 VehicleId = studio.VehicleId,
+                ClientName = "Jan",
+                ClientPhone = SharedClientPhone,
+                VehicleLicensePlate = "WA12345",
                 StatusId = BookingStatusIds.Created,
                 TotalPrice = 20000,
                 ScheduledAt = DateTime.UtcNow

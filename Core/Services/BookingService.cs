@@ -5,6 +5,7 @@ using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
+using Crm.Contracts;
 using Shared.Kernel.Pagination;
 
 namespace Core.Services;
@@ -12,7 +13,8 @@ namespace Core.Services;
 public class BookingService(
     IBookingRepository bookingRepository,
     ITenantContext tenantContext,
-    IBookingMapper mapper)
+    IBookingMapper mapper,
+    IClientDirectory clientDirectory)
     : IBookingService
 {
     public async Task<PagedResponse<BookingResponseDto>> GetAllBookingsAsync(
@@ -34,7 +36,11 @@ public class BookingService(
 
     public async Task<BookingResponseDto?> AddBookingAsync(BookingCreateDto bookingData)
     {
+        var parties = await clientDirectory.FindBookingPartiesAsync(bookingData.ClientId, bookingData.VehicleId);
+        if (parties == null) return null;
+
         var booking = mapper.MapCreateDtoToBooking(bookingData);
+        CopyParties(parties, booking);
 
         booking.CreatedBy = tenantContext.UserId;
         booking.TotalPrice = (long)Math.Round(bookingData.Price * 100);
@@ -59,7 +65,11 @@ public class BookingService(
         var existingBooking = await bookingRepository.GetByIdWithDetailsAsync(id, trackChanges: true);
         if (existingBooking == null) return null;
 
+        var parties = await clientDirectory.FindBookingPartiesAsync(bookingData.ClientId, bookingData.VehicleId);
+        if (parties == null) return null;
+
         mapper.UpdateBooking(bookingData, existingBooking);
+        CopyParties(parties, existingBooking);
 
         existingBooking.TotalPrice = (long)Math.Round(bookingData.Price * 100);
 
@@ -115,5 +125,15 @@ public class BookingService(
 
         var updatedBooking = await bookingRepository.GetByIdWithDetailsAsync(id);
         return updatedBooking == null ? null : mapper.MapBookingToResponse(updatedBooking);
+    }
+
+    private static void CopyParties(BookingParties parties, Booking booking)
+    {
+        booking.ClientName = parties.Client.Name;
+        booking.ClientPhone = parties.Client.Phone;
+        booking.ClientEmail = parties.Client.Email;
+        booking.VehicleLicensePlate = parties.Vehicle.LicensePlate;
+        booking.VehicleBrand = parties.Vehicle.Brand;
+        booking.VehicleModel = parties.Vehicle.Model;
     }
 }
