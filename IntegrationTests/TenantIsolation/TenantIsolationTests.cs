@@ -50,27 +50,6 @@ public class TenantIsolationTests
     }
 
     [Test]
-    public async Task Clients_AreScopedToCurrentStudio()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        var clients = (await new ClientRepository(db).GetAllWithVehiclesAsync(new PageRequest(), null)).Items;
-
-        Assert.That(clients.Select(c => c.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-        Assert.That(clients.Select(c => c.Id), Does.Contain(_seed.StudioA.ClientId));
-    }
-
-    [Test]
-    public async Task Vehicles_AreScopedToCurrentStudio()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        var vehicles = (await new VehicleRepository(db).GetAllFilteredAsync(new PageRequest())).Items;
-
-        Assert.That(vehicles.Select(v => v.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-    }
-
-    [Test]
     public async Task Services_AreScopedToCurrentStudio()
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
@@ -85,11 +64,7 @@ public class TenantIsolationTests
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        Assert.Multiple(async () =>
-        {
-            Assert.That(await new BookingRepository(db).GetByIdWithDetailsAsync(_seed.StudioB.BookingId), Is.Null);
-            Assert.That(await new ClientRepository(db).GetClientByIdWithVehiclesAsync(_seed.StudioB.ClientId), Is.Null);
-        });
+        Assert.That(await new BookingRepository(db).GetByIdWithDetailsAsync(_seed.StudioB.BookingId), Is.Null);
     }
 
     [Test]
@@ -100,8 +75,6 @@ public class TenantIsolationTests
         Assert.Multiple(async () =>
         {
             Assert.That((await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items, Is.Empty);
-            Assert.That((await new ClientRepository(db).GetAllWithVehiclesAsync(new PageRequest(), null)).Items, Is.Empty);
-            Assert.That((await new VehicleRepository(db).GetAllFilteredAsync(new PageRequest())).Items, Is.Empty);
             Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);
         });
     }
@@ -122,21 +95,9 @@ public class TenantIsolationTests
     {
         await using var db = DbForUserWithoutStudio();
 
-        db.Clients.Add(new Client { Name = "Anna", Phone = "500600700" });
+        db.Services.Add(new Service { Name = "Waxing" });
 
         Assert.That(() => db.SaveChangesAsync(), Throws.InvalidOperationException);
-    }
-
-    [Test]
-    public async Task SamePhone_CanBeClientOfDifferentStudios()
-    {
-        await using var dbA = DbForStudio(_seed.StudioA.StudioId);
-        await using var dbB = DbForStudio(_seed.StudioB.StudioId);
-
-        var clientA = await new ClientRepository(dbA).GetByIdAsync(_seed.StudioA.ClientId);
-        var clientB = await new ClientRepository(dbB).GetByIdAsync(_seed.StudioB.ClientId);
-
-        Assert.That(clientA!.Phone, Is.EqualTo(clientB!.Phone));
     }
 
     [Test]

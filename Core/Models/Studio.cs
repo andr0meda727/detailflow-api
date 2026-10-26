@@ -23,8 +23,6 @@ public class Studio : IAuditableEntity
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public ICollection<Client> Clients { get; set; } = new List<Client>();
-
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public ICollection<Service> Services { get; set; } = new List<Service>();
@@ -34,6 +32,4 @@ public class Studio : IAuditableEntity
     public ICollection<StudioMember> StudioMembers { get; set; } = new List<StudioMember>();
 
     public ICollection<StudioSubscription> StudioSubscriptions { get; set; } = new List<StudioSubscription>();
-
-    public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

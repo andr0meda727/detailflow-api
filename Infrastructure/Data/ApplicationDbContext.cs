@@ -14,8 +14,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<BookingStatus> BookingStatuses { get; set; }
 
-    public DbSet<Client> Clients { get; set; }
-
     public DbSet<Payment> Payments { get; set; }
 
     public DbSet<Role> Roles { get; set; }
@@ -34,7 +32,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<User> Users { get; set; }
 
-    public DbSet<Vehicle> Vehicles { get; set; }
     public DbSet<StudioInvitation> StudioInvitations { get; set; }
 
     // Studio scoping is added by TenantDbContext; only entity-specific filters live here.
@@ -42,8 +39,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        modelBuilder.Entity<Client>().HasQueryFilter("SoftDelete", c => !c.IsDeleted);
-        modelBuilder.Entity<Vehicle>().HasQueryFilter("SoftDelete", v => !v.IsDeleted);
         modelBuilder.Entity<Service>().HasQueryFilter("Active", s => s.IsActive);
     }
 }

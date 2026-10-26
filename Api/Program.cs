@@ -1,5 +1,6 @@
 using Api.Extensions;
 using Api.Middleware;
+using Crm.Api;
 using Infrastructure.Extensions;
 using Inventory.Api;
 using Microsoft.OpenApi;
@@ -17,6 +18,7 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 // Modules
 builder.Services.AddInventoryModule(builder.Configuration);
+builder.Services.AddCrmModule(builder.Configuration);
 
 builder.Services.AddOpenApi();
 

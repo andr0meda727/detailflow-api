@@ -182,62 +182,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("booking_status", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.Client", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Nip")
-                        .HasColumnType("text")
-                        .HasColumnName("nip");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("phone");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("client_pkey");
-
-                    b.HasIndex(new[] { "StudioId", "Phone" }, "client_studio_id_phone_key")
-                        .IsUnique()
-                        .HasFilter("is_deleted = false");
-
-                    b.ToTable("client", "d");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -831,61 +775,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("user", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.Vehicle", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Brand")
-                        .HasColumnType("text")
-                        .HasColumnName("brand");
-
-                    b.Property<Guid>("ClientId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("client_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("LicensePlate")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("license_plate");
-
-                    b.Property<string>("Model")
-                        .HasColumnType("text")
-                        .HasColumnName("model");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("vehicle_pkey");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("vehicle", "d");
-                });
-
             modelBuilder.Entity("Core.Models.Booking", b =>
                 {
                     b.HasOne("Core.Models.User", "CreatedByNavigation")
@@ -934,18 +823,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Booking");
 
                     b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("Core.Models.Client", b =>
-                {
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Clients")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("client_studio_id_fkey");
-
-                    b.Navigation("Studio");
                 });
 
             modelBuilder.Entity("Core.Models.Payment", b =>
@@ -1079,27 +956,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Studio");
                 });
 
-            modelBuilder.Entity("Core.Models.Vehicle", b =>
-                {
-                    b.HasOne("Core.Models.Client", "Client")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("vehicle_client_id_fkey");
-
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("vehicle_studio_id_fkey");
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Studio");
-                });
-
             modelBuilder.Entity("Core.Models.Booking", b =>
                 {
                     b.Navigation("BookingServices");
@@ -1108,11 +964,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Models.BookingStatus", b =>
                 {
                     b.Navigation("Bookings");
-                });
-
-            modelBuilder.Entity("Core.Models.Client", b =>
-                {
-                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("Core.Models.Role", b =>
@@ -1129,8 +980,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Bookings");
 
-                    b.Navigation("Clients");
-
                     b.Navigation("Payments");
 
                     b.Navigation("Services");
@@ -1140,8 +989,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("StudioMembers");
 
                     b.Navigation("StudioSubscriptions");
-
-                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("Core.Models.StudioSubscription", b =>

@@ -1,6 +1,7 @@
 using Core.Constants;
 using Shared.Kernel.Tenancy;
 using Core.Models;
+using Crm.Infrastructure.Persistence;
 using Infrastructure.Data;
 using Inventory.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,8 @@ public class PostgresFixture
         await db.Database.MigrateAsync();
         await using var inventoryDb = CreateInventoryDbContext(new TenantContext());
         await inventoryDb.Database.MigrateAsync();
+        await using var crmDb = CreateCrmDbContext(new TenantContext());
+        await crmDb.Database.MigrateAsync();
 
         await SeedLookupsAsync(db);
     }
@@ -61,6 +64,15 @@ public class PostgresFixture
             .Options;
 
         return new InventoryDbContext(options, tenantContext);
+    }
+
+    public static CrmDbContext CreateCrmDbContext(ITenantContext tenantContext)
+    {
+        var options = new DbContextOptionsBuilder<CrmDbContext>()
+            .UseNpgsql(ConnectionString, npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", CrmDbContext.Schema))
+            .Options;
+
+        return new CrmDbContext(options, tenantContext);
     }
 
     private static async Task SeedLookupsAsync(ApplicationDbContext db)

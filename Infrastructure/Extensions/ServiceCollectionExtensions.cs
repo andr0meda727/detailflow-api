@@ -1,6 +1,4 @@
-﻿using Crm.Contracts;
-using Infrastructure.Consumers;
-using Infrastructure.Crm;
+﻿using Infrastructure.Consumers;
 using Infrastructure.Data;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
@@ -33,9 +31,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
         services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
         services.AddScoped<IStudioRepository, StudioRepository>();
-
-        // CRM contract, served from the legacy tables until the CRM module owns them
-        services.AddScoped<IClientDirectory, LegacyClientDirectory>();
 
         // External services
         services.AddScoped<IAuthService, SupabaseAuthService>();

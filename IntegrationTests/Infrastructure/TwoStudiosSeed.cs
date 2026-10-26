@@ -2,6 +2,7 @@ using Core.Constants;
 using Core.Models;
 using Inventory.Domain;
 using Shared.Infrastructure.Tenancy;
+using CrmClient = Crm.Domain.Client;
 
 namespace IntegrationTests.Infrastructure;
 
@@ -35,8 +36,16 @@ public sealed class TwoStudiosSeed
 
             db.Services.Add(new Service { Id = studio.ServiceId, Name = "Polishing" });
 
-            db.Clients.Add(new Client { Id = studio.ClientId, Name = "Jan", Phone = SharedClientPhone });
-            db.Vehicles.Add(new Vehicle { Id = studio.VehicleId, ClientId = studio.ClientId, LicensePlate = "WA12345" });
+            await db.SaveChangesAsync();
+
+            // Module tables still reference d.studio, so they are seeded after the studio exists
+            await using var crmDb = PostgresFixture.CreateCrmDbContext(tenant);
+            var client = CrmClient.Create("Jan", SharedClientPhone, email: null, nip: null);
+            var vehicle = client.AddVehicle("WA12345", brand: null, model: null);
+            crmDb.Clients.Add(client);
+            studio.ClientId = client.Id;
+            studio.VehicleId = vehicle.Id;
+            await crmDb.SaveChangesAsync();
 
             db.Bookings.Add(new Booking
             {
@@ -50,10 +59,8 @@ public sealed class TwoStudiosSeed
                 TotalPrice = 20000,
                 ScheduledAt = DateTime.UtcNow
             });
-
             await db.SaveChangesAsync();
 
-            // Inventory lives in its own module context; its tables still reference d.studio, so it goes second
             await using var inventoryDb = PostgresFixture.CreateInventoryDbContext(tenant);
             var category = InventoryCategory.Create("Chemicals");
             var item = InventoryItem.Create("Wax", "l", stock: 1, minStock: 5, description: null, categoryId: category.Id);
@@ -71,8 +78,8 @@ public sealed class TwoStudiosSeed
         public Guid InventoryCategoryId { get; set; }
         public Guid InventoryId { get; set; }
         public Guid ServiceId { get; } = Guid.NewGuid();
-        public Guid ClientId { get; } = Guid.NewGuid();
-        public Guid VehicleId { get; } = Guid.NewGuid();
+        public Guid ClientId { get; set; }
+        public Guid VehicleId { get; set; }
         public Guid BookingId { get; } = Guid.NewGuid();
     }
 }

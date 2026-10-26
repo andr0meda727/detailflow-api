@@ -6,93 +6,107 @@ namespace ArchitectureTests;
 /// <summary>
 /// Modules are isolated from the legacy Core/Infrastructure projects and from each other,
 /// and keep their own layers pointing inwards: Api → Infrastructure → Application → Domain.
+/// The only way into a module from outside is its *.Contracts project.
 /// </summary>
 [TestFixture]
 public class ModuleBoundaryTests
 {
-    private static readonly string[] LegacyNamespaces = ["Core", "Infrastructure", "Api"];
+    public sealed record Module(string Name, Assembly Domain, Assembly Application, Assembly Infrastructure, Assembly Api)
+    {
+        public Assembly[] All => [Domain, Application, Infrastructure, Api];
 
-    private static readonly Assembly[] InventoryAssemblies =
+        // Namespaces other code must not touch; *.Contracts is deliberately left out
+        public string[] Internals => [$"{Name}.Domain", $"{Name}.Application", $"{Name}.Infrastructure", $"{Name}.Api"];
+
+        public override string ToString() => Name;
+    }
+
+    public static readonly Module[] Modules =
     [
-        typeof(Inventory.Domain.InventoryItem).Assembly,
-        typeof(Inventory.Application.Abstractions.IInventoryDbContext).Assembly,
-        typeof(Inventory.Infrastructure.Persistence.InventoryDbContext).Assembly,
-        typeof(Inventory.Api.InventoryModule).Assembly
+        new("Inventory",
+            typeof(Inventory.Domain.InventoryItem).Assembly,
+            typeof(Inventory.Application.Abstractions.IInventoryDbContext).Assembly,
+            typeof(Inventory.Infrastructure.Persistence.InventoryDbContext).Assembly,
+            typeof(Inventory.Api.InventoryModule).Assembly),
+        new("Crm",
+            typeof(Crm.Domain.Client).Assembly,
+            typeof(Crm.Application.Abstractions.ICrmDbContext).Assembly,
+            typeof(Crm.Infrastructure.Persistence.CrmDbContext).Assembly,
+            typeof(Crm.Api.CrmModule).Assembly)
     ];
 
-    [Test]
-    public void InventoryModule_DoesNotDependOnLegacyProjects()
+    private static readonly Assembly[] LegacyAssemblies =
+    [
+        typeof(Core.Models.Booking).Assembly,
+        typeof(Infrastructure.Data.ApplicationDbContext).Assembly
+    ];
+
+    private static readonly string[] LegacyNamespaces = ["Core", "Infrastructure", "Api"];
+
+    [TestCaseSource(nameof(Modules))]
+    public void Module_DoesNotDependOnLegacyProjects(Module module)
     {
-        var result = Types.InAssemblies(InventoryAssemblies)
+        var result = Types.InAssemblies(module.All)
             .ShouldNot().HaveDependencyOnAny(LegacyNamespaces)
             .GetResult();
 
-        AssertSuccess(result, "The Inventory module must not use Core, Infrastructure or the Api host");
+        AssertSuccess(result, $"The {module} module must not use Core, Infrastructure or the Api host");
     }
 
-    [Test]
-    public void LegacyProjects_DoNotDependOnInventoryModule()
+    [TestCaseSource(nameof(Modules))]
+    public void LegacyProjects_UseModuleOnlyThroughItsContracts(Module module)
     {
-        var legacy = new[]
-        {
-            typeof(Core.Models.Booking).Assembly,
-            typeof(Infrastructure.Data.ApplicationDbContext).Assembly
-        };
-
-        var result = Types.InAssemblies(legacy)
-            .ShouldNot().HaveDependencyOn("Inventory")
+        var result = Types.InAssemblies(LegacyAssemblies)
+            .ShouldNot().HaveDependencyOnAny(module.Internals)
             .GetResult();
 
-        AssertSuccess(result, "Core and Infrastructure must not reach into the Inventory module");
+        AssertSuccess(result, $"Core and Infrastructure may only use {module}.Contracts");
     }
 
-    [Test]
-    public void InventoryDomain_DependsOnNoOtherLayer()
+    [TestCaseSource(nameof(Modules))]
+    public void Module_UsesOtherModulesOnlyThroughTheirContracts(Module module)
     {
-        var result = Types.InAssembly(InventoryAssemblies[0])
+        var otherInternals = Modules.Where(m => m != module).SelectMany(m => m.Internals).ToArray();
+
+        var result = Types.InAssemblies(module.All)
+            .ShouldNot().HaveDependencyOnAny(otherInternals)
+            .GetResult();
+
+        AssertSuccess(result, $"The {module} module may only use other modules' *.Contracts");
+    }
+
+    [TestCaseSource(nameof(Modules))]
+    public void Domain_DependsOnNoOtherLayer(Module module)
+    {
+        var result = Types.InAssembly(module.Domain)
             .ShouldNot().HaveDependencyOnAny(
-                "Inventory.Application", "Inventory.Infrastructure", "Inventory.Api",
+                $"{module.Name}.Application", $"{module.Name}.Infrastructure", $"{module.Name}.Api",
                 "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore")
             .GetResult();
 
-        AssertSuccess(result, "Inventory.Domain must stay free of other layers and frameworks");
+        AssertSuccess(result, $"{module}.Domain must stay free of other layers and frameworks");
     }
 
-    [Test]
-    public void InventoryApplication_DoesNotDependOnInfrastructureOrWeb()
+    [TestCaseSource(nameof(Modules))]
+    public void Application_DoesNotDependOnInfrastructureOrWeb(Module module)
     {
-        var result = Types.InAssembly(InventoryAssemblies[1])
-            .ShouldNot().HaveDependencyOnAny("Inventory.Infrastructure", "Inventory.Api", "Microsoft.AspNetCore", "Npgsql")
+        var result = Types.InAssembly(module.Application)
+            .ShouldNot().HaveDependencyOnAny(
+                $"{module.Name}.Infrastructure", $"{module.Name}.Api", "Microsoft.AspNetCore", "Npgsql")
             .GetResult();
 
-        AssertSuccess(result, "Inventory.Application must not use ASP.NET Core, the database provider or outer layers");
+        AssertSuccess(result, $"{module}.Application must not use ASP.NET Core, the database provider or outer layers");
     }
 
-    [Test]
-    public void InventoryApplication_UsesOnlyEfCoreAbstractions()
+    [TestCaseSource(nameof(Modules))]
+    public void Application_UsesOnlyEfCoreAbstractions(Module module)
     {
         // Handlers work with DbSet and LINQ (Microsoft.EntityFrameworkCore), but SQL and provider specifics
         // stay in Infrastructure. Namespaces overlap, so check the referenced assemblies instead.
-        var referenced = InventoryAssemblies[1].GetReferencedAssemblies().Select(a => a.Name).ToList();
+        var referenced = module.Application.GetReferencedAssemblies().Select(a => a.Name).ToList();
 
         Assert.That(referenced, Has.None.EqualTo("Microsoft.EntityFrameworkCore.Relational"));
         Assert.That(referenced, Has.None.StartsWith("Npgsql"));
-    }
-
-    [Test]
-    public void LegacyProjects_UseCrmOnlyThroughItsContracts()
-    {
-        var legacy = new[]
-        {
-            typeof(Core.Models.Booking).Assembly,
-            typeof(Infrastructure.Data.ApplicationDbContext).Assembly
-        };
-
-        var result = Types.InAssemblies(legacy)
-            .ShouldNot().HaveDependencyOnAny("Crm.Domain", "Crm.Application", "Crm.Infrastructure", "Crm.Api")
-            .GetResult();
-
-        AssertSuccess(result, "Other parts of the system may only use Crm.Contracts");
     }
 
     [Test]
