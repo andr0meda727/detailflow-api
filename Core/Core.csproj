@@ -8,12 +8,10 @@
 
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="11.11.0" />
-        <PackageReference Include="Riok.Mapperly" Version="4.1.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Shared\Shared.Kernel\Shared.Kernel.csproj" />
-      <ProjectReference Include="..\Modules\Crm\Crm.Contracts\Crm.Contracts.csproj" />
       <ProjectReference Include="..\Modules\Scheduling\Scheduling.Contracts\Scheduling.Contracts.csproj" />
     </ItemGroup>
 

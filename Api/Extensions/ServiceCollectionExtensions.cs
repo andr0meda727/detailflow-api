@@ -1,13 +1,10 @@
 ﻿using System.Security.Claims;
 using Core.Constants;
 using Shared.Kernel.Tenancy;
-using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
-using Core.Mappings;
 using Core.Services;
 using Core.Settings;
 using Core.Validators;
-using Core.Validators.Bookings;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,10 +22,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantContext, TenantContext>();
 
         // Register application services
-        services.AddScoped<IBookingService, BookingService>();
-
-        services.AddSingleton<IBookingMapper, BookingMapper>();
-        services.AddScoped<IServicesService, ServicesService>();
 
         var frontendBaseUrl = configuration["Frontend:BaseUrl"]
                               ?? throw new InvalidOperationException("Frontend:BaseUrl is missing!");
@@ -42,9 +35,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvitationSender, InvitationSender>();
 
         services.AddScoped<IStudioService, StudioService>();
-        services.AddSingleton<IServiceMapper, ServiceMapper>();
-
-        services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<RegisterOwnerDtoValidator>();
         services.AddFluentValidationAutoValidation();
 

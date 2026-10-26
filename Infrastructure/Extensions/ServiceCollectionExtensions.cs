@@ -21,9 +21,7 @@ public static class ServiceCollectionExtensions
 
         // Add repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
         services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
         services.AddScoped<IStudioRepository, StudioRepository>();

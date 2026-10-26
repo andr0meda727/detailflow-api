@@ -42,7 +42,7 @@ public class ModuleBoundaryTests
 
     private static readonly Assembly[] LegacyAssemblies =
     [
-        typeof(Core.Models.Booking).Assembly,
+        typeof(Core.Models.Studio).Assembly,
         typeof(Infrastructure.Data.ApplicationDbContext).Assembly
     ];
 

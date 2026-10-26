@@ -1,5 +1,4 @@
 using Shared.Kernel.Tenancy;
-using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
