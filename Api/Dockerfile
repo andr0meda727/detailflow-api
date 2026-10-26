@@ -10,6 +10,8 @@ COPY ["Shared/Shared.Application/Shared.Application.csproj", "Shared/Shared.Appl
 COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Api/Shared.Api.csproj", "Shared/Shared.Api/"]
 COPY ["Modules/Crm/Crm.Contracts/Crm.Contracts.csproj", "Modules/Crm/Crm.Contracts/"]
+COPY ["Modules/Crm/Crm.Domain/Crm.Domain.csproj", "Modules/Crm/Crm.Domain/"]
+COPY ["Modules/Crm/Crm.Application/Crm.Application.csproj", "Modules/Crm/Crm.Application/"]
 COPY ["Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj", "Modules/Inventory/Inventory.Domain/"]
 COPY ["Modules/Inventory/Inventory.Application/Inventory.Application.csproj", "Modules/Inventory/Inventory.Application/"]
 COPY ["Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj", "Modules/Inventory/Inventory.Infrastructure/"]
