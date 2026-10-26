@@ -38,7 +38,7 @@ public class CrmEndpointTests
         var body = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.That(body.GetProperty("phone").GetString(), Is.EqualTo(phone));
         Assert.That(body.GetProperty("vehicles")[0].GetProperty("licensePlate").GetString(), Is.EqualTo("KR 5"));
-        Assert.That(response.Headers.Location?.ToString(), Does.EndWith(body.GetProperty("id").GetString()));
+        Assert.That(response.Headers.Location?.ToString(), Does.EndWith(body.GetProperty("id").GetString()!));
     }
 
     [Test]

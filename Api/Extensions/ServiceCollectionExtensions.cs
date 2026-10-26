@@ -28,10 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingService, BookingService>();
 
         services.AddSingleton<IBookingMapper, BookingMapper>();
-
-        services.AddScoped<IClientsService, ClientsService>();
         services.AddScoped<IServicesService, ServicesService>();
-        services.AddScoped<IVehiclesService, VehiclesService>();
 
         var frontendBaseUrl = configuration["Frontend:BaseUrl"]
                               ?? throw new InvalidOperationException("Frontend:BaseUrl is missing!");
@@ -45,10 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvitationSender, InvitationSender>();
 
         services.AddScoped<IStudioService, StudioService>();
-
-        services.AddSingleton<IClientMapper, ClientMapper>();
         services.AddSingleton<IServiceMapper, ServiceMapper>();
-        services.AddSingleton<IVehicleMapper, VehicleMapper>();
 
         services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<RegisterOwnerDtoValidator>();

@@ -6,7 +6,6 @@ using Core.Interfaces.Repositories;
 using Core.Models;
 using Core.Validators;
 using Core.Validators.Bookings;
-using Core.Validators.Vehicles;
 using Crm.Contracts;
 using FluentValidation.TestHelper;
 using NSubstitute;
@@ -302,48 +301,4 @@ public class BookingCreateDtoValidatorTests
         Price = 200m,
         ServiceIds = new List<Guid> { Guid.NewGuid() }
     };
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// CreateVehicleRequestValidator
-// ════════════════════════════════════════════════════════════════════════════
-
-[TestFixture]
-public class CreateVehicleRequestValidatorTests
-{
-    private IClientRepository _clientRepository;
-    private CreateVehicleRequestValidator _validator;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _clientRepository = Substitute.For<IClientRepository>();
-        _validator = new CreateVehicleRequestValidator(_clientRepository);
-    }
-
-    [Test]
-    public async Task Validate_PassesWhenClientExistsInStudio()
-    {
-        var clientId = Guid.NewGuid();
-        _clientRepository.ExistsAsync(clientId).Returns(true);
-
-        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(clientId, "KR 1", null, null));
-        result.ShouldNotHaveValidationErrorFor(x => x.ClientId);
-    }
-
-    [Test]
-    public async Task Validate_FailsWhenClientNotInStudio()
-    {
-        _clientRepository.ExistsAsync(Arg.Any<Guid>()).Returns(false);
-
-        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(Guid.NewGuid(), "KR 1", null, null));
-        result.ShouldHaveValidationErrorFor(x => x.ClientId);
-    }
-
-    [Test]
-    public async Task Validate_FailsWhenClientIdEmpty()
-    {
-        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(Guid.Empty, "KR 1", null, null));
-        result.ShouldHaveValidationErrorFor(x => x.ClientId);
-    }
 }
