@@ -54,7 +54,7 @@ public class TenantIsolationTests
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        var clients = await new ClientRepository(db).GetAllWithVehiclesAsync(null);
+        var clients = (await new ClientRepository(db).GetAllWithVehiclesAsync(new PageRequest(), null)).Items;
 
         Assert.That(clients.Select(c => c.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
         Assert.That(clients.Select(c => c.Id), Does.Contain(_seed.StudioA.ClientId));
@@ -100,7 +100,7 @@ public class TenantIsolationTests
         Assert.Multiple(async () =>
         {
             Assert.That((await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items, Is.Empty);
-            Assert.That(await new ClientRepository(db).GetAllWithVehiclesAsync(null), Is.Empty);
+            Assert.That((await new ClientRepository(db).GetAllWithVehiclesAsync(new PageRequest(), null)).Items, Is.Empty);
             Assert.That(await new VehicleRepository(db).GetAllFilteredAsync(), Is.Empty);
             Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);
         });

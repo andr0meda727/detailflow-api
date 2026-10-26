@@ -2,13 +2,15 @@ using Core.Interfaces.Repositories;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Pagination;
+using Shared.Kernel.Pagination;
 
 namespace Infrastructure.Repositories;
 
 public class ClientRepository(ApplicationDbContext context)
     : Repository<Client>(context), IClientRepository
 {
-    public async Task<List<Client>> GetAllWithVehiclesAsync(string? search)
+    public async Task<PagedResponse<Client>> GetAllWithVehiclesAsync(PageRequest page, string? search)
     {
         var query = DbSet
             .Include(c => c.Vehicles)
@@ -29,7 +31,9 @@ public class ClientRepository(ApplicationDbContext context)
                     EF.Functions.ILike(v.Model ?? "", $"%{search}%")));
         }
 
-        return await query.OrderBy(c => c.Name).ToListAsync();
+        return await query
+            .OrderBy(c => c.Name).ThenBy(c => c.Id)
+            .ToPagedResponseAsync(page);
     }
 
     public async Task<Client?> GetClientByIdWithVehiclesAsync(Guid clientId)

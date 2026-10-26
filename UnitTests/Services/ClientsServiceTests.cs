@@ -6,6 +6,7 @@ using Core.Models;
 using Core.Services;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Shared.Kernel.Pagination;
 
 namespace Unit.Services;
 
@@ -17,6 +18,10 @@ public class ClientsServiceTests
     private IVehicleRepository _vehicleRepository;
     private IVehicleMapper _vehicleMapper;
     private ClientsService _sut;
+    private static readonly PageRequest Page = new();
+
+    private static PagedResponse<Client> Paged(List<Client> clients) =>
+        new(clients, Page.Page, Page.PageSize, clients.Count);
 
     [SetUp]
     public void SetUp()
@@ -36,43 +41,44 @@ public class ClientsServiceTests
     public async Task GetAllClientsAsync_ReturnsAllMappedClients()
     {
         var clients = new List<Client> { BuildClient(), BuildClient() };
-        _clientRepository.GetAllWithVehiclesAsync(null).Returns(clients);
+        _clientRepository.GetAllWithVehiclesAsync(Page, null).Returns(Paged(clients));
         _clientMapper.MapClientToResponse(Arg.Any<Client>())
                      .Returns(ci => BuildClientResponseDto(ci.Arg<Client>().Id));
 
-        var result = await _sut.GetAllClientsAsync(null);
+        var result = await _sut.GetAllClientsAsync(Page, null);
 
-        Assert.That(result, Has.Count.EqualTo(2));
+        Assert.That(result.Items, Has.Count.EqualTo(2));
+        Assert.That(result.TotalCount, Is.EqualTo(2));
     }
 
     [Test]
     public async Task GetAllClientsAsync_ForwardsSearchTermToRepository()
     {
-        _clientRepository.GetAllWithVehiclesAsync("john").Returns(new List<Client>());
+        _clientRepository.GetAllWithVehiclesAsync(Page, "john").Returns(Paged([]));
 
-        await _sut.GetAllClientsAsync("john");
+        await _sut.GetAllClientsAsync(Page, "john");
 
-        await _clientRepository.Received(1).GetAllWithVehiclesAsync("john");
+        await _clientRepository.Received(1).GetAllWithVehiclesAsync(Page, "john");
     }
 
     [Test]
     public async Task GetAllClientsAsync_ReturnsEmptyList_WhenNoClientsFound()
     {
-        _clientRepository.GetAllWithVehiclesAsync(Arg.Any<string?>()).Returns(new List<Client>());
+        _clientRepository.GetAllWithVehiclesAsync(Page, Arg.Any<string?>()).Returns(Paged([]));
 
-        var result = await _sut.GetAllClientsAsync("nonexistent");
+        var result = await _sut.GetAllClientsAsync(Page, "nonexistent");
 
-        Assert.That(result, Is.Empty);
+        Assert.That(result.Items, Is.Empty);
     }
 
     [Test]
     public async Task GetAllClientsAsync_MapsEachClient()
     {
         var clients = new List<Client> { BuildClient(), BuildClient(), BuildClient() };
-        _clientRepository.GetAllWithVehiclesAsync(null).Returns(clients);
+        _clientRepository.GetAllWithVehiclesAsync(Page, null).Returns(Paged(clients));
         _clientMapper.MapClientToResponse(Arg.Any<Client>()).Returns(BuildClientResponseDto());
 
-        await _sut.GetAllClientsAsync(null);
+        await _sut.GetAllClientsAsync(Page, null);
 
         _clientMapper.Received(3).MapClientToResponse(Arg.Any<Client>());
     }

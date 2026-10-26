@@ -1,4 +1,5 @@
 using Shared.Api.Errors;
+using Shared.Kernel.Pagination;
 using Shared.Kernel.Results;
 using Core.DTOs.Clients;
 using Core.Interfaces.Services;
@@ -14,9 +15,10 @@ namespace Api.Controllers;
 public class ClientsController(IClientsService clientsService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<ClientResponseDto>>> GetAll([FromQuery] string? search)
+    public async Task<ActionResult<PagedResponse<ClientResponseDto>>> GetAll(
+        [FromQuery] PageRequest paging, [FromQuery] string? search)
     {
-        var clients = await clientsService.GetAllClientsAsync(search);
+        var clients = await clientsService.GetAllClientsAsync(paging, search);
         return Ok(clients);
     }
 
