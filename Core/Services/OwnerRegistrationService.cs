@@ -16,7 +16,7 @@ public class OwnerRegistrationService(
     {
         var exists = await authService.UserExistsAsync(dto.Email);
         if (exists)
-            return new Result(false, "EMAIL_TAKEN",
+            return Error.Conflict("EMAIL_TAKEN",
                 "Konto z tym adresem e-mail już istnieje.");
 
         var userId = await authService.SignUpAsync(
@@ -50,6 +50,6 @@ public class OwnerRegistrationService(
             throw;
         }
 
-        return new Result(true, null, null);
+        return Result.Ok();
     }
 }

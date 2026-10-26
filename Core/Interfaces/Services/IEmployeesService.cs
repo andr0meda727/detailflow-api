@@ -6,7 +6,7 @@ namespace Core.Interfaces.Services;
 
 public interface IEmployeesService
 {
-    Task<InviteResult> InviteEmployeeAsync(InviteEmployeeDto dto);
+    Task<Result<Guid>> InviteEmployeeAsync(InviteEmployeeDto dto);
     Task<List<StudioEmployeeDto>> GetAllEmployeesAsync();
     Task<Result> RemoveEmployeeAsync(Guid userId);
     Task<Result> ChangeEmployeeRoleAsync(ChangeEmployeeRoleDto dto);

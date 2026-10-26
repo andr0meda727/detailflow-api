@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Core.DTOs.Auth;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public class AuthController(IOwnerRegistrationService registrationService) : Con
         var result = await registrationService.RegisterAsync(dto);
 
         if (!result.Success)
-            return Conflict(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return Ok(new { message = "Konto zostało utworzone. Możesz się zalogować." });
     }

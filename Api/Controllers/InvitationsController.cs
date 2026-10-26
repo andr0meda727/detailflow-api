@@ -1,3 +1,4 @@
+using Api.Extensions;
 using System.Security.Claims;
 using Core.Interfaces;
 using Core.Interfaces.Services;
@@ -31,7 +32,7 @@ public class InvitationsController(IInvitationService invitationService, ITenant
         var result = await invitationService.AcceptAsync(token, userId.Value);
 
         if (!result.Success)
-            return BadRequest(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return Ok(new { message = "Zaproszenie zaakceptowane. Witaj w studiu!" });
     }
@@ -46,7 +47,7 @@ public class InvitationsController(IInvitationService invitationService, ITenant
         var result = await invitationService.DeclineAsync(token, userId.Value);
 
         if (!result.Success)
-            return BadRequest(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return Ok(new { message = "Zaproszenie zostało odrzucone." });
     }

@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Core.DTOs.Employees;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +20,7 @@ public class EmployeesController(IEmployeesService employeesService) : Controlle
         var result = await employeesService.InviteEmployeeAsync(dto);
 
         if (!result.Success)
-            return Conflict(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return Ok(new { message = "Zaproszenie zostało wysłane pomyślnie!" });
     }
@@ -45,9 +46,7 @@ public class EmployeesController(IEmployeesService employeesService) : Controlle
         var result = await employeesService.RemoveEmployeeAsync(userId);
 
         if (!result.Success)
-            return result.ErrorCode == "NOT_FOUND"
-                ? NotFound(new { error = result.ErrorCode, message = result.ErrorMessage })
-                : Conflict(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return NoContent();
     }
@@ -62,9 +61,7 @@ public class EmployeesController(IEmployeesService employeesService) : Controlle
         var result = await employeesService.ChangeEmployeeRoleAsync(dto);
 
         if (!result.Success)
-            return result.ErrorCode == "NOT_FOUND"
-                ? NotFound(new { error = result.ErrorCode, message = result.ErrorMessage })
-                : Conflict(new { error = result.ErrorCode, message = result.ErrorMessage });
+            return this.ToProblem(result.Error!);
 
         return Ok(new { message = "Rola pracownika została zmieniona." });
     }

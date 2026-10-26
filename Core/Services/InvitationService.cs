@@ -42,18 +42,18 @@ public class InvitationService(
         var invitation = await invitationRepository.GetByTokenAsync(token);
 
         if (invitation == null)
-            return Result.Fail("NOT_FOUND", "Zaproszenie nie istnieje.");
+            return Error.NotFound("NOT_FOUND", "Zaproszenie nie istnieje.");
 
         if (invitation.ExpiresAt < DateTime.UtcNow)
         {
             invitation.Status = InvitationStatus.Expired;
             await invitationRepository.UpdateAsync(invitation);
-            return Result.Fail("EXPIRED",
+            return Error.Conflict("EXPIRED",
                 "Zaproszenie wygasło. Poproś właściciela o ponowne wysłanie.");
         }
 
         if (invitation.Status != InvitationStatus.Pending)
-            return Result.Fail("ALREADY_USED",
+            return Error.Conflict("ALREADY_USED",
                 invitation.Status == InvitationStatus.Accepted
                     ? "To zaproszenie zostało już zaakceptowane."
                     : "To zaproszenie zostało już odrzucone.");
@@ -61,7 +61,7 @@ public class InvitationService(
 
         var user = await userRepository.GetByIdAsync(userId);
         if (user?.Email.ToLower() != invitation.Email.ToLower())
-            return Result.Fail("WRONG_USER",
+            return Error.Forbidden("WRONG_USER",
                 "To zaproszenie zostało wysłane na inny adres e-mail");
 
 
@@ -94,14 +94,14 @@ public class InvitationService(
         var invitation = await invitationRepository.GetByTokenAsync(token);
 
         if (invitation == null)
-            return Result.Fail("NOT_FOUND", "Zaproszenie nie istnieje.");
+            return Error.NotFound("NOT_FOUND", "Zaproszenie nie istnieje.");
 
         if (invitation.Status != InvitationStatus.Pending)
-            return Result.Fail("ALREADY_USED", "To zaproszenie zostało już wykorzystane.");
+            return Error.Conflict("ALREADY_USED", "To zaproszenie zostało już wykorzystane.");
 
         var user = await userRepository.GetByIdAsync(userId);
         if (user?.Email.ToLower() != invitation.Email.ToLower())
-            return Result.Fail("WRONG_USER",
+            return Error.Forbidden("WRONG_USER",
                 "To zaproszenie zostało wysłane na inny adres e-mail.");
 
         invitation.Status = InvitationStatus.Declined;

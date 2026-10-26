@@ -158,7 +158,7 @@ public class EmployeesServiceTests
         var result = await _sut.InviteEmployeeAsync(dto);
 
         Assert.That(result.Success, Is.True);
-        Assert.That(result.InvitationId, Is.EqualTo(invitation.Id));
+        Assert.That(result.Value, Is.EqualTo(invitation.Id));
     }
 
     [Test]
