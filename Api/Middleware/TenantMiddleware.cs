@@ -76,9 +76,12 @@ public class TenantMiddleware(RequestDelegate next)
 
     private static (bool IsSuccess, StudioMember? Membership, int StatusCode, string ErrorMessage) ResolveActiveMembership(User user, Guid? requestedStudioId)
     {
+        // Deactivated memberships (e.g. removed employees) never grant access to a studio
+        var activeMemberships = user.StudioMembers.Where(sm => sm.IsActive).ToList();
+
         if (requestedStudioId.HasValue)
         {
-            var membership = user.StudioMembers.FirstOrDefault(sm => sm.StudioId == requestedStudioId.Value && sm.IsActive);
+            var membership = activeMemberships.FirstOrDefault(sm => sm.StudioId == requestedStudioId.Value);
             if (membership == null)
             {
                 return (false, null, StatusCodes.Status403Forbidden, "You do not have access to this studio.");
@@ -86,12 +89,12 @@ public class TenantMiddleware(RequestDelegate next)
             return (true, membership, 200, string.Empty);
         }
 
-        if (user.StudioMembers.Count == 1)
+        if (activeMemberships.Count == 1)
         {
-            return (true, user.StudioMembers.First(), 200, string.Empty);
+            return (true, activeMemberships[0], 200, string.Empty);
         }
 
-        if (user.StudioMembers.Count > 1)
+        if (activeMemberships.Count > 1)
         {
             return (false, null, StatusCodes.Status400BadRequest, "Multiple studios found. Please provide X-Studio-Id header.");
         }
