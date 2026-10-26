@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSync : Migration
+    public partial class Baseline : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -223,6 +223,48 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "studio_invitation",
+                schema: "d",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    studio_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false),
+                    role_id = table.Column<long>(type: "bigint", nullable: false),
+                    token = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    status = table.Column<string>(type: "text", nullable: false),
+                    invited_by = table.Column<Guid>(type: "uuid", nullable: false),
+                    expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("studio_invitation_pkey", x => x.id);
+                    table.ForeignKey(
+                        name: "studio_invitation_invited_by_fkey",
+                        column: x => x.invited_by,
+                        principalSchema: "d",
+                        principalTable: "user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "studio_invitation_role_id_fkey",
+                        column: x => x.role_id,
+                        principalSchema: "d",
+                        principalTable: "role",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "studio_invitation_studio_id_fkey",
+                        column: x => x.studio_id,
+                        principalSchema: "d",
+                        principalTable: "studio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "studio_member",
                 schema: "d",
                 columns: table => new
@@ -230,7 +272,9 @@ namespace Infrastructure.Migrations
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     studio_id = table.Column<Guid>(type: "uuid", nullable: false),
                     role_id = table.Column<long>(type: "bigint", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    is_active = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
@@ -466,7 +510,8 @@ namespace Infrastructure.Migrations
                 {
                     booking_id = table.Column<Guid>(type: "uuid", nullable: false),
                     service_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
@@ -620,6 +665,32 @@ namespace Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_studio_invitation_invited_by",
+                schema: "d",
+                table: "studio_invitation",
+                column: "invited_by");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studio_invitation_role_id",
+                schema: "d",
+                table: "studio_invitation",
+                column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studio_invitation_studio_id_email",
+                schema: "d",
+                table: "studio_invitation",
+                columns: new[] { "studio_id", "email" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_studio_invitation_token",
+                schema: "d",
+                table: "studio_invitation",
+                column: "token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_studio_member_role_id",
                 schema: "d",
                 table: "studio_member",
@@ -701,6 +772,10 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "stripe_event",
+                schema: "d");
+
+            migrationBuilder.DropTable(
+                name: "studio_invitation",
                 schema: "d");
 
             migrationBuilder.DropTable(

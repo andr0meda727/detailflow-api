@@ -9,8 +9,8 @@ using Testcontainers.PostgreSql;
 namespace IntegrationTests;
 
 /// <summary>
-/// Starts a single Postgres container for the whole test run and creates the schema from the EF model.
-/// (EnsureCreated rather than migrations: the migrations folder is behind the model.)
+/// Starts a single Postgres container for the whole test run and applies the EF migrations.
+/// Migrating fails on pending model changes, so CI catches model edits that lack a migration.
 /// Lives in the root namespace so NUnit runs it before every fixture in the assembly.
 /// </summary>
 [SetUpFixture]
@@ -31,7 +31,7 @@ public class PostgresFixture
         await _container.StartAsync();
 
         await using var db = CreateDbContext(new TenantContext());
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
         await SeedLookupsAsync(db);
     }
 
