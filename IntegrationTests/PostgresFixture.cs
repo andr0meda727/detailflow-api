@@ -58,9 +58,9 @@ public class PostgresFixture
             new Role { Id = Roles.Employee, RoleName = "Employee" });
 
         db.BookingStatuses.AddRange(
-            new BookingStatus { Id = BookingStatusIds.Created, Name = "Created", SortOrder = 1 },
-            new BookingStatus { Id = BookingStatusIds.Completed, Name = "Completed", SortOrder = 2 },
-            new BookingStatus { Id = BookingStatusIds.Cancelled, Name = "Cancelled", SortOrder = 3 });
+            new BookingStatus { Id = BookingStatusIds.Created, Name = "Created", Color = "#3b82f6", SortOrder = 1 },
+            new BookingStatus { Id = BookingStatusIds.Completed, Name = "Completed", Color = "#22c55e", SortOrder = 2 },
+            new BookingStatus { Id = BookingStatusIds.Cancelled, Name = "Cancelled", Color = "#ef4444", SortOrder = 3 });
 
         await db.SaveChangesAsync();
     }

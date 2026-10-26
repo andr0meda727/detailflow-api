@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -8,6 +10,7 @@ namespace IntegrationTests.Api;
 /// <summary>
 /// Boots the real API host against the test Postgres container.
 /// Scope and build validation are on, so a missing or captive registration fails at startup.
+/// Supabase JWT auth is replaced by <see cref="TestAuthHandler"/>; use <see cref="CreateClientFor"/> to act as a user.
 /// </summary>
 public class ApiFactory : WebApplicationFactory<Program>
 {
@@ -18,6 +21,18 @@ public class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Supabase:Url", "https://supabase.test");
         builder.UseSetting("Supabase:Key", "test-anon-key");
         builder.UseSetting("Supabase:ServiceRoleKey", "test-service-role-key");
+
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+
+            services.PostConfigure<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+            });
+        });
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
@@ -29,5 +44,12 @@ public class ApiFactory : WebApplicationFactory<Program>
         });
 
         return base.CreateHost(builder);
+    }
+
+    public HttpClient CreateClientFor(Guid userId)
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add(TestAuthHandler.UserIdHeader, userId.ToString());
+        return client;
     }
 }
