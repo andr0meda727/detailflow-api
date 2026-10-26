@@ -11,10 +11,12 @@ Each module owns a schema and has its own `DbContext` and migrations:
 | `ApplicationDbContext` (legacy core) | `d` | `Infrastructure/Migrations` | `public.__EFMigrationsHistory` |
 | `InventoryDbContext` | `inventory` | `Modules/Inventory/Inventory.Infrastructure/Persistence/Migrations` | `inventory.__EFMigrationsHistory` |
 | `CrmDbContext` | `crm` | `Modules/Crm/Crm.Infrastructure/Persistence/Migrations` | `crm.__EFMigrationsHistory` |
+| `SchedulingDbContext` | `scheduling` | `Modules/Scheduling/Scheduling.Infrastructure/Persistence/Migrations` | `scheduling.__EFMigrationsHistory` |
 
 **Order matters:** apply `ApplicationDbContext` first, then the modules. Module migrations may adopt tables
 that the core baseline created; for example, Inventory moves `d.inventory*` into the `inventory` schema and CRM moves `d.client` and
-`d.vehicle` into `crm`. The order between modules doesn't matter.
+`d.vehicle` into `crm`, and Scheduling moves `d.booking`, `d.booking_service`, `d.booking_status` and `d.service`
+into `scheduling`. The order between modules doesn't matter.
 
 The integration tests apply all migrations in that order to a fresh Postgres container. If an EF model has changes
 that no migration covers, they fail.
@@ -25,6 +27,7 @@ that no migration covers, they fail.
 dotnet ef migrations add <Name> -p Infrastructure -s Api -c ApplicationDbContext
 dotnet ef migrations add <Name> -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext -o Persistence/Migrations
 dotnet ef migrations add <Name> -p Modules/Crm/Crm.Infrastructure -s Api -c CrmDbContext -o Persistence/Migrations
+dotnet ef migrations add <Name> -p Modules/Scheduling/Scheduling.Infrastructure -s Api -c SchedulingDbContext -o Persistence/Migrations
 ```
 
 Review the generated `Up`/`Down` code before committing it.
@@ -42,6 +45,7 @@ Pick one of these:
 dotnet ef migrations script -p Infrastructure -s Api -c ApplicationDbContext --idempotent -o 1-core.sql
 dotnet ef migrations script -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext --idempotent -o 2-inventory.sql
 dotnet ef migrations script -p Modules/Crm/Crm.Infrastructure -s Api -c CrmDbContext --idempotent -o 3-crm.sql
+dotnet ef migrations script -p Modules/Scheduling/Scheduling.Infrastructure -s Api -c SchedulingDbContext --idempotent -o 4-scheduling.sql
 ```
 
 Open Supabase → SQL Editor, then paste and run the files in order.
@@ -52,6 +56,7 @@ Open Supabase → SQL Editor, then paste and run the files in order.
 dotnet ef database update -p Infrastructure -s Api -c ApplicationDbContext --connection "<connection string>"
 dotnet ef database update -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext --connection "<connection string>"
 dotnet ef database update -p Modules/Crm/Crm.Infrastructure -s Api -c CrmDbContext --connection "<connection string>"
+dotnet ef database update -p Modules/Scheduling/Scheduling.Infrastructure -s Api -c SchedulingDbContext --connection "<connection string>"
 ```
 
 Use the **direct / session** connection string (port `5432`) from Supabase → Project Settings → Database.
@@ -86,7 +91,7 @@ After that, apply every later migration with option A or B above.
 ## Data that crosses modules
 
 Modules never join each other's tables, and there are no foreign keys between module schemas (the FKs to
-`d.studio` are a temporary exception until studios move into their own module). A module that needs another
-module's data keeps its own copy and updates it from integration events. For example, `d.booking` stores the
-client's name/phone/email and the vehicle's plate/brand/model, updated by `BookingCopiesConsumer` when CRM
+`d.studio` and `d."user"` are a temporary exception until they move into their own module). A module that needs another
+module's data keeps its own copy and updates it from integration events. For example, `scheduling.booking` stores
+the client's name/phone/email and the vehicle's plate/brand/model, updated by Scheduling's `BookingCopiesConsumer` when CRM
 publishes `ClientDetailsChanged` / `VehicleDetailsChanged`.
