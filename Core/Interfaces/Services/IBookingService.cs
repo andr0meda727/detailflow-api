@@ -1,10 +1,12 @@
 ﻿using Core.DTOs.Bookings;
+using Shared.Kernel.Pagination;
 
 namespace Core.Interfaces.Services;
 
 public interface IBookingService
 {
-    Task<List<BookingResponseDto>> GetAllBookingsAsync(
+    Task<PagedResponse<BookingResponseDto>> GetAllBookingsAsync(
+        PageRequest page,
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null);

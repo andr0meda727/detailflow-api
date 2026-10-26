@@ -5,6 +5,7 @@ using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
+using Shared.Kernel.Pagination;
 
 namespace Core.Services;
 
@@ -14,14 +15,15 @@ public class BookingService(
     IBookingMapper mapper)
     : IBookingService
 {
-    public async Task<List<BookingResponseDto>> GetAllBookingsAsync(
+    public async Task<PagedResponse<BookingResponseDto>> GetAllBookingsAsync(
+        PageRequest page,
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null)
     {
-        var bookings = await bookingRepository.GetAllWithDetailsAsync(isCompleted, fromDate, toDate);
+        var bookings = await bookingRepository.GetAllWithDetailsAsync(page, isCompleted, fromDate, toDate);
 
-        return bookings.Select(mapper.MapBookingToResponse).ToList();
+        return bookings.Map(mapper.MapBookingToResponse);
     }
 
     public async Task<BookingResponseDto?> GetBookingByIdAsync(Guid id)

@@ -1,4 +1,5 @@
 ﻿using Shared.Api.Errors;
+using Shared.Kernel.Pagination;
 using Shared.Kernel.Results;
 using Core.DTOs.Bookings;
 using Core.Interfaces.Services;
@@ -13,7 +14,8 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 {
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetAll(
+    public async Task<ActionResult<PagedResponse<BookingResponseDto>>> GetAll(
+        [FromQuery] PageRequest paging,
         [FromQuery] bool? isCompleted = null,
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
@@ -23,7 +25,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
             return this.ToProblem(Error.Validation("INVALID_DATE_RANGE", "'fromDate' must be less than or equal to 'toDate'."));
         }
 
-        var bookings = await bookingService.GetAllBookingsAsync(isCompleted, fromDate, toDate);
+        var bookings = await bookingService.GetAllBookingsAsync(paging, isCompleted, fromDate, toDate);
         return Ok(bookings);
     }
 

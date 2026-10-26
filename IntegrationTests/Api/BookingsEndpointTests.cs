@@ -53,6 +53,32 @@ public class BookingsEndpointTests
     }
 
     [Test]
+    public async Task List_ReturnsPagedOwnBookings()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var page = await client.GetFromJsonAsync<JsonElement>("/api/bookings?page=1&pageSize=5");
+
+        var ids = page.GetProperty("items").EnumerateArray().Select(b => b.GetProperty("id").GetGuid()).ToList();
+        Assert.That(ids, Does.Contain(_seed.StudioA.BookingId));
+        Assert.That(ids, Does.Not.Contain(_seed.StudioB.BookingId));
+        Assert.That(page.GetProperty("pageSize").GetInt32(), Is.EqualTo(5));
+        Assert.That(page.GetProperty("totalCount").GetInt32(), Is.EqualTo(ids.Count));
+        Assert.That(page.GetProperty("totalPages").GetInt32(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task List_WithTooLargePageSize_ReturnsValidationProblem()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var response = await client.GetAsync("/api/bookings?pageSize=1000");
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("application/problem+json"));
+    }
+
+    [Test]
     public async Task InvalidDateRange_ReturnsValidationProblemWithCode()
     {
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);

@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using IntegrationTests.Infrastructure;
 using Shared.Infrastructure.Tenancy;
+using Shared.Kernel.Pagination;
 
 namespace IntegrationTests.TenantIsolation;
 
@@ -42,7 +43,7 @@ public class TenantIsolationTests
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        var bookings = await new BookingRepository(db).GetAllWithDetailsAsync();
+        var bookings = (await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items;
 
         Assert.That(bookings.Select(b => b.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
         Assert.That(bookings.Select(b => b.Id), Does.Contain(_seed.StudioA.BookingId));
@@ -98,7 +99,7 @@ public class TenantIsolationTests
 
         Assert.Multiple(async () =>
         {
-            Assert.That(await new BookingRepository(db).GetAllWithDetailsAsync(), Is.Empty);
+            Assert.That((await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items, Is.Empty);
             Assert.That(await new ClientRepository(db).GetAllWithVehiclesAsync(null), Is.Empty);
             Assert.That(await new VehicleRepository(db).GetAllFilteredAsync(), Is.Empty);
             Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);

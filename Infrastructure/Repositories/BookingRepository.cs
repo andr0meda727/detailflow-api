@@ -2,13 +2,16 @@ using Core.Interfaces.Repositories;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Pagination;
+using Shared.Kernel.Pagination;
 
 namespace Infrastructure.Repositories;
 
 public class BookingRepository(ApplicationDbContext context)
     : Repository<Booking>(context), IBookingRepository
 {
-    public async Task<List<Booking>> GetAllWithDetailsAsync(
+    public async Task<PagedResponse<Booking>> GetAllWithDetailsAsync(
+        PageRequest page,
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null)
@@ -40,8 +43,8 @@ public class BookingRepository(ApplicationDbContext context)
         }
 
         return await query
-            .OrderBy(b => b.ScheduledAt)
-            .ToListAsync();
+            .OrderBy(b => b.ScheduledAt).ThenBy(b => b.Id)
+            .ToPagedResponseAsync(page);
     }
 
     public async Task<Booking?> GetByIdWithDetailsAsync(Guid id, bool trackChanges = false)

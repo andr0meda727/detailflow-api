@@ -7,6 +7,7 @@ using Core.Models;
 using Core.Services;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Shared.Kernel.Pagination;
 
 namespace Unit.Services;
 
@@ -17,6 +18,10 @@ public class BookingServiceTests
     private ITenantContext _tenantContext;
     private IBookingMapper _mapper;
     private BookingService _sut;
+    private static readonly PageRequest Page = new();
+
+    private static PagedResponse<Booking> Paged(List<Booking> bookings) =>
+        new(bookings, Page.Page, Page.PageSize, bookings.Count);
 
     [SetUp]
     public void SetUp()
@@ -35,23 +40,24 @@ public class BookingServiceTests
     public async Task GetAllBookingsAsync_ReturnsAllMappedBookings_WhenNoFilters()
     {
         var bookings = new List<Booking> { BuildBooking(), BuildBooking() };
-        _bookingRepository.GetAllWithDetailsAsync().Returns(bookings);
+        _bookingRepository.GetAllWithDetailsAsync(Page).Returns(Paged(bookings));
         _mapper.MapBookingToResponse(Arg.Any<Booking>())
                .Returns(ci => BuildBookingResponseDto(ci.Arg<Booking>().Id));
 
-        var result = await _sut.GetAllBookingsAsync();
+        var result = await _sut.GetAllBookingsAsync(Page);
 
-        Assert.That(result, Has.Count.EqualTo(2));
+        Assert.That(result.Items, Has.Count.EqualTo(2));
+        Assert.That(result.TotalCount, Is.EqualTo(2));
     }
 
     [Test]
     public async Task GetAllBookingsAsync_ReturnsEmptyList_WhenNoBookingsExist()
     {
-        _bookingRepository.GetAllWithDetailsAsync().Returns(new List<Booking>());
+        _bookingRepository.GetAllWithDetailsAsync(Page).Returns(Paged([]));
 
-        var result = await _sut.GetAllBookingsAsync();
+        var result = await _sut.GetAllBookingsAsync(Page);
 
-        Assert.That(result, Is.Empty);
+        Assert.That(result.Items, Is.Empty);
     }
 
     [Test]
@@ -59,21 +65,21 @@ public class BookingServiceTests
     {
         var from = new DateTime(2026, 1, 1);
         var to = new DateTime(2026, 12, 31);
-        _bookingRepository.GetAllWithDetailsAsync(true, from, to).Returns(new List<Booking>());
+        _bookingRepository.GetAllWithDetailsAsync(Page, true, from, to).Returns(Paged([]));
 
-        await _sut.GetAllBookingsAsync(isCompleted: true, fromDate: from, toDate: to);
+        await _sut.GetAllBookingsAsync(Page, isCompleted: true, fromDate: from, toDate: to);
 
-        await _bookingRepository.Received(1).GetAllWithDetailsAsync(true, from, to);
+        await _bookingRepository.Received(1).GetAllWithDetailsAsync(Page, true, from, to);
     }
 
     [Test]
     public async Task GetAllBookingsAsync_CallsMapperForEachBooking()
     {
         var bookings = new List<Booking> { BuildBooking(), BuildBooking(), BuildBooking() };
-        _bookingRepository.GetAllWithDetailsAsync().Returns(bookings);
+        _bookingRepository.GetAllWithDetailsAsync(Page).Returns(Paged(bookings));
         _mapper.MapBookingToResponse(Arg.Any<Booking>()).Returns(BuildBookingResponseDto());
 
-        await _sut.GetAllBookingsAsync();
+        await _sut.GetAllBookingsAsync(Page);
 
         _mapper.Received(3).MapBookingToResponse(Arg.Any<Booking>());
     }

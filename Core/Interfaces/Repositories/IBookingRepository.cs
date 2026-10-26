@@ -1,10 +1,12 @@
 using Core.Models;
+using Shared.Kernel.Pagination;
 
 namespace Core.Interfaces.Repositories;
 
 public interface IBookingRepository : IRepository<Booking>
 {
-    Task<List<Booking>> GetAllWithDetailsAsync(
+    Task<PagedResponse<Booking>> GetAllWithDetailsAsync(
+        PageRequest page,
         bool? isCompleted = null,
         DateTime? fromDate = null,
         DateTime? toDate = null);
