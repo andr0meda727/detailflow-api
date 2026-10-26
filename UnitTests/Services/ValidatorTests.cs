@@ -1,10 +1,14 @@
 using Core.DTOs.Auth;
 using Core.DTOs.Bookings;
+using Core.DTOs.Inventory;
 using Core.DTOs.Studio;
+using Core.DTOs.Vehicles;
 using Core.Interfaces.Repositories;
 using Core.Models;
 using Core.Validators;
 using Core.Validators.Bookings;
+using Core.Validators.Inventory;
+using Core.Validators.Vehicles;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -313,4 +317,93 @@ public class BookingCreateDtoValidatorTests
         Price = 200m,
         ServiceIds = new List<Guid> { Guid.NewGuid() }
     };
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// InventoryCreateDtoValidator
+// ════════════════════════════════════════════════════════════════════════════
+
+[TestFixture]
+public class InventoryCreateDtoValidatorTests
+{
+    private IInventoryCategoryRepository _categoryRepository;
+    private InventoryCreateDtoValidator _validator;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _categoryRepository = Substitute.For<IInventoryCategoryRepository>();
+        _validator = new InventoryCreateDtoValidator(_categoryRepository);
+    }
+
+    [Test]
+    public async Task Validate_PassesWhenCategoryNotGiven()
+    {
+        var result = await _validator.TestValidateAsync(new InventoryCreateDto { Name = "Wosk", Unit = "l" });
+        result.ShouldNotHaveValidationErrorFor(x => x.CategoryId);
+        await _categoryRepository.DidNotReceive().ExistsAsync(Arg.Any<Guid>());
+    }
+
+    [Test]
+    public async Task Validate_PassesWhenCategoryExistsInStudio()
+    {
+        var categoryId = Guid.NewGuid();
+        _categoryRepository.ExistsAsync(categoryId).Returns(true);
+
+        var result = await _validator.TestValidateAsync(new InventoryCreateDto { CategoryId = categoryId });
+        result.ShouldNotHaveValidationErrorFor(x => x.CategoryId);
+    }
+
+    [Test]
+    public async Task Validate_FailsWhenCategoryNotInStudio()
+    {
+        _categoryRepository.ExistsAsync(Arg.Any<Guid>()).Returns(false);
+
+        var result = await _validator.TestValidateAsync(new InventoryCreateDto { CategoryId = Guid.NewGuid() });
+        result.ShouldHaveValidationErrorFor(x => x.CategoryId);
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// CreateVehicleRequestValidator
+// ════════════════════════════════════════════════════════════════════════════
+
+[TestFixture]
+public class CreateVehicleRequestValidatorTests
+{
+    private IClientRepository _clientRepository;
+    private CreateVehicleRequestValidator _validator;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _clientRepository = Substitute.For<IClientRepository>();
+        _validator = new CreateVehicleRequestValidator(_clientRepository);
+    }
+
+    [Test]
+    public async Task Validate_PassesWhenClientExistsInStudio()
+    {
+        var clientId = Guid.NewGuid();
+        _clientRepository.ExistsAsync(clientId).Returns(true);
+
+        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(clientId, "KR 1", null, null));
+        result.ShouldNotHaveValidationErrorFor(x => x.ClientId);
+    }
+
+    [Test]
+    public async Task Validate_FailsWhenClientNotInStudio()
+    {
+        _clientRepository.ExistsAsync(Arg.Any<Guid>()).Returns(false);
+
+        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(Guid.NewGuid(), "KR 1", null, null));
+        result.ShouldHaveValidationErrorFor(x => x.ClientId);
+    }
+
+    [Test]
+    public async Task Validate_FailsWhenClientIdEmpty()
+    {
+        var result = await _validator.TestValidateAsync(new CreateVehicleRequest(Guid.Empty, "KR 1", null, null));
+        result.ShouldHaveValidationErrorFor(x => x.ClientId);
+    }
 }
