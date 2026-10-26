@@ -1,19 +1,13 @@
 ﻿using System.Security.Claims;
 using Core.Constants;
-using Core.DTOs.Services;
 using Core.Interfaces;
 using Core.Interfaces.Mappings;
-using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
 using Core.Validators;
 using Core.Validators.Bookings;
 using FluentValidation;
-using Infrastructure.Consumers;
-using Infrastructure.Repositories;
-using Infrastructure.Services;
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -41,9 +35,6 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IEmployeesService, EmployeesService>();
         services.AddScoped<IInvitationService, InvitationService>();
-        services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
-        services.AddScoped<IStudioRepository, StudioRepository>();
-        services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
 
         services.AddScoped<IOwnerRegistrationService, OwnerRegistrationService>();
 
@@ -60,8 +51,6 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<BookingCreateDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<RegisterOwnerDtoValidator>();
         services.AddFluentValidationAutoValidation();
-
-        services.AddScoped<IAuthService, SupabaseAuthService>();
 
         var supabaseUrl = configuration["Supabase:Url"]
                           ?? throw new InvalidOperationException("Supabase URL is missing!");
@@ -86,18 +75,6 @@ public static class ServiceCollectionExtensions
         {
             options.AddPolicy("OwnerOnly", policy => policy.RequireClaim(ClaimTypes.Role, Roles.Owner.ToString()));
         });
-
-        services.AddMassTransit(x =>
-        {
-            x.AddConsumer<GenerateBookingsReportConsumer>();
-
-            x.UsingInMemory((context, cfg) =>
-            {
-                cfg.ConfigureEndpoints(context);
-            });
-        });
-
-        services.AddScoped<IReportPdfService, ReportPdfService>();
 
         return services;
     }
