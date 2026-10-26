@@ -19,7 +19,6 @@ public class OwnerRegistrationServiceTests
 {
     private IAuthService _authService;
     private IStudioRepository _studioRepository;
-    private IStudioMemberRepository _studioMemberRepository;
     private OwnerRegistrationService _sut;
 
     [SetUp]
@@ -27,8 +26,7 @@ public class OwnerRegistrationServiceTests
     {
         _authService = Substitute.For<IAuthService>();
         _studioRepository = Substitute.For<IStudioRepository>();
-        _studioMemberRepository = Substitute.For<IStudioMemberRepository>();
-        _sut = new OwnerRegistrationService(_authService, _studioRepository, _studioMemberRepository);
+        _sut = new OwnerRegistrationService(_authService, _studioRepository);
     }
 
     [Test]
@@ -64,7 +62,6 @@ public class OwnerRegistrationServiceTests
         _authService.UserExistsAsync("newowner@test.pl").Returns(false);
         _authService.SignUpAsync(dto.Email, dto.Password, dto.FirstName, dto.LastName).Returns(userId);
         _studioRepository.AddAsync(Arg.Any<Studio>()).Returns(studio);
-        _studioMemberRepository.AddAsync(Arg.Any<StudioMember>()).Returns(new StudioMember());
 
         var result = await _sut.RegisterAsync(dto);
 
@@ -83,7 +80,6 @@ public class OwnerRegistrationServiceTests
         _authService.SignUpAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>()).Returns(userId);
         _studioRepository.AddAsync(Arg.Do<Studio>(s => capturedStudio = s))
                           .Returns(ci => ci.Arg<Studio>());
-        _studioMemberRepository.AddAsync(Arg.Any<StudioMember>()).Returns(new StudioMember());
 
         await _sut.RegisterAsync(dto);
 
@@ -92,25 +88,37 @@ public class OwnerRegistrationServiceTests
     }
 
     [Test]
-    public async Task RegisterAsync_CreatesOwnerMembership()
+    public async Task RegisterAsync_CreatesActiveOwnerMembershipTogetherWithStudio()
     {
         var userId = Guid.NewGuid();
-        var studio = new Studio { Id = Guid.NewGuid(), Name = "Test Studio" };
         var dto = BuildRegisterDto();
-        StudioMember? capturedMember = null;
+        Studio? capturedStudio = null;
 
         _authService.UserExistsAsync(Arg.Any<string>()).Returns(false);
         _authService.SignUpAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>()).Returns(userId);
-        _studioRepository.AddAsync(Arg.Any<Studio>()).Returns(studio);
-        _studioMemberRepository.AddAsync(Arg.Do<StudioMember>(m => capturedMember = m))
-                                .Returns(new StudioMember());
+        _studioRepository.AddAsync(Arg.Do<Studio>(s => capturedStudio = s))
+                          .Returns(ci => ci.Arg<Studio>());
 
         await _sut.RegisterAsync(dto);
 
-        Assert.That(capturedMember, Is.Not.Null);
-        Assert.That(capturedMember!.UserId, Is.EqualTo(userId));
-        Assert.That(capturedMember.StudioId, Is.EqualTo(studio.Id));
-        Assert.That(capturedMember.RoleId, Is.EqualTo(Roles.Owner));
+        var member = capturedStudio!.StudioMembers.Single();
+        Assert.That(member.UserId, Is.EqualTo(userId));
+        Assert.That(member.RoleId, Is.EqualTo(Roles.Owner));
+        Assert.That(member.IsActive, Is.True);
+    }
+
+    [Test]
+    public void RegisterAsync_DeletesAuthUserAndRethrows_WhenSavingStudioFails()
+    {
+        var userId = Guid.NewGuid();
+        var dto = BuildRegisterDto();
+
+        _authService.UserExistsAsync(Arg.Any<string>()).Returns(false);
+        _authService.SignUpAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>()).Returns(userId);
+        _studioRepository.AddAsync(Arg.Any<Studio>()).Returns<Studio>(_ => throw new InvalidOperationException("db down"));
+
+        Assert.ThrowsAsync<InvalidOperationException>(() => _sut.RegisterAsync(dto));
+        _authService.Received(1).DeleteUserAsync(userId);
     }
 
     [Test]
@@ -121,7 +129,6 @@ public class OwnerRegistrationServiceTests
         _authService.SignUpAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>())
                     .Returns(Guid.NewGuid());
         _studioRepository.AddAsync(Arg.Any<Studio>()).Returns(new Studio { Id = Guid.NewGuid(), Name = "Test" });
-        _studioMemberRepository.AddAsync(Arg.Any<StudioMember>()).Returns(new StudioMember());
 
         await _sut.RegisterAsync(dto);
 
@@ -139,7 +146,6 @@ public class OwnerRegistrationServiceTests
         _authService.SignUpAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>()).Returns(userId);
         _studioRepository.AddAsync(Arg.Do<Studio>(s => capturedStudio = s))
                           .Returns(ci => ci.Arg<Studio>());
-        _studioMemberRepository.AddAsync(Arg.Any<StudioMember>()).Returns(new StudioMember());
 
         await _sut.RegisterAsync(dto);
 

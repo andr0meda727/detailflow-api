@@ -79,6 +79,14 @@ public class SupabaseAuthService : IAuthService
                ?? false;
     }
 
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        var success = await _adminClient.DeleteUser(userId.ToString());
+
+        if (!success)
+            throw new InvalidOperationException($"Failed to delete user {userId}");
+    }
+
     private async Task<Guid?> GetUserIdByEmailAsync(string email)
     {
         var result = await _adminClient.ListUsers(filter: email);
