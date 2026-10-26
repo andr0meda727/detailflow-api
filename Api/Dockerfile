@@ -15,6 +15,8 @@ COPY ["Modules/Crm/Crm.Application/Crm.Application.csproj", "Modules/Crm/Crm.App
 COPY ["Modules/Crm/Crm.Infrastructure/Crm.Infrastructure.csproj", "Modules/Crm/Crm.Infrastructure/"]
 COPY ["Modules/Crm/Crm.Api/Crm.Api.csproj", "Modules/Crm/Crm.Api/"]
 COPY ["Modules/Scheduling/Scheduling.Contracts/Scheduling.Contracts.csproj", "Modules/Scheduling/Scheduling.Contracts/"]
+COPY ["Modules/Scheduling/Scheduling.Domain/Scheduling.Domain.csproj", "Modules/Scheduling/Scheduling.Domain/"]
+COPY ["Modules/Scheduling/Scheduling.Application/Scheduling.Application.csproj", "Modules/Scheduling/Scheduling.Application/"]
 COPY ["Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj", "Modules/Inventory/Inventory.Domain/"]
 COPY ["Modules/Inventory/Inventory.Application/Inventory.Application.csproj", "Modules/Inventory/Inventory.Application/"]
 COPY ["Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj", "Modules/Inventory/Inventory.Infrastructure/"]
