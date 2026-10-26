@@ -1,6 +1,6 @@
 using Core.DTOs.Bookings;
 using Core.DTOs.Vehicles;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Models;

@@ -1,5 +1,5 @@
 using Api.Extensions;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;

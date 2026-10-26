@@ -1,4 +1,4 @@
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Extensions;

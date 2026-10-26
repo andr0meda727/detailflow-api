@@ -1,4 +1,4 @@
-namespace Core.Interfaces;
+namespace Shared.Kernel.Tenancy;
 
 public interface ITenantContext
 {

@@ -1,5 +1,5 @@
 using Api.Extensions;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using Core.DTOs.Clients;
 using Core.Interfaces.Services;
 using Core.Models;

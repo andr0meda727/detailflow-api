@@ -1,4 +1,4 @@
-namespace Core.DTOs.Results;
+namespace Shared.Kernel.Results;
 
 public enum ErrorType
 {

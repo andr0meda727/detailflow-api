@@ -1,4 +1,5 @@
-﻿using Core.Interfaces.Audit;
+﻿using Shared.Kernel.Auditing;
+using Shared.Kernel.Tenancy;
 
 namespace Core.Models;
 

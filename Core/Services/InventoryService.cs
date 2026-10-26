@@ -1,5 +1,5 @@
 using Core.DTOs.Inventory;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;

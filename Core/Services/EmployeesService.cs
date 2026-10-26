@@ -1,7 +1,7 @@
 using Core.Constants;
 using Core.DTOs.Employees;
-using Core.DTOs.Results;
-using Core.Interfaces;
+using Shared.Kernel.Results;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;

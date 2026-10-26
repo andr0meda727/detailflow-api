@@ -1,6 +1,6 @@
 using Core.DTOs.Reports;
 using Core.Messages;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

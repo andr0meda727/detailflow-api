@@ -1,5 +1,5 @@
 using Core.DTOs.Employees;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using InviteEmployeeDto = Core.DTOs.Auth.InviteEmployeeDto;
 
 namespace Core.Interfaces.Services;

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using Core.Constants;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
 using Core.Mappings;

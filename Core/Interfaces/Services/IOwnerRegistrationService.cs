@@ -1,5 +1,5 @@
 using Core.DTOs.Auth;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 
 namespace Core.Interfaces.Services;
 

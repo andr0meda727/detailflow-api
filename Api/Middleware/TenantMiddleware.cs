@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Repositories;
 using Core.Models;
 

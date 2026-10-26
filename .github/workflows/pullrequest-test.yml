@@ -8,6 +8,8 @@ on:
       - 'Api/**'
       - 'Core/**'
       - 'Infrastructure/**'
+      - 'Shared/**'
+      - 'Modules/**'
       - 'UnitTests/**'
       - 'IntegrationTests/**'
       - '**/*.csproj'

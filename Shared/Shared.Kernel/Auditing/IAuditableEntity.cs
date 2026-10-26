@@ -1,4 +1,4 @@
-namespace Core.Interfaces.Audit;
+namespace Shared.Kernel.Auditing;
 
 public interface IAuditableEntity
 {

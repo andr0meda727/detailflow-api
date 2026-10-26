@@ -1,4 +1,4 @@
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 
 namespace Core.Services;
 

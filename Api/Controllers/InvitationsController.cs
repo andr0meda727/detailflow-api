@@ -1,7 +1,7 @@
 using Api.Extensions;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using System.Security.Claims;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

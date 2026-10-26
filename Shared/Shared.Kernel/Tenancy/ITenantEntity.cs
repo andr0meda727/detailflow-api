@@ -1,4 +1,4 @@
-namespace Core.Interfaces.Audit;
+namespace Shared.Kernel.Tenancy;
 
 public interface ITenantEntity
 {

@@ -1,5 +1,5 @@
 using Api.Extensions;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using Core.DTOs.Inventory.InventoryCategories;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;

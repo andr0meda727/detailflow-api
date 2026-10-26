@@ -1,5 +1,5 @@
-using Core.Interfaces;
-using Core.Interfaces.Audit;
+using Shared.Kernel.Tenancy;
+using Shared.Kernel.Auditing;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 

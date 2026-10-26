@@ -1,5 +1,5 @@
 using Core.Constants;
-using Core.Interfaces;
+using Shared.Kernel.Tenancy;
 using Core.Models;
 using Core.Services;
 using Infrastructure.Data;

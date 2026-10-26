@@ -1,6 +1,6 @@
 using Core.Constants;
 using Core.DTOs.Auth;
-using Core.DTOs.Results;
+using Shared.Kernel.Results;
 using Core.DTOs.Services;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
