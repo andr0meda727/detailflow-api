@@ -42,6 +42,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     private Guid? CurrentStudioId => tenantContext.StudioId;
 
+    // Tenant filters fail closed: with no studio resolved, "StudioId == null" matches no rows.
+    // Code that legitimately works across studios (e.g. background jobs) must call IgnoreQueryFilters().
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -49,15 +52,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         modelBuilder.Entity<Booking>()
-            .HasQueryFilter(b => CurrentStudioId == null || b.StudioId == CurrentStudioId.Value);
+            .HasQueryFilter(b => b.StudioId == CurrentStudioId);
         modelBuilder.Entity<Client>()
-            .HasQueryFilter(c => !c.IsDeleted && (CurrentStudioId == null || c.StudioId == CurrentStudioId.Value));
+            .HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
         modelBuilder.Entity<Vehicle>()
-            .HasQueryFilter(v => !v.IsDeleted && (CurrentStudioId == null || v.StudioId == CurrentStudioId.Value));
+            .HasQueryFilter(v => !v.IsDeleted && v.StudioId == CurrentStudioId);
         modelBuilder.Entity<Service>()
-            .HasQueryFilter(s => s.IsActive && (CurrentStudioId == null || s.StudioId == CurrentStudioId.Value));
+            .HasQueryFilter(s => s.IsActive && s.StudioId == CurrentStudioId);
         modelBuilder.Entity<InventoryCategory>()
-            .HasQueryFilter(ic => CurrentStudioId == null || ic.StudioId == CurrentStudioId.Value);
+            .HasQueryFilter(ic => ic.StudioId == CurrentStudioId);
+        modelBuilder.Entity<Inventory>()
+            .HasQueryFilter(i => i.StudioId == CurrentStudioId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -88,6 +93,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 if (entry.State == EntityState.Added && CurrentStudioId.HasValue)
                 {
                     tenantEntity.StudioId = CurrentStudioId.Value;
+                }
+                else if (entry.State == EntityState.Added && tenantEntity.StudioId == Guid.Empty)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot add {entry.Entity.GetType().Name} without a studio: no tenant is resolved for this request.");
                 }
                 else if (entry.State == EntityState.Modified)
                 {

@@ -1,3 +1,4 @@
+using Core.Models;
 using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -25,6 +26,13 @@ public class TenantIsolationTests
     {
         var tenant = new TenantContext();
         tenant.SetTenant(studioId, Guid.NewGuid());
+        return PostgresFixture.CreateDbContext(tenant);
+    }
+
+    private static ApplicationDbContext DbForUserWithoutStudio()
+    {
+        var tenant = new TenantContext();
+        tenant.SetUserOnly(Guid.NewGuid());
         return PostgresFixture.CreateDbContext(tenant);
     }
 
@@ -78,5 +86,57 @@ public class TenantIsolationTests
         var categories = await new InventoryCategoryRepository(db).GetAllAsync();
 
         Assert.That(categories.Select(c => c.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
+    }
+
+    [Test]
+    public async Task Inventory_IsScopedToCurrentStudio()
+    {
+        await using var db = DbForStudio(_seed.StudioA.StudioId);
+        var repository = new InventoryRepository(db);
+
+        var all = await repository.GetAllAsync();
+        var lowStock = await repository.GetLowStockAsync();
+
+        Assert.That(all.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
+        Assert.That(lowStock.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
+    }
+
+    [Test]
+    public async Task GetById_DoesNotReturnOtherStudiosRecord()
+    {
+        await using var db = DbForStudio(_seed.StudioA.StudioId);
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(await new BookingRepository(db).GetByIdWithDetailsAsync(_seed.StudioB.BookingId), Is.Null);
+            Assert.That(await new ClientRepository(db).GetClientByIdWithVehiclesAsync(_seed.StudioB.ClientId), Is.Null);
+            Assert.That(await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId), Is.Null);
+        });
+    }
+
+    [Test]
+    public async Task UserWithoutStudio_SeesNoTenantData()
+    {
+        await using var db = DbForUserWithoutStudio();
+
+        Assert.Multiple(async () =>
+        {
+            Assert.That(await new BookingRepository(db).GetAllWithDetailsAsync(), Is.Empty);
+            Assert.That(await new ClientRepository(db).GetAllWithVehiclesAsync(null), Is.Empty);
+            Assert.That(await new VehicleRepository(db).GetAllFilteredAsync(), Is.Empty);
+            Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);
+            Assert.That(await new InventoryCategoryRepository(db).GetAllAsync(), Is.Empty);
+            Assert.That(await new InventoryRepository(db).GetAllAsync(), Is.Empty);
+        });
+    }
+
+    [Test]
+    public async Task UserWithoutStudio_CannotAddTenantData()
+    {
+        await using var db = DbForUserWithoutStudio();
+
+        db.Clients.Add(new Client { Name = "Anna", Phone = "500600700" });
+
+        Assert.That(() => db.SaveChangesAsync(), Throws.InvalidOperationException);
     }
 }
