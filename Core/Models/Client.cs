@@ -23,8 +23,6 @@ public class Client : IAuditableEntity, ITenantEntity
 
     public bool IsDeleted { get; set; }
 
-    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
     public Studio Studio { get; set; } = null!;
 
     public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();

@@ -1,3 +1,5 @@
+using Core.DTOs.Bookings;
+using Core.DTOs.Vehicles;
 using Core.Mappings;
 using Core.Models;
 
@@ -34,16 +36,32 @@ public class BookingMapperTests
         Assert.That(dto.Services, Is.EqualTo(new[] { "Polishing" }));
     }
 
+    [Test]
+    public void MapBookingToResponse_BuildsClientAndVehicleFromTheBookingsCopy()
+    {
+        var booking = BuildBooking();
+
+        var dto = _mapper.MapBookingToResponse(booking);
+
+        Assert.That(dto.Client, Is.EqualTo(new ClientInfoDto(booking.ClientId, "Jan", "jan@test.pl", "123456789")));
+        Assert.That(dto.Vehicle, Is.EqualTo(new VehicleInfoDto(booking.VehicleId, "KR 1", "Audi", "A4")));
+    }
+
     private static Booking BuildBooking()
     {
-        var client = new Client { Id = Guid.NewGuid(), Name = "Jan", Phone = "123456789" };
         return new Booking
         {
             Id = Guid.NewGuid(),
             ScheduledAt = DateTime.UtcNow,
             TotalPrice = 20000,
-            Client = client,
-            Vehicle = new Vehicle { Id = Guid.NewGuid(), LicensePlate = "KR 1", Client = client },
+            ClientId = Guid.NewGuid(),
+            ClientName = "Jan",
+            ClientPhone = "123456789",
+            ClientEmail = "jan@test.pl",
+            VehicleId = Guid.NewGuid(),
+            VehicleLicensePlate = "KR 1",
+            VehicleBrand = "Audi",
+            VehicleModel = "A4",
             Status = new BookingStatus { Id = Guid.NewGuid(), Name = "Created", Color = "#3b82f6" },
             BookingServices = [new BookingServices { Service = new Service { Name = "Polishing" } }]
         };

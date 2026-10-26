@@ -45,13 +45,9 @@ public class Booking : IAuditableEntity, ITenantEntity
 
     public ICollection<BookingServices> BookingServices { get; set; } = new List<BookingServices>();
 
-    public Client Client { get; set; } = null!;
-
     public User? CreatedByNavigation { get; set; }
 
     public BookingStatus Status { get; set; } = null!;
 
     public Studio Studio { get; set; } = null!;
-
-    public Vehicle Vehicle { get; set; } = null!;
 }

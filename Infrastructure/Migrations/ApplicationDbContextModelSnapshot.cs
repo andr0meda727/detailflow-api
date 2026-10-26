@@ -888,13 +888,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Models.Booking", b =>
                 {
-                    b.HasOne("Core.Models.Client", "Client")
-                        .WithMany("Bookings")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("booking_client_id_fkey");
-
                     b.HasOne("Core.Models.User", "CreatedByNavigation")
                         .WithMany("Bookings")
                         .HasForeignKey("CreatedBy")
@@ -915,22 +908,11 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("booking_studio_id_fkey");
 
-                    b.HasOne("Core.Models.Vehicle", "Vehicle")
-                        .WithMany("Bookings")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("booking_vehicle_id_fkey");
-
-                    b.Navigation("Client");
-
                     b.Navigation("CreatedByNavigation");
 
                     b.Navigation("Status");
 
                     b.Navigation("Studio");
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("Core.Models.BookingServices", b =>
@@ -1130,8 +1112,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Models.Client", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("Vehicles");
                 });
 
@@ -1181,11 +1161,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("StudioMembers");
-                });
-
-            modelBuilder.Entity("Core.Models.Vehicle", b =>
-                {
-                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

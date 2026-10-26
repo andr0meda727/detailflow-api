@@ -15,7 +15,6 @@ public partial class VehicleMapper : IVehicleMapper
     [MapperIgnoreTarget(nameof(Vehicle.IsDeleted))]
     [MapperIgnoreTarget(nameof(Vehicle.CreatedAt))]
     [MapperIgnoreTarget(nameof(Vehicle.UpdatedAt))]
-    [MapperIgnoreTarget(nameof(Vehicle.Bookings))]
     [MapperIgnoreTarget(nameof(Vehicle.Client))]
     [MapperIgnoreTarget(nameof(Vehicle.Studio))]
     public partial Vehicle MapToEntity(CreateVehicleRequest dto);

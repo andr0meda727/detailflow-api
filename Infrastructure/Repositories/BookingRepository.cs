@@ -17,8 +17,6 @@ public class BookingRepository(ApplicationDbContext context)
         DateTime? toDate = null)
     {
         var query = DbSet
-            .Include(b => b.Vehicle)
-            .Include(b => b.Client)
             .Include(b => b.Status)
             .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.Service)
@@ -50,8 +48,6 @@ public class BookingRepository(ApplicationDbContext context)
     public async Task<Booking?> GetByIdWithDetailsAsync(Guid id, bool trackChanges = false)
     {
         var query =  DbSet
-            .Include(b => b.Vehicle)
-            .Include(b => b.Client)
             .Include(b => b.Status)
             .Include(b => b.BookingServices)
                 .ThenInclude(bs => bs.Service)
@@ -70,7 +66,6 @@ public class BookingRepository(ApplicationDbContext context)
     {
         return await DbSet
             .IgnoreQueryFilters()
-            .Include(b => b.Client)
             .Include(b => b.Status)
             .Include(b => b.BookingServices).ThenInclude(bs => bs.Service)
             .Where(b => b.StudioId == studioId

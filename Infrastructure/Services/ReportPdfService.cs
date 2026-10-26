@@ -85,7 +85,7 @@ public class ReportPdfService : IReportPdfService
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.ScheduledAt.ToString("dd.MM.yyyy HH:mm"));
                             table.Cell().Background(bg).Padding(6)
-                                .Text(booking.Client?.Name ?? "—");
+                                .Text(booking.ClientName);
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.BookingServices
                                     .FirstOrDefault()?.Service?.Name ?? "—");

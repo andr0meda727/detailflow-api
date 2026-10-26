@@ -77,12 +77,11 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(e => e.VehicleId)
             .HasColumnName("vehicle_id");
 
-        builder
-            .HasOne(d => d.Client)
-            .WithMany(p => p.Bookings)
-            .HasForeignKey(d => d.ClientId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("booking_client_id_fkey");
+        // Client and vehicle belong to the CRM module: plain IDs, no foreign keys or navigations.
+        // The indexes stay for lookups when CRM data changes.
+        builder.HasIndex(e => e.ClientId);
+
+        builder.HasIndex(e => e.VehicleId);
 
         builder
             .HasOne(d => d.CreatedByNavigation)
@@ -103,12 +102,5 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .WithMany(p => p.Bookings)
             .HasForeignKey(d => d.StudioId)
             .HasConstraintName("booking_studio_id_fkey");
-
-        builder
-            .HasOne(d => d.Vehicle)
-            .WithMany(p => p.Bookings)
-            .HasForeignKey(d => d.VehicleId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("booking_vehicle_id_fkey");
     }
 }

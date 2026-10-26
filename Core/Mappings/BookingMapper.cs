@@ -1,4 +1,5 @@
 using Core.DTOs.Bookings;
+using Core.DTOs.Vehicles;
 using Core.Interfaces.Mappings;
 using Core.Models;
 using Riok.Mapperly.Abstractions;
@@ -11,7 +12,16 @@ public partial class BookingMapper : IBookingMapper
     [MapProperty("Status.Name", nameof(BookingResponseDto.Status))]
     [MapProperty("Status.Color", nameof(BookingResponseDto.StatusColor))]
     [MapProperty(nameof(Booking.BookingServices), nameof(BookingResponseDto.Services))]
+    [MapPropertyFromSource(nameof(BookingResponseDto.Client), Use = nameof(MapClient))]
+    [MapPropertyFromSource(nameof(BookingResponseDto.Vehicle), Use = nameof(MapVehicle))]
     public partial BookingResponseDto MapBookingToResponse(Booking booking);
+
+    // The response keeps its nested shape; the data comes from the booking's own copy
+    private static ClientInfoDto MapClient(Booking booking) =>
+        new(booking.ClientId, booking.ClientName, booking.ClientEmail, booking.ClientPhone);
+
+    private static VehicleInfoDto MapVehicle(Booking booking) =>
+        new(booking.VehicleId, booking.VehicleLicensePlate, booking.VehicleBrand, booking.VehicleModel);
 
     [MapperIgnoreTarget(nameof(Booking.Id))]
     [MapperIgnoreTarget(nameof(Booking.StudioId))]
@@ -21,8 +31,6 @@ public partial class BookingMapper : IBookingMapper
     [MapperIgnoreTarget(nameof(Booking.CreatedAt))]
     [MapperIgnoreTarget(nameof(Booking.UpdatedAt))]
     [MapperIgnoreTarget(nameof(Booking.Studio))]
-    [MapperIgnoreTarget(nameof(Booking.Vehicle))]
-    [MapperIgnoreTarget(nameof(Booking.Client))]
     [MapperIgnoreTarget(nameof(Booking.Status))]
     [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
     [MapperIgnoreTarget(nameof(Booking.ClientName))]
@@ -45,12 +53,10 @@ public partial class BookingMapper : IBookingMapper
     [MapperIgnoreTarget(nameof(Booking.StudioId))]
     [MapperIgnoreTarget(nameof(Booking.CompletedAt))]
     [MapperIgnoreTarget(nameof(Booking.TotalPrice))]
-    [MapperIgnoreTarget(nameof(Booking.Client))]
     [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
     [MapperIgnoreTarget(nameof(Booking.CreatedAt))]
     [MapperIgnoreTarget(nameof(Booking.UpdatedAt))]
     [MapperIgnoreTarget(nameof(Booking.Studio))]
-    [MapperIgnoreTarget(nameof(Booking.Vehicle))]
     [MapperIgnoreTarget(nameof(Booking.Status))]
     [MapperIgnoreTarget(nameof(Booking.CreatedBy))]
     [MapperIgnoreTarget(nameof(Booking.ClientName))]
