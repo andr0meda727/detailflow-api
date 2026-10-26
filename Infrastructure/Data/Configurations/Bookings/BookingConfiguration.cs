@@ -15,6 +15,11 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder
             .ToTable("booking", "d");
 
+        // Serves the default list order; it also covers the studio_id foreign key
+        builder
+            .HasIndex(e => new { e.StudioId, e.ScheduledAt })
+            .HasDatabaseName("booking_studio_id_scheduled_at_idx");
+
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");

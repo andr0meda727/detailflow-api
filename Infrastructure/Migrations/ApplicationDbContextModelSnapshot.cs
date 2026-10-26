@@ -87,9 +87,10 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("StudioId");
-
                     b.HasIndex("VehicleId");
+
+                    b.HasIndex("StudioId", "ScheduledAt")
+                        .HasDatabaseName("booking_studio_id_scheduled_at_idx");
 
                     b.ToTable("booking", "d");
                 });
