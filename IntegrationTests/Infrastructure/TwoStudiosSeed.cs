@@ -1,8 +1,11 @@
 using Core.Constants;
 using Core.Models;
 using Inventory.Domain;
+using Scheduling.Domain.Bookings;
+using Booking = Scheduling.Domain.Bookings.Booking;
 using Shared.Infrastructure.Tenancy;
 using CrmClient = Crm.Domain.Client;
+using SchedulingService = Scheduling.Domain.Catalog.Service;
 
 namespace IntegrationTests.Infrastructure;
 
@@ -34,8 +37,6 @@ public sealed class TwoStudiosSeed
                 UserId = studio.OwnerUserId, StudioId = studio.StudioId, RoleId = Roles.Owner, IsActive = true
             });
 
-            db.Services.Add(new Service { Id = studio.ServiceId, Name = "Polishing" });
-
             await db.SaveChangesAsync();
 
             // Module tables still reference d.studio, so they are seeded after the studio exists
@@ -47,19 +48,17 @@ public sealed class TwoStudiosSeed
             studio.VehicleId = vehicle.Id;
             await crmDb.SaveChangesAsync();
 
-            db.Bookings.Add(new Booking
-            {
-                Id = studio.BookingId,
-                ClientId = studio.ClientId,
-                VehicleId = studio.VehicleId,
-                ClientName = "Jan",
-                ClientPhone = SharedClientPhone,
-                VehicleLicensePlate = "WA12345",
-                StatusId = BookingStatusIds.Created,
-                TotalPrice = 20000,
-                ScheduledAt = DateTime.UtcNow
-            });
-            await db.SaveChangesAsync();
+            await using var schedulingDb = PostgresFixture.CreateSchedulingDbContext(tenant);
+            var service = SchedulingService.Create("Polishing");
+            var booking = Booking.Create(
+                new BookingClient(client.Id, client.Name, client.Phone, client.Email),
+                new BookingVehicle(vehicle.Id, vehicle.LicensePlate, vehicle.Brand, vehicle.Model),
+                DateTime.UtcNow, priceInCents: 20000, notes: null, [service.Id], createdBy: studio.OwnerUserId);
+            schedulingDb.Services.Add(service);
+            schedulingDb.Bookings.Add(booking);
+            studio.ServiceId = service.Id;
+            studio.BookingId = booking.Id;
+            await schedulingDb.SaveChangesAsync();
 
             await using var inventoryDb = PostgresFixture.CreateInventoryDbContext(tenant);
             var category = InventoryCategory.Create("Chemicals");
@@ -77,9 +76,9 @@ public sealed class TwoStudiosSeed
         public Guid OwnerUserId { get; } = Guid.NewGuid();
         public Guid InventoryCategoryId { get; set; }
         public Guid InventoryId { get; set; }
-        public Guid ServiceId { get; } = Guid.NewGuid();
+        public Guid ServiceId { get; set; }
         public Guid ClientId { get; set; }
         public Guid VehicleId { get; set; }
-        public Guid BookingId { get; } = Guid.NewGuid();
+        public Guid BookingId { get; set; }
     }
 }

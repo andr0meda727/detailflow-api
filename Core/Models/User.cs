@@ -19,7 +19,5 @@ public class User : IAuditableEntity
 
     public DateTime UpdatedAt { get; set; }
 
-    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
     public ICollection<StudioMember> StudioMembers { get; set; } = new List<StudioMember>();
 }

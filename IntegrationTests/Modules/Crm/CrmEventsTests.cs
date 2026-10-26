@@ -1,11 +1,12 @@
 using System.Net.Http.Json;
 using Crm.Contracts;
-using Infrastructure.Consumers;
+using Scheduling.Infrastructure.Consumers;
 using IntegrationTests.Api;
 using IntegrationTests.Infrastructure;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
+using Scheduling.Domain.Bookings;
 using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.Modules.Crm;
@@ -30,17 +31,17 @@ public class CrmEventsTests
     [OneTimeTearDown]
     public async Task TearDownAsync() => await _factory.DisposeAsync();
 
-    private static async Task<Core.Models.Booking> LoadBookingAsync(Guid studioId, Guid bookingId)
+    private static async Task<Booking> LoadBookingAsync(Guid studioId, Guid bookingId)
     {
         var tenant = new TenantContext();
         tenant.SetTenant(studioId, null);
-        await using var db = PostgresFixture.CreateDbContext(tenant);
+        await using var db = PostgresFixture.CreateSchedulingDbContext(tenant);
         return await db.Bookings.AsNoTracking().SingleAsync(b => b.Id == bookingId);
     }
 
     // The bus delivers events asynchronously, so poll until the consumer has run
-    private static async Task<Core.Models.Booking> WaitForBookingAsync(
-        Guid studioId, Guid bookingId, Func<Core.Models.Booking, bool> condition)
+    private static async Task<Booking> WaitForBookingAsync(
+        Guid studioId, Guid bookingId, Func<Booking, bool> condition)
     {
         var deadline = DateTime.UtcNow.AddSeconds(10);
         while (true)
@@ -83,8 +84,7 @@ public class CrmEventsTests
     public async Task Consumer_OnlyTouchesTheStudioNamedInTheEvent()
     {
         // An event claiming studio B must not change studio A's booking, even for studio A's client id
-        var tenant = new TenantContext();
-        await using var db = PostgresFixture.CreateDbContext(tenant);
+        await using var db = PostgresFixture.CreateSchedulingDbContext(new TenantContext());
         var consumeContext = Substitute.For<ConsumeContext<ClientDetailsChanged>>();
         consumeContext.Message.Returns(new ClientDetailsChanged(
             _seed.StudioB.StudioId, _seed.StudioA.ClientId, "Podmieniony", "000000000", null));

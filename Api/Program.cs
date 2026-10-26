@@ -6,6 +6,7 @@ using Infrastructure.Extensions;
 using Inventory.Api;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Scheduling.Api;
 using Shared.Infrastructure.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,9 +22,10 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // Modules
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCrmModule(builder.Configuration);
+builder.Services.AddSchedulingModule(builder.Configuration);
 
 // One bus for the host; every assembly with consumers is listed here
-builder.Services.AddMessaging(typeof(GenerateBookingsReportConsumer).Assembly);
+builder.Services.AddMessaging(typeof(GenerateBookingsReportConsumer).Assembly, SchedulingModule.ConsumersAssembly);
 
 builder.Services.AddOpenApi();
 

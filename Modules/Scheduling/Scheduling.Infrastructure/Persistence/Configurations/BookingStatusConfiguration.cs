@@ -1,8 +1,8 @@
-using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Scheduling.Domain.Bookings;
 
-namespace Infrastructure.Data.Configurations.Bookings;
+namespace Scheduling.Infrastructure.Persistence.Configurations;
 
 public class BookingStatusConfiguration : IEntityTypeConfiguration<BookingStatus>
 {
@@ -13,7 +13,7 @@ public class BookingStatusConfiguration : IEntityTypeConfiguration<BookingStatus
             .HasName("booking_status_pkey");
 
         builder
-            .ToTable("booking_status", "d");
+            .ToTable("booking_status", SchedulingDbContext.Schema);
 
         builder
             .HasIndex(e => e.Name, "booking_status_name_key")
@@ -23,13 +23,8 @@ public class BookingStatusConfiguration : IEntityTypeConfiguration<BookingStatus
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
 
-        builder.Property(e => e.Color)
-            .HasColumnName("color");
-
-        builder.Property(e => e.Name)
-            .HasColumnName("name");
-
-        builder.Property(e => e.SortOrder)
-            .HasColumnName("sort_order");
+        builder.Property(e => e.Name).HasColumnName("name");
+        builder.Property(e => e.Color).HasColumnName("color");
+        builder.Property(e => e.SortOrder).HasColumnName("sort_order");
     }
 }

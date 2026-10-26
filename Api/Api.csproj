@@ -27,6 +27,7 @@
       <ProjectReference Include="..\Shared\Shared.Api\Shared.Api.csproj" />
       <ProjectReference Include="..\Modules\Inventory\Inventory.Api\Inventory.Api.csproj" />
       <ProjectReference Include="..\Modules\Crm\Crm.Api\Crm.Api.csproj" />
+      <ProjectReference Include="..\Modules\Scheduling\Scheduling.Api\Scheduling.Api.csproj" />
     </ItemGroup>
 
 </Project>

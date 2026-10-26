@@ -1,16 +1,16 @@
 using Crm.Contracts;
-using Infrastructure.Data;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Scheduling.Infrastructure.Persistence;
 using Shared.Infrastructure.Persistence;
 
-namespace Infrastructure.Consumers;
+namespace Scheduling.Infrastructure.Consumers;
 
 /// <summary>
 /// Keeps the client and vehicle copies on bookings in step with CRM. Runs outside any request, so it
 /// bypasses the tenant filter and scopes every update by the studio carried in the event instead.
 /// </summary>
-public class BookingCopiesConsumer(ApplicationDbContext db)
+public class BookingCopiesConsumer(SchedulingDbContext db)
     : IConsumer<ClientDetailsChanged>, IConsumer<VehicleDetailsChanged>
 {
     public async Task Consume(ConsumeContext<ClientDetailsChanged> consumeContext)

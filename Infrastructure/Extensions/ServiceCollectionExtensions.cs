@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Data;
-using Infrastructure.ModuleBridges;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Infrastructure.Repositories;
@@ -7,7 +6,6 @@ using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Scheduling.Contracts;
 
 namespace Infrastructure.Extensions;
 
@@ -29,9 +27,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
         services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
         services.AddScoped<IStudioRepository, StudioRepository>();
-
-        // Scheduling contract, served from the legacy tables until the Scheduling module owns them
-        services.AddScoped<IBookingReportSource, LegacyBookingReportSource>();
 
         // External services
         services.AddScoped<IAuthService, SupabaseAuthService>();

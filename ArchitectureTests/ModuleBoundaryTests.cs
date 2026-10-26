@@ -32,7 +32,12 @@ public class ModuleBoundaryTests
             typeof(Crm.Domain.Client).Assembly,
             typeof(Crm.Application.Abstractions.ICrmDbContext).Assembly,
             typeof(Crm.Infrastructure.Persistence.CrmDbContext).Assembly,
-            typeof(Crm.Api.CrmModule).Assembly)
+            typeof(Crm.Api.CrmModule).Assembly),
+        new("Scheduling",
+            typeof(Scheduling.Domain.Bookings.Booking).Assembly,
+            typeof(Scheduling.Application.Abstractions.ISchedulingDbContext).Assembly,
+            typeof(Scheduling.Infrastructure.Persistence.SchedulingDbContext).Assembly,
+            typeof(Scheduling.Api.SchedulingModule).Assembly)
     ];
 
     private static readonly Assembly[] LegacyAssemblies =

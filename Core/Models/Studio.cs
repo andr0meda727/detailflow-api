@@ -21,11 +21,7 @@ public class Studio : IAuditableEntity
 
     public string? Address { get; set; }
 
-    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
-    public ICollection<Service> Services { get; set; } = new List<Service>();
 
     public ICollection<StripeEvent> StripeEvents { get; set; } = new List<StripeEvent>();
 

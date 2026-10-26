@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Core.Constants;
-using Core.DTOs.Bookings;
+using Scheduling.Application.Bookings;
+using Scheduling.Domain.Bookings;
 using IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Tenancy;
@@ -97,11 +97,11 @@ public class BookingsEndpointTests
     {
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
 
-        var response = await client.PostAsJsonAsync("/api/bookings", new BookingCreateDto
+        var response = await client.PostAsJsonAsync("/api/bookings", new BookingRequest
         {
             ClientId = _seed.StudioA.ClientId,
             VehicleId = _seed.StudioA.VehicleId,
-            StatusId = BookingStatusIds.Created,
+            StatusId = BookingStatus.Created,
             ScheduledAt = DateTime.UtcNow.AddDays(3),
             ServiceIds = [_seed.StudioA.ServiceId],
             Price = 150m
@@ -112,11 +112,23 @@ public class BookingsEndpointTests
 
         var tenant = new TenantContext();
         tenant.SetTenant(_seed.StudioA.StudioId, null);
-        await using var db = PostgresFixture.CreateDbContext(tenant);
+        await using var db = PostgresFixture.CreateSchedulingDbContext(tenant);
         var booking = await db.Bookings.SingleAsync(b => b.Id == id);
         Assert.That(booking.ClientName, Is.EqualTo("Jan"));
         Assert.That(booking.ClientPhone, Is.EqualTo(_seed.SharedClientPhone));
         Assert.That(booking.VehicleLicensePlate, Is.EqualTo("WA12345"));
+    }
+
+    [Test]
+    public async Task CompletingTwice_IsAConflictWithCode()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioB.OwnerUserId);
+
+        var first = await client.PostAsync($"/api/bookings/{_seed.StudioB.BookingId}/complete", null);
+        var second = await client.PostAsync($"/api/bookings/{_seed.StudioB.BookingId}/complete", null);
+
+        Assert.That(first.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        await AssertProblemAsync(second, HttpStatusCode.Conflict, "BOOKING_ALREADY_FINISHED");
     }
 
     private static async Task AssertProblemAsync(HttpResponseMessage response, HttpStatusCode status, string code)

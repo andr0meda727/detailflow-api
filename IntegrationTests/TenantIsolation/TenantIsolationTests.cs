@@ -4,13 +4,12 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using IntegrationTests.Infrastructure;
 using Shared.Infrastructure.Tenancy;
-using Shared.Kernel.Pagination;
 
 namespace IntegrationTests.TenantIsolation;
 
 /// <summary>
-/// Every tenant-scoped read must return only the current studio's rows,
-/// and nothing at all when no studio is resolved (fail closed).
+/// Tenant scoping of the legacy context. Every tenant-scoped read must return only the current studio's rows,
+/// and nothing at all when no studio is resolved (fail closed). Modules have their own isolation tests.
 /// </summary>
 [TestFixture]
 public class TenantIsolationTests
@@ -38,64 +37,22 @@ public class TenantIsolationTests
         return PostgresFixture.CreateDbContext(tenant);
     }
 
-    [Test]
-    public async Task Bookings_AreScopedToCurrentStudio()
+    private StudioInvitation NewInvitation(Guid token) => new()
     {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        var bookings = (await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items;
-
-        Assert.That(bookings.Select(b => b.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-        Assert.That(bookings.Select(b => b.Id), Does.Contain(_seed.StudioA.BookingId));
-    }
-
-    [Test]
-    public async Task Services_AreScopedToCurrentStudio()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        var services = await new ServiceRepository(db).GetAllActiveAsync();
-
-        Assert.That(services.Select(s => s.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-    }
-
-    [Test]
-    public async Task GetById_DoesNotReturnOtherStudiosRecord()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        Assert.That(await new BookingRepository(db).GetByIdWithDetailsAsync(_seed.StudioB.BookingId), Is.Null);
-    }
-
-    [Test]
-    public async Task UserWithoutStudio_SeesNoTenantData()
-    {
-        await using var db = DbForUserWithoutStudio();
-
-        Assert.Multiple(async () =>
-        {
-            Assert.That((await new BookingRepository(db).GetAllWithDetailsAsync(new PageRequest())).Items, Is.Empty);
-            Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);
-        });
-    }
-
-    [Test]
-    public async Task ServiceLookup_DoesNotCountOtherStudiosServices()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-        var ids = new[] { _seed.StudioA.ServiceId, _seed.StudioB.ServiceId };
-
-        var count = await new ServiceRepository(db).CountExistingAsync(ids);
-
-        Assert.That(count, Is.EqualTo(1));
-    }
+        Email = "invitee@test.pl",
+        RoleId = Roles.Employee,
+        Token = token,
+        Status = InvitationStatus.Pending,
+        InvitedBy = _seed.StudioB.OwnerUserId,
+        ExpiresAt = DateTime.UtcNow.AddDays(7)
+    };
 
     [Test]
     public async Task UserWithoutStudio_CannotAddTenantData()
     {
         await using var db = DbForUserWithoutStudio();
 
-        db.Services.Add(new Service { Name = "Waxing" });
+        db.StudioInvitations.Add(NewInvitation(Guid.NewGuid()));
 
         Assert.That(() => db.SaveChangesAsync(), Throws.InvalidOperationException);
     }
@@ -106,15 +63,7 @@ public class TenantIsolationTests
         var token = Guid.NewGuid();
         await using (var db = DbForStudio(_seed.StudioB.StudioId))
         {
-            db.StudioInvitations.Add(new StudioInvitation
-            {
-                Email = "invitee@test.pl",
-                RoleId = Roles.Employee,
-                Token = token,
-                Status = InvitationStatus.Pending,
-                InvitedBy = _seed.StudioB.OwnerUserId,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
-            });
+            db.StudioInvitations.Add(NewInvitation(token));
             await db.SaveChangesAsync();
         }
 
@@ -123,9 +72,11 @@ public class TenantIsolationTests
             Assert.That(db.StudioInvitations.Any(i => i.Token == token), Is.False);
         }
 
-        // The invitee has no membership yet, so the lookup must work without a tenant
         await using (var db = DbForUserWithoutStudio())
         {
+            Assert.That(db.StudioInvitations.Any(i => i.Token == token), Is.False);
+
+            // The invitee has no membership yet, so the lookup by token must work without a tenant
             var invitation = await new StudioInvitationRepository(db).GetByTokenAsync(token);
             Assert.That(invitation?.StudioId, Is.EqualTo(_seed.StudioB.StudioId));
         }

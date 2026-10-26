@@ -22,166 +22,6 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Core.Models.Booking", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("ClientEmail")
-                        .HasColumnType("text")
-                        .HasColumnName("client_email");
-
-                    b.Property<Guid>("ClientId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("client_id");
-
-                    b.Property<string>("ClientName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("client_name");
-
-                    b.Property<string>("ClientPhone")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("client_phone");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("completed_at");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("notes");
-
-                    b.Property<DateTime>("ScheduledAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("scheduled_at");
-
-                    b.Property<Guid>("StatusId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("status_id");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<long?>("TotalPrice")
-                        .HasColumnType("bigint")
-                        .HasColumnName("total_price");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("VehicleBrand")
-                        .HasColumnType("text")
-                        .HasColumnName("vehicle_brand");
-
-                    b.Property<Guid>("VehicleId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("vehicle_id");
-
-                    b.Property<string>("VehicleLicensePlate")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("vehicle_license_plate");
-
-                    b.Property<string>("VehicleModel")
-                        .HasColumnType("text")
-                        .HasColumnName("vehicle_model");
-
-                    b.HasKey("Id")
-                        .HasName("booking_pkey");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("StatusId");
-
-                    b.HasIndex("VehicleId");
-
-                    b.HasIndex("StudioId", "ScheduledAt")
-                        .HasDatabaseName("booking_studio_id_scheduled_at_idx");
-
-                    b.ToTable("booking", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.BookingServices", b =>
-                {
-                    b.Property<Guid>("BookingId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("booking_id");
-
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("service_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("BookingId", "ServiceId")
-                        .HasName("booking_service_pkey");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("booking_service", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.BookingStatus", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Color")
-                        .HasColumnType("text")
-                        .HasColumnName("color");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
-
-                    b.HasKey("Id")
-                        .HasName("booking_status_pkey");
-
-                    b.HasIndex(new[] { "Name" }, "booking_status_name_key")
-                        .IsUnique();
-
-                    b.ToTable("booking_status", "d");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -282,52 +122,6 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("role", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.Service", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("service_pkey");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("service", "d", t =>
-                        {
-                            t.HasComment("Table contains services that studio can choose for booking purposes. Every studio is filled with default services (studio_id null). But there is option to add its own service, in this situation the studio_id is equal to id of the studio that add this service.");
-                        });
                 });
 
             modelBuilder.Entity("Core.Models.StripeEvent", b =>
@@ -775,56 +569,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("user", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.Booking", b =>
-                {
-                    b.HasOne("Core.Models.User", "CreatedByNavigation")
-                        .WithMany("Bookings")
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("booking_created_by_fkey");
-
-                    b.HasOne("Core.Models.BookingStatus", "Status")
-                        .WithMany("Bookings")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("booking_status_id_fkey");
-
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Bookings")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("booking_studio_id_fkey");
-
-                    b.Navigation("CreatedByNavigation");
-
-                    b.Navigation("Status");
-
-                    b.Navigation("Studio");
-                });
-
-            modelBuilder.Entity("Core.Models.BookingServices", b =>
-                {
-                    b.HasOne("Core.Models.Booking", "Booking")
-                        .WithMany("BookingServices")
-                        .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("booking_service_booking_id_fkey");
-
-                    b.HasOne("Core.Models.Service", "Service")
-                        .WithMany("BookingServices")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("booking_service_service_id_fkey");
-
-                    b.Navigation("Booking");
-
-                    b.Navigation("Service");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
                     b.HasOne("Core.Models.Studio", "Studio")
@@ -843,18 +587,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Studio");
 
                     b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("Core.Models.Service", b =>
-                {
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Services")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("service_studio_id_fkey");
-
-                    b.Navigation("Studio");
                 });
 
             modelBuilder.Entity("Core.Models.StripeEvent", b =>
@@ -956,33 +688,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("Studio");
                 });
 
-            modelBuilder.Entity("Core.Models.Booking", b =>
-                {
-                    b.Navigation("BookingServices");
-                });
-
-            modelBuilder.Entity("Core.Models.BookingStatus", b =>
-                {
-                    b.Navigation("Bookings");
-                });
-
             modelBuilder.Entity("Core.Models.Role", b =>
                 {
                     b.Navigation("StudioMembers");
                 });
 
-            modelBuilder.Entity("Core.Models.Service", b =>
-                {
-                    b.Navigation("BookingServices");
-                });
-
             modelBuilder.Entity("Core.Models.Studio", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("Payments");
-
-                    b.Navigation("Services");
 
                     b.Navigation("StripeEvents");
 
@@ -1005,8 +718,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Models.User", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("StudioMembers");
                 });
 #pragma warning restore 612, 618

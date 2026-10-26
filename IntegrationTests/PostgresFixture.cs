@@ -2,6 +2,8 @@ using Core.Constants;
 using Shared.Kernel.Tenancy;
 using Core.Models;
 using Crm.Infrastructure.Persistence;
+using BookingStatus = Scheduling.Domain.Bookings.BookingStatus;
+using Scheduling.Infrastructure.Persistence;
 using Infrastructure.Data;
 using Inventory.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -38,8 +40,10 @@ public class PostgresFixture
         await inventoryDb.Database.MigrateAsync();
         await using var crmDb = CreateCrmDbContext(new TenantContext());
         await crmDb.Database.MigrateAsync();
+        await using var schedulingDb = CreateSchedulingDbContext(new TenantContext());
+        await schedulingDb.Database.MigrateAsync();
 
-        await SeedLookupsAsync(db);
+        await SeedLookupsAsync(db, schedulingDb);
     }
 
     [OneTimeTearDown]
@@ -75,18 +79,29 @@ public class PostgresFixture
         return new CrmDbContext(options, tenantContext);
     }
 
-    private static async Task SeedLookupsAsync(ApplicationDbContext db)
+    public static SchedulingDbContext CreateSchedulingDbContext(ITenantContext tenantContext)
+    {
+        var options = new DbContextOptionsBuilder<SchedulingDbContext>()
+            .UseNpgsql(ConnectionString, npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", SchedulingDbContext.Schema))
+            .Options;
+
+        return new SchedulingDbContext(options, tenantContext);
+    }
+
+    private static async Task SeedLookupsAsync(ApplicationDbContext db, SchedulingDbContext schedulingDb)
     {
         db.Roles.AddRange(
             new Role { Id = Roles.Owner, RoleName = "Owner" },
             new Role { Id = Roles.Manager, RoleName = "Manager" },
             new Role { Id = Roles.Employee, RoleName = "Employee" });
 
-        db.BookingStatuses.AddRange(
-            new BookingStatus { Id = BookingStatusIds.Created, Name = "Created", Color = "#3b82f6", SortOrder = 1 },
-            new BookingStatus { Id = BookingStatusIds.Completed, Name = "Completed", Color = "#22c55e", SortOrder = 2 },
-            new BookingStatus { Id = BookingStatusIds.Cancelled, Name = "Cancelled", Color = "#ef4444", SortOrder = 3 });
-
         await db.SaveChangesAsync();
+
+        schedulingDb.BookingStatuses.AddRange(
+            new BookingStatus(BookingStatus.Created, "Created", "#3b82f6", 1),
+            new BookingStatus(BookingStatus.Completed, "Completed", "#22c55e", 2),
+            new BookingStatus(BookingStatus.Cancelled, "Cancelled", "#ef4444", 3));
+
+        await schedulingDb.SaveChangesAsync();
     }
 }
