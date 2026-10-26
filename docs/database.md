@@ -1,19 +1,32 @@
 # Database and migrations
 
 The database is the Supabase Postgres instance. Supabase owns the `auth` schema (users, sessions, sign-in).
-The application tables live in schema `d` and are managed **only** through EF Core migrations
-in `Infrastructure/Migrations`. Don't change `d` by hand in the Supabase dashboard: put every change in a migration.
+Everything else is managed **only** through EF Core migrations. Don't change these schemas by hand in the
+Supabase dashboard: put every change in a migration.
 
-The integration tests apply all migrations to a fresh Postgres container. If the EF model has changes
+Each module owns a schema and has its own `DbContext` and migrations:
+
+| Context | Schema | Migrations | History table |
+|---|---|---|---|
+| `ApplicationDbContext` (legacy core) | `d` | `Infrastructure/Migrations` | `public.__EFMigrationsHistory` |
+| `InventoryDbContext` | `inventory` | `Modules/Inventory/Inventory.Infrastructure/Persistence/Migrations` | `inventory.__EFMigrationsHistory` |
+
+**Order matters:** apply `ApplicationDbContext` first, then the modules. Module migrations may adopt tables
+that the core baseline created; for example, Inventory moves `d.inventory*` into the `inventory` schema.
+
+The integration tests apply all migrations in that order to a fresh Postgres container. If an EF model has changes
 that no migration covers, they fail.
 
 ## Adding a migration
 
 ```bash
-dotnet ef migrations add <Name> -p Infrastructure -s Api
+dotnet ef migrations add <Name> -p Infrastructure -s Api -c ApplicationDbContext
+dotnet ef migrations add <Name> -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext -o Persistence/Migrations
 ```
 
 Review the generated `Up`/`Down` code before committing it.
+To undo a migration that was never applied, delete its files instead of running `ef migrations remove`
+(that command connects to the database configured for the Api project).
 
 ## Applying migrations to Supabase
 
@@ -23,15 +36,17 @@ Pick one of these:
 
 ```bash
 # idempotent: safe to run on a database that already has some of the migrations
-dotnet ef migrations script -p Infrastructure -s Api --idempotent -o migrate.sql
+dotnet ef migrations script -p Infrastructure -s Api -c ApplicationDbContext --idempotent -o 1-core.sql
+dotnet ef migrations script -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext --idempotent -o 2-inventory.sql
 ```
 
-Open Supabase → SQL Editor, paste `migrate.sql` and run it.
+Open Supabase → SQL Editor, then paste and run the files in order.
 
 **B. Apply directly from your machine**
 
 ```bash
-dotnet ef database update -p Infrastructure -s Api --connection "<connection string>"
+dotnet ef database update -p Infrastructure -s Api -c ApplicationDbContext --connection "<connection string>"
+dotnet ef database update -p Modules/Inventory/Inventory.Infrastructure -s Api -c InventoryDbContext --connection "<connection string>"
 ```
 
 Use the **direct / session** connection string (port `5432`) from Supabase → Project Settings → Database.
@@ -45,7 +60,7 @@ It was replaced by a single `Baseline` migration that matches the current model.
 The existing database already has these tables, so the baseline must be **marked as applied, not run**:
 
 1. Check that the database matches the baseline. Compare
-   `dotnet ef migrations script 0 20261026120857_Baseline -p Infrastructure -s Api`
+   `dotnet ef migrations script 0 20261026120857_Baseline -p Infrastructure -s Api -c ApplicationDbContext`
    with the live schema (Supabase → Database → Tables, or `pg_dump --schema-only --schema=d`).
 2. Record the baseline as applied:
 
