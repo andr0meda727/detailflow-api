@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Shared\Shared.Kernel\Shared.Kernel.csproj" />
+      <ProjectReference Include="..\Modules\Crm\Crm.Contracts\Crm.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

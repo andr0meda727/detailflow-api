@@ -79,6 +79,34 @@ public class ModuleBoundaryTests
         Assert.That(referenced, Has.None.StartsWith("Npgsql"));
     }
 
+    [Test]
+    public void LegacyProjects_UseCrmOnlyThroughItsContracts()
+    {
+        var legacy = new[]
+        {
+            typeof(Core.Models.Booking).Assembly,
+            typeof(Infrastructure.Data.ApplicationDbContext).Assembly
+        };
+
+        var result = Types.InAssemblies(legacy)
+            .ShouldNot().HaveDependencyOnAny("Crm.Domain", "Crm.Application", "Crm.Infrastructure", "Crm.Api")
+            .GetResult();
+
+        AssertSuccess(result, "Other parts of the system may only use Crm.Contracts");
+    }
+
+    [Test]
+    public void CrmContracts_DependOnNothing()
+    {
+        // Contracts are what another service would consume, so they stay plain C# types
+        var referenced = typeof(Crm.Contracts.IClientDirectory).Assembly.GetReferencedAssemblies()
+            .Select(a => a.Name!)
+            .Where(name => !name.StartsWith("System") && name != "netstandard" && name != "mscorlib")
+            .ToList();
+
+        Assert.That(referenced, Is.Empty);
+    }
+
     private static void AssertSuccess(TestResult result, string rule)
     {
         Assert.That(result.IsSuccessful, Is.True,

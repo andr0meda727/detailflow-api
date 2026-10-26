@@ -1,20 +1,21 @@
 ﻿using Core.DTOs.Bookings;
 using Core.Interfaces.Repositories;
+using Crm.Contracts;
 using FluentValidation;
 
 namespace Core.Validators.Bookings;
 
 public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
 {
-    private readonly IVehicleRepository _vehicleRepository;
+    private readonly IClientDirectory _clientDirectory;
     private readonly IServiceRepository _serviceRepository;
 
     // Bookings cannot be scheduled further than 2 years into the future
     private static readonly TimeSpan MaxFutureBooking = TimeSpan.FromDays(365 * 2);
 
-    public BookingCreateDtoValidator(IVehicleRepository vehicleRepository, IServiceRepository serviceRepository)
+    public BookingCreateDtoValidator(IClientDirectory clientDirectory, IServiceRepository serviceRepository)
     {
-        _vehicleRepository = vehicleRepository;
+        _clientDirectory = clientDirectory;
         _serviceRepository = serviceRepository;
 
         RuleFor(x => x.ClientId)
@@ -67,9 +68,8 @@ public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
     {
         if (dto.ClientId == Guid.Empty || vehicleId == Guid.Empty) return false;
 
-        var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
-
-        return vehicle != null && vehicle.ClientId == dto.ClientId;
+        // The directory only sees the current studio, so another studio's client or vehicle is "not found"
+        return await _clientDirectory.FindBookingPartiesAsync(dto.ClientId, vehicleId, cancellationToken) != null;
     }
 
     // The service lookup is tenant-filtered, so IDs of another studio's services don't count.

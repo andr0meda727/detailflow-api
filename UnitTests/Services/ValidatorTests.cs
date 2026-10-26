@@ -7,6 +7,7 @@ using Core.Models;
 using Core.Validators;
 using Core.Validators.Bookings;
 using Core.Validators.Vehicles;
+using Crm.Contracts;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -135,7 +136,7 @@ public class RegisterOwnerDtoValidatorTests
 [TestFixture]
 public class BookingCreateDtoValidatorTests
 {
-    private IVehicleRepository _vehicleRepository;
+    private IClientDirectory _clientDirectory;
     private IServiceRepository _serviceRepository;
     private BookingCreateDtoValidator _validator;
 
@@ -147,14 +148,16 @@ public class BookingCreateDtoValidatorTests
     {
         _vehicleId = Guid.NewGuid();
         _clientId = Guid.NewGuid();
-        _vehicleRepository = Substitute.For<IVehicleRepository>();
-        _vehicleRepository.GetByIdAsync(_vehicleId)
-                          .Returns(new Vehicle { Id = _vehicleId, ClientId = _clientId, LicensePlate = "KR 1", StudioId = Guid.NewGuid() });
+        _clientDirectory = Substitute.For<IClientDirectory>();
+        _clientDirectory.FindBookingPartiesAsync(_clientId, _vehicleId, Arg.Any<CancellationToken>())
+                        .Returns(new BookingParties(
+                            new ClientSummary(_clientId, "Jan", "500600700", null),
+                            new VehicleSummary(_vehicleId, _clientId, "KR 1", null, null)));
         // By default every requested service exists in the current studio
         _serviceRepository = Substitute.For<IServiceRepository>();
         _serviceRepository.CountExistingAsync(Arg.Any<IReadOnlyCollection<Guid>>())
                           .Returns(ci => ci.Arg<IReadOnlyCollection<Guid>>().Count);
-        _validator = new BookingCreateDtoValidator(_vehicleRepository, _serviceRepository);
+        _validator = new BookingCreateDtoValidator(_clientDirectory, _serviceRepository);
     }
 
     [Test]
@@ -279,28 +282,12 @@ public class BookingCreateDtoValidatorTests
     }
 
     [Test]
-    public async Task Validate_FailsWhenVehicleDoesNotBelongToClient()
+    public async Task Validate_FailsWhenDirectoryHasNoSuchVehicleForClient()
     {
+        // Covers a missing vehicle, another client's vehicle and another studio's vehicle:
+        // the directory returns nothing for all of them
         var dto = ValidDto();
-        var wrongVehicleId = Guid.NewGuid();
-        dto.VehicleId = wrongVehicleId;
-
-        // Vehicle exists but belongs to different client (data is intentionally denormalized for archived bookings purposes)
-        _vehicleRepository.GetByIdAsync(wrongVehicleId)
-                          .Returns(new Vehicle { Id = wrongVehicleId, ClientId = Guid.NewGuid(), LicensePlate = "KR 99", StudioId = Guid.NewGuid() });
-
-        var result = await _validator.TestValidateAsync(dto);
-        result.ShouldHaveValidationErrorFor(x => x.VehicleId);
-    }
-
-    [Test]
-    public async Task Validate_FailsWhenVehicleNotFound()
-    {
-        var dto = ValidDto();
-        var missingVehicleId = Guid.NewGuid();
-        dto.VehicleId = missingVehicleId;
-
-        _vehicleRepository.GetByIdAsync(missingVehicleId).ReturnsNull();
+        dto.VehicleId = Guid.NewGuid();
 
         var result = await _validator.TestValidateAsync(dto);
         result.ShouldHaveValidationErrorFor(x => x.VehicleId);
