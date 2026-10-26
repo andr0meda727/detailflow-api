@@ -1,19 +1,19 @@
-using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Messages;
 using MassTransit;
+using Scheduling.Contracts;
 
 namespace Infrastructure.Consumers;
 
 public class GenerateBookingsReportConsumer(
-    IBookingRepository bookingRepository,
+    IBookingReportSource bookingReportSource,
     IReportPdfService reportPdfService,
     IEmailService emailService) : IConsumer<GenerateBookingsReportCommand>
 {
     public async Task Consume(ConsumeContext<GenerateBookingsReportCommand> context)
     {
-        var bookings = await bookingRepository.GetByStudioAndDateRangeAsync(
-            context.Message.StudioId, context.Message.DateFrom, context.Message.DateTo);
+        var bookings = await bookingReportSource.GetBookingsAsync(
+            context.Message.StudioId, context.Message.DateFrom, context.Message.DateTo, context.CancellationToken);
 
         var pdfBytes = reportPdfService.GenerateBookingsReport(
             bookings, context.Message.DateFrom, context.Message.DateTo);

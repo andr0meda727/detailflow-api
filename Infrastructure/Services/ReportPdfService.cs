@@ -1,5 +1,5 @@
 using Core.Interfaces.Services;
-using Core.Models;
+using Scheduling.Contracts;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -9,7 +9,7 @@ namespace Infrastructure.Services;
 public class ReportPdfService : IReportPdfService
 {
     public byte[] GenerateBookingsReport(
-        IEnumerable<Booking> bookings, DateTime dateFrom, DateTime dateTo)
+        IEnumerable<BookingReportRow> bookings, DateTime dateFrom, DateTime dateTo)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
@@ -87,10 +87,9 @@ public class ReportPdfService : IReportPdfService
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.ClientName);
                             table.Cell().Background(bg).Padding(6)
-                                .Text(booking.BookingServices
-                                    .FirstOrDefault()?.Service?.Name ?? "—");
+                                .Text(booking.Services.FirstOrDefault() ?? "—");
                             table.Cell().Background(bg).Padding(6)
-                                .Text(booking.Status?.Name ?? "—");
+                                .Text(booking.Status);
                         }
                     });
                 });

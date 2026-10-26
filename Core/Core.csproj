@@ -14,6 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Shared\Shared.Kernel\Shared.Kernel.csproj" />
       <ProjectReference Include="..\Modules\Crm\Crm.Contracts\Crm.Contracts.csproj" />
+      <ProjectReference Include="..\Modules\Scheduling\Scheduling.Contracts\Scheduling.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

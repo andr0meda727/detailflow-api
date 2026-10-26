@@ -1,9 +1,9 @@
-using Core.Models;
+using Scheduling.Contracts;
 
 namespace Core.Interfaces.Services;
 
 public interface IReportPdfService
 {
     byte[] GenerateBookingsReport(
-        IEnumerable<Booking> bookings, DateTime dateFrom, DateTime dateTo);
+        IEnumerable<BookingReportRow> bookings, DateTime dateFrom, DateTime dateTo);
 }

@@ -109,11 +109,17 @@ public class ModuleBoundaryTests
         Assert.That(referenced, Has.None.StartsWith("Npgsql"));
     }
 
-    [Test]
-    public void CrmContracts_DependOnNothing()
+    private static readonly Assembly[] ContractAssemblies =
+    [
+        typeof(Crm.Contracts.IClientDirectory).Assembly,
+        typeof(Scheduling.Contracts.IBookingReportSource).Assembly
+    ];
+
+    [TestCaseSource(nameof(ContractAssemblies))]
+    public void Contracts_DependOnNothing(Assembly contracts)
     {
         // Contracts are what another service would consume, so they stay plain C# types
-        var referenced = typeof(Crm.Contracts.IClientDirectory).Assembly.GetReferencedAssemblies()
+        var referenced = contracts.GetReferencedAssemblies()
             .Select(a => a.Name!)
             .Where(name => !name.StartsWith("System") && name != "netstandard" && name != "mscorlib")
             .ToList();
