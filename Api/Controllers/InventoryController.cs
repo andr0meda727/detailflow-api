@@ -35,6 +35,9 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
     public async Task<ActionResult<InventoryResponseDto>> UpdateInventory(Guid id, InventoryCreateDto inventoryData)
     {
         var updatedItem = await inventoryService.EditInventory(id, inventoryData);
+
+        if (updatedItem == null) return NotFound($"Inventory item {id} not found");
+
         return Ok(updatedItem);
     }
 }

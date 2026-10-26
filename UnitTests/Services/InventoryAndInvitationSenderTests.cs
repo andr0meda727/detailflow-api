@@ -149,6 +149,7 @@ public class InventoryServiceTests
         };
         Inventory? captured = null;
 
+        _inventoryRepository.GetByIdAsync(id).Returns(BuildInventory(id));
         _inventoryRepository.UpdateAsync(Arg.Do<Inventory>(i => captured = i)).Returns(Task.CompletedTask);
         _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto(id));
 
@@ -166,12 +167,27 @@ public class InventoryServiceTests
         var id = Guid.NewGuid();
         var dto = new InventoryCreateDto { Name = "Test", Unit = "szt", Stock = 5 };
 
+        _inventoryRepository.GetByIdAsync(id).Returns(BuildInventory(id));
         _inventoryRepository.UpdateAsync(Arg.Any<Inventory>()).Returns(Task.CompletedTask);
         _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
 
         await _sut.EditInventory(id, dto);
 
         await _inventoryRepository.Received(1).UpdateAsync(Arg.Any<Inventory>());
+    }
+
+    [Test]
+    public async Task EditInventory_ReturnsNull_AndDoesNotUpdate_WhenItemNotFound()
+    {
+        var id = Guid.NewGuid();
+        var dto = new InventoryCreateDto { Name = "Test", Unit = "szt", Stock = 5 };
+
+        _inventoryRepository.GetByIdAsync(id).ReturnsNull();
+
+        var result = await _sut.EditInventory(id, dto);
+
+        Assert.That(result, Is.Null);
+        await _inventoryRepository.DidNotReceive().UpdateAsync(Arg.Any<Inventory>());
     }
 
     private static Inventory BuildInventory(Guid? id = null, decimal stock = 50, decimal? minStock = 10) => new()

@@ -47,18 +47,16 @@ public class InventoryService(
 
     public async Task<InventoryResponseDto?> EditInventory(Guid id, InventoryCreateDto inventoryData)
     {
-        var now = DateTime.UtcNow;
+        // Load through the tenant-filtered repository so an ID from another studio is treated as not found
+        var inventoryItem = await inventoryRepository.GetByIdAsync(id);
+        if (inventoryItem == null) return null;
 
-        var inventoryItem = new Inventory
-        {
-            Id = id,
-            CategoryId = inventoryData.CategoryId,
-            Name = inventoryData.Name,
-            Description = inventoryData.Description,
-            Unit = inventoryData.Unit,
-            Stock = inventoryData.Stock,
-            MinStock = inventoryData.MinStock,
-        };
+        inventoryItem.CategoryId = inventoryData.CategoryId;
+        inventoryItem.Name = inventoryData.Name;
+        inventoryItem.Description = inventoryData.Description;
+        inventoryItem.Unit = inventoryData.Unit;
+        inventoryItem.Stock = inventoryData.Stock;
+        inventoryItem.MinStock = inventoryData.MinStock;
 
         await inventoryRepository.UpdateAsync(inventoryItem);
         return mapper.MapInventoryToResponse(inventoryItem);

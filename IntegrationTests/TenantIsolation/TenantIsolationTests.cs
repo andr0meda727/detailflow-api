@@ -1,3 +1,5 @@
+using Core.DTOs.Inventory;
+using Core.Mappings;
 using Core.Models;
 using Core.Services;
 using Infrastructure.Data;
@@ -139,6 +141,26 @@ public class TenantIsolationTests
         var count = await new ServiceRepository(db).CountExistingAsync(ids);
 
         Assert.That(count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task EditInventory_CannotOverwriteOtherStudiosItem()
+    {
+        await using (var db = DbForStudio(_seed.StudioA.StudioId))
+        {
+            var service = new InventoryService(new InventoryRepository(db), new InventoryMapper());
+
+            var result = await service.EditInventory(_seed.StudioB.InventoryId,
+                new InventoryCreateDto { Name = "Hijacked", Unit = "l", Stock = 0 });
+
+            Assert.That(result, Is.Null);
+        }
+
+        await using (var db = DbForStudio(_seed.StudioB.StudioId))
+        {
+            var item = await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId);
+            Assert.That(item!.Name, Is.EqualTo("Wax"));
+        }
     }
 
     [Test]
