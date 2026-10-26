@@ -6,6 +6,7 @@ using Core.Models;
 using Core.Services;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Shared.Kernel.Pagination;
 
 namespace Unit.Services;
 
@@ -20,6 +21,10 @@ public class VehiclesServiceTests
     private IClientRepository _clientRepository;
     private IVehicleMapper _vehicleMapper;
     private VehiclesService _sut;
+    private static readonly PageRequest Page = new();
+
+    private static PagedResponse<Vehicle> Paged(List<Vehicle> vehicles) =>
+        new(vehicles, Page.Page, Page.PageSize, vehicles.Count);
 
     [SetUp]
     public void SetUp()
@@ -34,24 +39,24 @@ public class VehiclesServiceTests
     public async Task GetAllAsync_ReturnsMappedVehicles()
     {
         var vehicles = new List<Vehicle> { BuildVehicle(), BuildVehicle() };
-        _vehicleRepository.GetAllFilteredAsync(null, null).Returns(vehicles);
+        _vehicleRepository.GetAllFilteredAsync(Page, null, null).Returns(Paged(vehicles));
         _vehicleMapper.MapVehicleToResponse(Arg.Any<Vehicle>())
                       .Returns(ci => BuildVehicleInfoDto(ci.Arg<Vehicle>().Id));
 
-        var result = await _sut.GetAllAsync();
+        var result = await _sut.GetAllAsync(Page);
 
-        Assert.That(result, Has.Count.EqualTo(2));
+        Assert.That(result.Items, Has.Count.EqualTo(2));
     }
 
     [Test]
     public async Task GetAllAsync_ForwardsClientIdAndSearchToRepository()
     {
         var clientId = Guid.NewGuid();
-        _vehicleRepository.GetAllFilteredAsync(clientId, "BMW").Returns(new List<Vehicle>());
+        _vehicleRepository.GetAllFilteredAsync(Page, clientId, "BMW").Returns(Paged([]));
 
-        await _sut.GetAllAsync(clientId, "BMW");
+        await _sut.GetAllAsync(Page, clientId, "BMW");
 
-        await _vehicleRepository.Received(1).GetAllFilteredAsync(clientId, "BMW");
+        await _vehicleRepository.Received(1).GetAllFilteredAsync(Page, clientId, "BMW");
     }
 
     [Test]

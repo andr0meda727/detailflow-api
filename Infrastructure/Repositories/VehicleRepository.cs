@@ -2,12 +2,15 @@ using Core.Interfaces.Repositories;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Pagination;
+using Shared.Kernel.Pagination;
 
 namespace Infrastructure.Repositories;
 
 public class VehicleRepository(ApplicationDbContext context) : Repository<Vehicle>(context), IVehicleRepository
 {
-    public async Task<List<Vehicle>> GetAllFilteredAsync(Guid? clientId = null, string? search = null)
+    public async Task<PagedResponse<Vehicle>> GetAllFilteredAsync(
+        PageRequest page, Guid? clientId = null, string? search = null)
     {
         var query = DbSet
             .AsNoTracking()
@@ -28,7 +31,7 @@ public class VehicleRepository(ApplicationDbContext context) : Repository<Vehicl
         }
 
         return await query
-            .OrderBy(v => v.LicensePlate)
-            .ToListAsync();
+            .OrderBy(v => v.LicensePlate).ThenBy(v => v.Id)
+            .ToPagedResponseAsync(page);
     }
 }

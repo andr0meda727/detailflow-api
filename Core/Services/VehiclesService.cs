@@ -3,6 +3,7 @@ using Shared.Kernel.Tenancy;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
+using Shared.Kernel.Pagination;
 
 namespace Core.Services;
 
@@ -11,10 +12,10 @@ public class VehiclesService(
     IClientRepository clientRepository,
     IVehicleMapper mapper) : IVehiclesService
 {
-    public async Task<List<VehicleInfoDto>> GetAllAsync(Guid? clientId = null, string? search = null)
+    public async Task<PagedResponse<VehicleInfoDto>> GetAllAsync(PageRequest page, Guid? clientId = null, string? search = null)
     {
-        var vehicles = await vehicleRepository.GetAllFilteredAsync(clientId, search);
-        return vehicles.Select(mapper.MapVehicleToResponse).ToList();
+        var vehicles = await vehicleRepository.GetAllFilteredAsync(page, clientId, search);
+        return vehicles.Map(mapper.MapVehicleToResponse);
     }
 
     public async Task<VehicleInfoDto?> AddAsync(CreateVehicleRequest dto)

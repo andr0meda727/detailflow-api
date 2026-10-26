@@ -4,6 +4,7 @@ using Core.DTOs.Vehicles;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Kernel.Pagination;
 
 namespace Api.Controllers;
 
@@ -13,11 +14,12 @@ namespace Api.Controllers;
 public class VehicleController(IVehiclesService vehiclesService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<VehicleInfoDto>>> GetAll(
+    public async Task<ActionResult<PagedResponse<VehicleInfoDto>>> GetAll(
+        [FromQuery] PageRequest paging,
         [FromQuery] Guid? clientId = null,
         [FromQuery] string? search = null)
     {
-        var vehicles = await vehiclesService.GetAllAsync(clientId, search);
+        var vehicles = await vehiclesService.GetAllAsync(paging, clientId, search);
         return Ok(vehicles);
     }
 
