@@ -172,4 +172,16 @@ public class TenantIsolationTests
 
         Assert.That(() => db.SaveChangesAsync(), Throws.InvalidOperationException);
     }
+
+    [Test]
+    public async Task SamePhone_CanBeClientOfDifferentStudios()
+    {
+        await using var dbA = DbForStudio(_seed.StudioA.StudioId);
+        await using var dbB = DbForStudio(_seed.StudioB.StudioId);
+
+        var clientA = await new ClientRepository(dbA).GetByIdAsync(_seed.StudioA.ClientId);
+        var clientB = await new ClientRepository(dbB).GetByIdAsync(_seed.StudioB.ClientId);
+
+        Assert.That(clientA!.Phone, Is.EqualTo(clientB!.Phone));
+    }
 }

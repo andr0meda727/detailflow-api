@@ -14,9 +14,12 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder
             .ToTable("client", "d");
 
+        // A phone number identifies a client within one studio; the same person can be a client of many studios.
+        // Soft-deleted clients are excluded so their number can be used again.
         builder
-            .HasIndex(e => e.Phone, "client_phone_key")
-            .IsUnique();
+            .HasIndex(e => new { e.StudioId, e.Phone }, "client_studio_id_phone_key")
+            .IsUnique()
+            .HasFilter("is_deleted = false");
 
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")

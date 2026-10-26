@@ -12,6 +12,9 @@ public sealed class TwoStudiosSeed
     public StudioData StudioA { get; } = new(Guid.NewGuid());
     public StudioData StudioB { get; } = new(Guid.NewGuid());
 
+    // The same person is a client of both studios, which must be allowed
+    public string SharedClientPhone { get; } = Random.Shared.Next(100_000_000, 999_999_999).ToString();
+
     public async Task SeedAsync()
     {
         foreach (var studio in new[] { StudioA, StudioB })
@@ -32,7 +35,7 @@ public sealed class TwoStudiosSeed
 
             db.Services.Add(new Service { Id = studio.ServiceId, Name = "Polishing" });
 
-            db.Clients.Add(new Client { Id = studio.ClientId, Name = "Jan", Phone = studio.Phone });
+            db.Clients.Add(new Client { Id = studio.ClientId, Name = "Jan", Phone = SharedClientPhone });
             db.Vehicles.Add(new Vehicle { Id = studio.VehicleId, ClientId = studio.ClientId, LicensePlate = "WA12345" });
 
             db.Bookings.Add(new Booking
@@ -56,6 +59,5 @@ public sealed class TwoStudiosSeed
         public Guid ClientId { get; } = Guid.NewGuid();
         public Guid VehicleId { get; } = Guid.NewGuid();
         public Guid BookingId { get; } = Guid.NewGuid();
-        public string Phone { get; } = Random.Shared.Next(100_000_000, 999_999_999).ToString();
     }
 }

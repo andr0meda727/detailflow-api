@@ -203,10 +203,9 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("client_pkey");
 
-                    b.HasIndex("StudioId");
-
-                    b.HasIndex(new[] { "Phone" }, "client_phone_key")
-                        .IsUnique();
+                    b.HasIndex(new[] { "StudioId", "Phone" }, "client_studio_id_phone_key")
+                        .IsUnique()
+                        .HasFilter("is_deleted = false");
 
                     b.ToTable("client", "d");
                 });
