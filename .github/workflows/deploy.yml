@@ -12,6 +12,7 @@ on:
       - 'Modules/**'
       - 'UnitTests/**'
       - 'IntegrationTests/**'
+      - 'ArchitectureTests/**'
       - '**/*.csproj'
       - '**/*.props'
       - '**/*.targets'

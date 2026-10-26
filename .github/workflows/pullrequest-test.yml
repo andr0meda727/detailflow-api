@@ -12,6 +12,7 @@ on:
       - 'Modules/**'
       - 'UnitTests/**'
       - 'IntegrationTests/**'
+      - 'ArchitectureTests/**'
       - '**/*.csproj'
       - '**/*.props'
       - '**/*.targets'
@@ -41,6 +42,9 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test "UnitTests/UnitTests.csproj" --configuration Release --logger "trx;LogFileName=unit-test-results.trx"
+
+      - name: Run Architecture Tests
+        run: dotnet test "ArchitectureTests/ArchitectureTests.csproj" --configuration Release --logger "trx;LogFileName=architecture-test-results.trx"
 
   integration-tests:
     name: Integration Tests
