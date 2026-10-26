@@ -1,58 +1,60 @@
-using Shared.Api.Errors;
-using Shared.Kernel.Results;
 using Inventory.Application.Categories;
+using Inventory.Application.Categories.CreateCategory;
+using Inventory.Application.Categories.DeleteCategory;
+using Inventory.Application.Categories.GetCategories;
+using Inventory.Application.Categories.GetCategory;
+using Inventory.Application.Categories.UpdateCategory;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Api.Errors;
 
 namespace Inventory.Api.Controllers;
 
 [ApiController]
 [Route("api/inventory-categories")]
 [Authorize]
-public class InventoryCategoriesController(IInventoryCategoriesService service) : ControllerBase
+public class InventoryCategoriesController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<CategoryResponseDto>>> GetAllASync()
+    public async Task<ActionResult<List<CategoryResponseDto>>> GetAll(
+        [FromServices] GetCategoriesHandler handler, CancellationToken cancellationToken)
     {
-        var categories = await service.GetAllAsync();
-        return Ok(categories);
+        return await handler.HandleAsync(cancellationToken);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<CategoryResponseDto>> GetInventoryCategoryById(Guid id)
+    public async Task<ActionResult<CategoryResponseDto>> GetById(
+        Guid id, [FromServices] GetCategoryHandler handler, CancellationToken cancellationToken)
     {
-        var category = await service.GetByIdAsync(id);
+        var result = await handler.HandleAsync(id, cancellationToken);
 
-        if (category == null) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
-
-        return Ok(category);
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 
     [HttpPost]
-    public async Task<ActionResult<CategoryResponseDto>> CreateInventoryCategory([FromBody] CategoryCreateDto inventoryCategoryData)
+    public async Task<ActionResult<CategoryResponseDto>> Create(
+        [FromBody] CategoryCreateDto request, [FromServices] CreateCategoryHandler handler, CancellationToken cancellationToken)
     {
-        var addedCategory = await service.CreateAsync(inventoryCategoryData);
+        var category = await handler.HandleAsync(request, cancellationToken);
 
-        return CreatedAtAction(nameof(GetInventoryCategoryById), new { id = addedCategory.Id }, addedCategory);
+        return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<CategoryResponseDto>> UpdateInventoryCategory(Guid id, CategoryCreateDto inventoryCategoryData)
+    public async Task<ActionResult<CategoryResponseDto>> Update(
+        Guid id, CategoryCreateDto request, [FromServices] UpdateCategoryHandler handler, CancellationToken cancellationToken)
     {
-        var updatedItem = await service.UpdateAsync(id, inventoryCategoryData);
+        var result = await handler.HandleAsync(id, request, cancellationToken);
 
-        if (updatedItem == null) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
-
-        return Ok(updatedItem);
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteInventoryCategory(Guid id)
+    public async Task<IActionResult> Delete(
+        Guid id, [FromServices] DeleteCategoryHandler handler, CancellationToken cancellationToken)
     {
-        var deleted = await service.DeleteAsync(id);
+        var result = await handler.HandleAsync(id, cancellationToken);
 
-        if (!deleted) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
-
-        return NoContent();
+        return result.Success ? NoContent() : this.ToProblem(result.Error!);
     }
 }

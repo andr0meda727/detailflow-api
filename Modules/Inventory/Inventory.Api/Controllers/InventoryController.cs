@@ -1,47 +1,48 @@
-using Shared.Api.Errors;
-using Shared.Kernel.Results;
 using Inventory.Application.Items;
+using Inventory.Application.Items.CreateItem;
+using Inventory.Application.Items.GetItem;
+using Inventory.Application.Items.GetItems;
+using Inventory.Application.Items.UpdateItem;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Api.Errors;
 
 namespace Inventory.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class InventoryController(IInventoryService inventoryService) : ControllerBase
+public class InventoryController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<InventoryResponseDto>>> GetAllASync([FromQuery] bool? isLowStock)
+    public async Task<ActionResult<List<InventoryResponseDto>>> GetAll(
+        [FromQuery] bool? isLowStock, [FromServices] GetItemsHandler handler, CancellationToken cancellationToken)
     {
-        var items = await inventoryService.GetAllAsync(isLowStock);
-        return Ok(items);
+        return await handler.HandleAsync(isLowStock == true, cancellationToken);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<InventoryResponseDto>> GetInventoryById(Guid id)
+    public async Task<ActionResult<InventoryResponseDto>> GetById(
+        Guid id, [FromServices] GetItemHandler handler, CancellationToken cancellationToken)
     {
-        var item = await inventoryService.GetByIdAsync(id);
+        var result = await handler.HandleAsync(id, cancellationToken);
 
-        if (item == null) return this.ToProblem(Error.NotFound("INVENTORY_ITEM_NOT_FOUND", $"Inventory item {id} not found"));
-
-        return Ok(item);
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 
     [HttpPost]
-    public async Task<ActionResult<InventoryResponseDto>> CreateInventory(InventoryCreateDto inventoryData)
+    public async Task<ActionResult<InventoryResponseDto>> Create(
+        InventoryCreateDto request, [FromServices] CreateItemHandler handler, CancellationToken cancellationToken)
     {
-        var addedItem = await inventoryService.AddInventory(inventoryData);
-        return Ok(addedItem);
+        return await handler.HandleAsync(request, cancellationToken);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<InventoryResponseDto>> UpdateInventory(Guid id, InventoryCreateDto inventoryData)
+    public async Task<ActionResult<InventoryResponseDto>> Update(
+        Guid id, InventoryCreateDto request, [FromServices] UpdateItemHandler handler, CancellationToken cancellationToken)
     {
-        var updatedItem = await inventoryService.EditInventory(id, inventoryData);
+        var result = await handler.HandleAsync(id, request, cancellationToken);
 
-        if (updatedItem == null) return this.ToProblem(Error.NotFound("INVENTORY_ITEM_NOT_FOUND", $"Inventory item {id} not found"));
-
-        return Ok(updatedItem);
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 }

@@ -15,7 +15,7 @@ public class ModuleBoundaryTests
     private static readonly Assembly[] InventoryAssemblies =
     [
         typeof(Inventory.Domain.InventoryItem).Assembly,
-        typeof(Inventory.Application.Items.IInventoryService).Assembly,
+        typeof(Inventory.Application.Abstractions.IInventoryDbContext).Assembly,
         typeof(Inventory.Infrastructure.Persistence.InventoryDbContext).Assembly,
         typeof(Inventory.Api.InventoryModule).Assembly
     ];
@@ -62,11 +62,21 @@ public class ModuleBoundaryTests
     public void InventoryApplication_DoesNotDependOnInfrastructureOrWeb()
     {
         var result = Types.InAssembly(InventoryAssemblies[1])
-            .ShouldNot().HaveDependencyOnAny(
-                "Inventory.Infrastructure", "Inventory.Api", "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore")
+            .ShouldNot().HaveDependencyOnAny("Inventory.Infrastructure", "Inventory.Api", "Microsoft.AspNetCore", "Npgsql")
             .GetResult();
 
-        AssertSuccess(result, "Inventory.Application must not use EF Core, ASP.NET Core or outer layers");
+        AssertSuccess(result, "Inventory.Application must not use ASP.NET Core, the database provider or outer layers");
+    }
+
+    [Test]
+    public void InventoryApplication_UsesOnlyEfCoreAbstractions()
+    {
+        // Handlers work with DbSet and LINQ (Microsoft.EntityFrameworkCore), but SQL and provider specifics
+        // stay in Infrastructure. Namespaces overlap, so check the referenced assemblies instead.
+        var referenced = InventoryAssemblies[1].GetReferencedAssemblies().Select(a => a.Name).ToList();
+
+        Assert.That(referenced, Has.None.EqualTo("Microsoft.EntityFrameworkCore.Relational"));
+        Assert.That(referenced, Has.None.StartsWith("Npgsql"));
     }
 
     private static void AssertSuccess(TestResult result, string rule)

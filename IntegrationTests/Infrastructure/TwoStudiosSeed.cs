@@ -52,12 +52,12 @@ public sealed class TwoStudiosSeed
 
             // Inventory lives in its own module context; its tables still reference d.studio, so it goes second
             await using var inventoryDb = PostgresFixture.CreateInventoryDbContext(tenant);
-            var category = new InventoryCategory { Id = studio.InventoryCategoryId, Name = "Chemicals" };
+            var category = InventoryCategory.Create("Chemicals");
+            var item = InventoryItem.Create("Wax", "l", stock: 1, minStock: 5, description: null, categoryId: category.Id);
             inventoryDb.Categories.Add(category);
-            inventoryDb.Items.Add(new InventoryItem
-            {
-                Id = studio.InventoryId, CategoryId = category.Id, Name = "Wax", Unit = "l", Stock = 1, MinStock = 5
-            });
+            inventoryDb.Items.Add(item);
+            studio.InventoryCategoryId = category.Id;
+            studio.InventoryId = item.Id;
             await inventoryDb.SaveChangesAsync();
         }
     }
@@ -65,8 +65,8 @@ public sealed class TwoStudiosSeed
     public sealed record StudioData(Guid StudioId)
     {
         public Guid OwnerUserId { get; } = Guid.NewGuid();
-        public Guid InventoryCategoryId { get; } = Guid.NewGuid();
-        public Guid InventoryId { get; } = Guid.NewGuid();
+        public Guid InventoryCategoryId { get; set; }
+        public Guid InventoryId { get; set; }
         public Guid ServiceId { get; } = Guid.NewGuid();
         public Guid ClientId { get; } = Guid.NewGuid();
         public Guid VehicleId { get; } = Guid.NewGuid();

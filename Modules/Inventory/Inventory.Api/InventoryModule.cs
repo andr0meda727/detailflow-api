@@ -1,7 +1,15 @@
 using FluentValidation;
 using Inventory.Api.Controllers;
-using Inventory.Application.Categories;
+using Inventory.Application.Categories.CreateCategory;
+using Inventory.Application.Categories.DeleteCategory;
+using Inventory.Application.Categories.GetCategories;
+using Inventory.Application.Categories.GetCategory;
+using Inventory.Application.Categories.UpdateCategory;
 using Inventory.Application.Items;
+using Inventory.Application.Items.CreateItem;
+using Inventory.Application.Items.GetItem;
+using Inventory.Application.Items.GetItems;
+using Inventory.Application.Items.UpdateItem;
 using Inventory.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +23,17 @@ public static class InventoryModule
 {
     public static IServiceCollection AddInventoryModule(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IInventoryCategoriesService, InventoryCategoriesService>();
-        services.AddSingleton<IInventoryMapper, InventoryMapper>();
-        services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();
+        services.AddScoped<GetItemsHandler>();
+        services.AddScoped<GetItemHandler>();
+        services.AddScoped<CreateItemHandler>();
+        services.AddScoped<UpdateItemHandler>();
+
+        services.AddScoped<GetCategoriesHandler>();
+        services.AddScoped<GetCategoryHandler>();
+        services.AddScoped<CreateCategoryHandler>();
+        services.AddScoped<UpdateCategoryHandler>();
+        services.AddScoped<DeleteCategoryHandler>();
+
         services.AddValidatorsFromAssemblyContaining<InventoryCreateDtoValidator>();
 
         services.AddInventoryInfrastructure(configuration);

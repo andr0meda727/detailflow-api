@@ -1,13 +1,11 @@
 using Core.DTOs.Auth;
 using Core.DTOs.Bookings;
-using Inventory.Application.Items;
 using Core.DTOs.Studio;
 using Core.DTOs.Vehicles;
 using Core.Interfaces.Repositories;
 using Core.Models;
 using Core.Validators;
 using Core.Validators.Bookings;
-using Inventory.Application.Categories;
 using Core.Validators.Vehicles;
 using FluentValidation.TestHelper;
 using NSubstitute;
@@ -317,51 +315,6 @@ public class BookingCreateDtoValidatorTests
         Price = 200m,
         ServiceIds = new List<Guid> { Guid.NewGuid() }
     };
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// InventoryCreateDtoValidator
-// ════════════════════════════════════════════════════════════════════════════
-
-[TestFixture]
-public class InventoryCreateDtoValidatorTests
-{
-    private IInventoryCategoryRepository _categoryRepository;
-    private InventoryCreateDtoValidator _validator;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _categoryRepository = Substitute.For<IInventoryCategoryRepository>();
-        _validator = new InventoryCreateDtoValidator(_categoryRepository);
-    }
-
-    [Test]
-    public async Task Validate_PassesWhenCategoryNotGiven()
-    {
-        var result = await _validator.TestValidateAsync(new InventoryCreateDto { Name = "Wosk", Unit = "l" });
-        result.ShouldNotHaveValidationErrorFor(x => x.CategoryId);
-        await _categoryRepository.DidNotReceive().ExistsAsync(Arg.Any<Guid>());
-    }
-
-    [Test]
-    public async Task Validate_PassesWhenCategoryExistsInStudio()
-    {
-        var categoryId = Guid.NewGuid();
-        _categoryRepository.ExistsAsync(categoryId).Returns(true);
-
-        var result = await _validator.TestValidateAsync(new InventoryCreateDto { CategoryId = categoryId });
-        result.ShouldNotHaveValidationErrorFor(x => x.CategoryId);
-    }
-
-    [Test]
-    public async Task Validate_FailsWhenCategoryNotInStudio()
-    {
-        _categoryRepository.ExistsAsync(Arg.Any<Guid>()).Returns(false);
-
-        var result = await _validator.TestValidateAsync(new InventoryCreateDto { CategoryId = Guid.NewGuid() });
-        result.ShouldHaveValidationErrorFor(x => x.CategoryId);
-    }
 }
 
 // ════════════════════════════════════════════════════════════════════════════

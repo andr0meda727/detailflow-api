@@ -1,6 +1,9 @@
+using Inventory.Application.Categories.GetCategories;
 using Inventory.Application.Items;
+using Inventory.Application.Items.GetItem;
+using Inventory.Application.Items.GetItems;
+using Inventory.Application.Items.UpdateItem;
 using Inventory.Infrastructure.Persistence;
-using Inventory.Infrastructure.Repositories;
 using IntegrationTests.Infrastructure;
 using Shared.Infrastructure.Tenancy;
 
@@ -18,7 +21,7 @@ public class InventoryTenantIsolationTests
         await _seed.SeedAsync();
     }
 
-    private static InventoryDbContext DbForStudio(Guid studioId)
+    internal static InventoryDbContext DbForStudio(Guid studioId)
     {
         var tenant = new TenantContext();
         tenant.SetTenant(studioId, Guid.NewGuid());
@@ -37,20 +40,20 @@ public class InventoryTenantIsolationTests
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        var categories = await new InventoryCategoryRepository(db).GetAllAsync();
+        var categories = await new GetCategoriesHandler(db).HandleAsync(CancellationToken.None);
 
-        Assert.That(categories.Select(c => c.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
         Assert.That(categories.Select(c => c.Id), Does.Contain(_seed.StudioA.InventoryCategoryId));
+        Assert.That(categories.Select(c => c.Id), Does.Not.Contain(_seed.StudioB.InventoryCategoryId));
     }
 
     [Test]
     public async Task Items_AreScopedToCurrentStudio()
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
-        var repository = new InventoryRepository(db);
+        var handler = new GetItemsHandler(db);
 
-        var all = await repository.GetAllAsync();
-        var lowStock = await repository.GetLowStockAsync();
+        var all = await handler.HandleAsync(lowStockOnly: false, CancellationToken.None);
+        var lowStock = await handler.HandleAsync(lowStockOnly: true, CancellationToken.None);
 
         Assert.That(all.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
         Assert.That(all.Select(i => i.Id), Does.Contain(_seed.StudioA.InventoryId));
@@ -58,11 +61,13 @@ public class InventoryTenantIsolationTests
     }
 
     [Test]
-    public async Task GetById_DoesNotReturnOtherStudiosItem()
+    public async Task GetItem_DoesNotReturnOtherStudiosItem()
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        Assert.That(await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId), Is.Null);
+        var result = await new GetItemHandler(db).HandleAsync(_seed.StudioB.InventoryId, CancellationToken.None);
+
+        Assert.That(result.ErrorCode, Is.EqualTo("INVENTORY_ITEM_NOT_FOUND"));
     }
 
     [Test]
@@ -72,28 +77,26 @@ public class InventoryTenantIsolationTests
 
         Assert.Multiple(async () =>
         {
-            Assert.That(await new InventoryCategoryRepository(db).GetAllAsync(), Is.Empty);
-            Assert.That(await new InventoryRepository(db).GetAllAsync(), Is.Empty);
+            Assert.That(await new GetCategoriesHandler(db).HandleAsync(CancellationToken.None), Is.Empty);
+            Assert.That(await new GetItemsHandler(db).HandleAsync(false, CancellationToken.None), Is.Empty);
         });
     }
 
     [Test]
-    public async Task EditInventory_CannotOverwriteOtherStudiosItem()
+    public async Task UpdateItem_CannotOverwriteOtherStudiosItem()
     {
         await using (var db = DbForStudio(_seed.StudioA.StudioId))
         {
-            var service = new InventoryService(new InventoryRepository(db), new InventoryMapper());
+            var result = await new UpdateItemHandler(db).HandleAsync(_seed.StudioB.InventoryId,
+                new InventoryCreateDto { Name = "Hijacked", Unit = "l", Stock = 0 }, CancellationToken.None);
 
-            var result = await service.EditInventory(_seed.StudioB.InventoryId,
-                new InventoryCreateDto { Name = "Hijacked", Unit = "l", Stock = 0 });
-
-            Assert.That(result, Is.Null);
+            Assert.That(result.ErrorCode, Is.EqualTo("INVENTORY_ITEM_NOT_FOUND"));
         }
 
         await using (var db = DbForStudio(_seed.StudioB.StudioId))
         {
-            var item = await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId);
-            Assert.That(item!.Name, Is.EqualTo("Wax"));
+            var item = await new GetItemHandler(db).HandleAsync(_seed.StudioB.InventoryId, CancellationToken.None);
+            Assert.That(item.Value!.Name, Is.EqualTo("Wax"));
         }
     }
 }

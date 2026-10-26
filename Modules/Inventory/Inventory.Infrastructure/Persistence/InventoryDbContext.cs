@@ -1,3 +1,4 @@
+using Inventory.Application.Abstractions;
 using Inventory.Domain;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Persistence;
@@ -6,7 +7,7 @@ using Shared.Kernel.Tenancy;
 namespace Inventory.Infrastructure.Persistence;
 
 public class InventoryDbContext(DbContextOptions<InventoryDbContext> options, ITenantContext tenantContext)
-    : TenantDbContext(options, tenantContext)
+    : TenantDbContext(options, tenantContext), IInventoryDbContext
 {
     public const string Schema = "inventory";
 

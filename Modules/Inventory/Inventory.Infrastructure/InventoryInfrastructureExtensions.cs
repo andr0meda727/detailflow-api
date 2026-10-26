@@ -1,7 +1,5 @@
-using Inventory.Application.Categories;
-using Inventory.Application.Items;
+using Inventory.Application.Abstractions;
 using Inventory.Infrastructure.Persistence;
-using Inventory.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +15,7 @@ public static class InventoryInfrastructureExtensions
                 configuration.GetConnectionString("DefaultConnection"),
                 npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", InventoryDbContext.Schema)));
 
-        services.AddScoped<IInventoryRepository, InventoryRepository>();
-        services.AddScoped<IInventoryCategoryRepository, InventoryCategoryRepository>();
+        services.AddScoped<IInventoryDbContext>(sp => sp.GetRequiredService<InventoryDbContext>());
 
         return services;
     }
