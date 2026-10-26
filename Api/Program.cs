@@ -1,10 +1,12 @@
 using Api.Extensions;
 using Api.Middleware;
 using Crm.Api;
+using Infrastructure.Consumers;
 using Infrastructure.Extensions;
 using Inventory.Api;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Shared.Infrastructure.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,9 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // Modules
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCrmModule(builder.Configuration);
+
+// One bus for the host; every assembly with consumers is listed here
+builder.Services.AddMessaging(typeof(GenerateBookingsReportConsumer).Assembly);
 
 builder.Services.AddOpenApi();
 
