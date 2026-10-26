@@ -10,6 +10,7 @@ namespace ArchitectureTests;
 public class LayerDependencyTests
 {
     private static readonly Assembly SharedKernel = typeof(Shared.Kernel.Results.Result).Assembly;
+    private static readonly Assembly SharedApplication = typeof(Shared.Application.Pagination.PagingExtensions).Assembly;
     private static readonly Assembly SharedInfrastructure = typeof(Shared.Infrastructure.Persistence.TenantDbContext).Assembly;
     private static readonly Assembly Core = typeof(Core.Models.Booking).Assembly;
     private static readonly Assembly Infrastructure = typeof(Infrastructure.Data.ApplicationDbContext).Assembly;
@@ -19,6 +20,13 @@ public class LayerDependencyTests
     {
         AssertNoDependencies(SharedKernel,
             "Shared.Infrastructure", "Core", "Infrastructure", "Api", "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore");
+    }
+
+    [Test]
+    public void SharedApplication_DoesNotDependOnInfrastructureOrWeb()
+    {
+        AssertNoDependencies(SharedApplication,
+            "Shared.Infrastructure", "Core", "Infrastructure", "Api", "Microsoft.AspNetCore", "Npgsql");
     }
 
     [Test]

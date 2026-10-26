@@ -6,6 +6,7 @@ using Inventory.Application.Items.UpdateItem;
 using Inventory.Infrastructure.Persistence;
 using IntegrationTests.Infrastructure;
 using Shared.Infrastructure.Tenancy;
+using Shared.Kernel.Pagination;
 
 namespace IntegrationTests.Modules.Inventory;
 
@@ -52,12 +53,12 @@ public class InventoryTenantIsolationTests
         await using var db = DbForStudio(_seed.StudioA.StudioId);
         var handler = new GetItemsHandler(db);
 
-        var all = await handler.HandleAsync(lowStockOnly: false, CancellationToken.None);
-        var lowStock = await handler.HandleAsync(lowStockOnly: true, CancellationToken.None);
+        var all = await handler.HandleAsync(lowStockOnly: false, new PageRequest(), CancellationToken.None);
+        var lowStock = await handler.HandleAsync(lowStockOnly: true, new PageRequest(), CancellationToken.None);
 
-        Assert.That(all.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-        Assert.That(all.Select(i => i.Id), Does.Contain(_seed.StudioA.InventoryId));
-        Assert.That(lowStock.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
+        Assert.That(all.Items.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
+        Assert.That(all.Items.Select(i => i.Id), Does.Contain(_seed.StudioA.InventoryId));
+        Assert.That(lowStock.Items.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
     }
 
     [Test]
@@ -78,7 +79,7 @@ public class InventoryTenantIsolationTests
         Assert.Multiple(async () =>
         {
             Assert.That(await new GetCategoriesHandler(db).HandleAsync(CancellationToken.None), Is.Empty);
-            Assert.That(await new GetItemsHandler(db).HandleAsync(false, CancellationToken.None), Is.Empty);
+            Assert.That((await new GetItemsHandler(db).HandleAsync(false, new PageRequest(), CancellationToken.None)).Items, Is.Empty);
         });
     }
 

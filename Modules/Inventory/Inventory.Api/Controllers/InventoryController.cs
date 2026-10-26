@@ -6,6 +6,7 @@ using Inventory.Application.Items.UpdateItem;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api.Errors;
+using Shared.Kernel.Pagination;
 
 namespace Inventory.Api.Controllers;
 
@@ -15,10 +16,11 @@ namespace Inventory.Api.Controllers;
 public class InventoryController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<InventoryResponseDto>>> GetAll(
-        [FromQuery] bool? isLowStock, [FromServices] GetItemsHandler handler, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResponse<InventoryResponseDto>>> GetAll(
+        [FromQuery] bool? isLowStock, [FromQuery] PageRequest paging,
+        [FromServices] GetItemsHandler handler, CancellationToken cancellationToken)
     {
-        return await handler.HandleAsync(isLowStock == true, cancellationToken);
+        return await handler.HandleAsync(isLowStock == true, paging, cancellationToken);
     }
 
     [HttpGet("{id:guid}")]

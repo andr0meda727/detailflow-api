@@ -1,11 +1,14 @@
 using Inventory.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Pagination;
+using Shared.Kernel.Pagination;
 
 namespace Inventory.Application.Items.GetItems;
 
 public sealed class GetItemsHandler(IInventoryDbContext db)
 {
-    public async Task<List<InventoryResponseDto>> HandleAsync(bool lowStockOnly, CancellationToken cancellationToken)
+    public async Task<PagedResponse<InventoryResponseDto>> HandleAsync(
+        bool lowStockOnly, PageRequest page, CancellationToken cancellationToken)
     {
         var query = db.Items.Include(i => i.Category).AsNoTracking();
 
@@ -15,8 +18,10 @@ public sealed class GetItemsHandler(IInventoryDbContext db)
             query = query.Where(i => i.MinStock != null && i.Stock < i.MinStock);
         }
 
-        var items = await query.OrderBy(i => i.Name).ToListAsync(cancellationToken);
+        var items = await query
+            .OrderBy(i => i.Name).ThenBy(i => i.Id)
+            .ToPagedResponseAsync(page, cancellationToken);
 
-        return items.Select(InventoryResponseDto.From).ToList();
+        return items.Map(InventoryResponseDto.From);
     }
 }

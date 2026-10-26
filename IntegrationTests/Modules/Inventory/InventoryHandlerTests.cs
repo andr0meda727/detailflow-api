@@ -9,6 +9,7 @@ using Inventory.Application.Items.GetItem;
 using Inventory.Application.Items.GetItems;
 using Inventory.Application.Items.UpdateItem;
 using IntegrationTests.Infrastructure;
+using Shared.Kernel.Pagination;
 using static IntegrationTests.Modules.Inventory.InventoryTenantIsolationTests;
 
 namespace IntegrationTests.Modules.Inventory;
@@ -82,10 +83,48 @@ public class InventoryHandlerTests
         var low = await create.HandleAsync(new InventoryCreateDto { Name = "Glinka", Unit = "szt", Stock = 1, MinStock = 4 }, Ct);
         var enough = await create.HandleAsync(new InventoryCreateDto { Name = "Recznik", Unit = "szt", Stock = 9, MinStock = 4 }, Ct);
 
-        var lowStock = await new GetItemsHandler(db).HandleAsync(lowStockOnly: true, Ct);
+        var lowStock = await new GetItemsHandler(db).HandleAsync(lowStockOnly: true, new PageRequest { PageSize = PageRequest.MaxPageSize }, Ct);
 
-        Assert.That(lowStock.Select(i => i.Id), Does.Contain(low.Id));
-        Assert.That(lowStock.Select(i => i.Id), Does.Not.Contain(enough.Id));
+        Assert.That(lowStock.Items.Select(i => i.Id), Does.Contain(low.Id));
+        Assert.That(lowStock.Items.Select(i => i.Id), Does.Not.Contain(enough.Id));
+    }
+
+    [Test]
+    public async Task GetItems_PagesThroughAllItemsInNameOrder()
+    {
+        await using var db = DbForStudio(StudioId);
+        var create = new CreateItemHandler(db);
+        foreach (var name in new[] { "Zeta", "Alfa", "Beta" })
+        {
+            await create.HandleAsync(new InventoryCreateDto { Name = name, Unit = "szt", Stock = 1 }, Ct);
+        }
+        var handler = new GetItemsHandler(db);
+        var everything = await handler.HandleAsync(false, new PageRequest { PageSize = PageRequest.MaxPageSize }, Ct);
+
+        var paged = new List<InventoryResponseDto>();
+        var pageCount = (everything.TotalCount + 1) / 2;
+        for (var page = 1; page <= pageCount; page++)
+        {
+            var result = await handler.HandleAsync(false, new PageRequest { Page = page, PageSize = 2 }, Ct);
+            Assert.That(result.TotalPages, Is.EqualTo(pageCount));
+            paged.AddRange(result.Items);
+        }
+
+        var names = paged.Select(i => i.Name).ToList();
+        Assert.That(paged.Select(i => i.Id), Is.EqualTo(everything.Items.Select(i => i.Id)));
+        Assert.That(names.IndexOf("Alfa"), Is.LessThan(names.IndexOf("Beta")));
+        Assert.That(names.IndexOf("Beta"), Is.LessThan(names.IndexOf("Zeta")));
+    }
+
+    [Test]
+    public async Task GetItems_PastTheLastPage_ReturnsNoItemsButKeepsTotal()
+    {
+        await using var db = DbForStudio(StudioId);
+
+        var result = await new GetItemsHandler(db).HandleAsync(false, new PageRequest { Page = 1000 }, Ct);
+
+        Assert.That(result.Items, Is.Empty);
+        Assert.That(result.TotalCount, Is.GreaterThan(0));
     }
 
     [Test]
