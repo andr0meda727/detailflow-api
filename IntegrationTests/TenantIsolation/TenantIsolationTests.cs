@@ -1,3 +1,4 @@
+using Core.Constants;
 using Core.DTOs.Inventory;
 using Core.Mappings;
 using Core.Models;
@@ -5,6 +6,7 @@ using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using IntegrationTests.Infrastructure;
+using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.TenantIsolation;
 
@@ -183,5 +185,36 @@ public class TenantIsolationTests
         var clientB = await new ClientRepository(dbB).GetByIdAsync(_seed.StudioB.ClientId);
 
         Assert.That(clientA!.Phone, Is.EqualTo(clientB!.Phone));
+    }
+
+    [Test]
+    public async Task Invitations_AreScopedToCurrentStudio_ButResolvableByToken()
+    {
+        var token = Guid.NewGuid();
+        await using (var db = DbForStudio(_seed.StudioB.StudioId))
+        {
+            db.StudioInvitations.Add(new StudioInvitation
+            {
+                Email = "invitee@test.pl",
+                RoleId = Roles.Employee,
+                Token = token,
+                Status = InvitationStatus.Pending,
+                InvitedBy = _seed.StudioB.OwnerUserId,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+            await db.SaveChangesAsync();
+        }
+
+        await using (var db = DbForStudio(_seed.StudioA.StudioId))
+        {
+            Assert.That(db.StudioInvitations.Any(i => i.Token == token), Is.False);
+        }
+
+        // The invitee has no membership yet, so the lookup must work without a tenant
+        await using (var db = DbForUserWithoutStudio())
+        {
+            var invitation = await new StudioInvitationRepository(db).GetByTokenAsync(token);
+            Assert.That(invitation?.StudioId, Is.EqualTo(_seed.StudioB.StudioId));
+        }
     }
 }

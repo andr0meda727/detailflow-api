@@ -12,6 +12,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Shared.Infrastructure.Tenancy;
 
 
 namespace Api.Extensions;

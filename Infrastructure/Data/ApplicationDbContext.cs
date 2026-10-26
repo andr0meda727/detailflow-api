@@ -1,11 +1,12 @@
-using Shared.Kernel.Tenancy;
-using Shared.Kernel.Auditing;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Persistence;
+using Shared.Kernel.Tenancy;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantContext tenantContext)
+    : TenantDbContext(options, tenantContext)
 {
     public DbSet<Booking> Bookings { get; set; }
 
@@ -40,72 +41,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Vehicle> Vehicles { get; set; }
     public DbSet<StudioInvitation> StudioInvitations { get; set; }
 
-    private Guid? CurrentStudioId => tenantContext.StudioId;
-
-    // Tenant filters fail closed: with no studio resolved, "StudioId == null" matches no rows.
-    // Code that legitimately works across studios (e.g. background jobs) must call IgnoreQueryFilters().
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // Studio scoping is added by TenantDbContext; only entity-specific filters live here.
+    protected override void ConfigureModel(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        modelBuilder.Entity<Booking>()
-            .HasQueryFilter(b => b.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Client>()
-            .HasQueryFilter(c => !c.IsDeleted && c.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Vehicle>()
-            .HasQueryFilter(v => !v.IsDeleted && v.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Service>()
-            .HasQueryFilter(s => s.IsActive && s.StudioId == CurrentStudioId);
-        modelBuilder.Entity<InventoryCategory>()
-            .HasQueryFilter(ic => ic.StudioId == CurrentStudioId);
-        modelBuilder.Entity<Inventory>()
-            .HasQueryFilter(i => i.StudioId == CurrentStudioId);
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var entries = ChangeTracker.Entries()
-            .Where(e => e.State is EntityState.Added or EntityState.Modified);
-
-        var now = DateTime.UtcNow;
-
-        foreach (var entry in entries)
-        {
-            if (entry.Entity is IAuditableEntity auditable)
-            {
-                if (entry.State == EntityState.Added)
-                {
-                    auditable.CreatedAt = now;
-                    auditable.UpdatedAt = now;
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    auditable.UpdatedAt = now;
-                    entry.Property(nameof(IAuditableEntity.CreatedAt)).IsModified = false;
-                }
-            }
-
-            if (entry.Entity is ITenantEntity tenantEntity)
-            {
-                if (entry.State == EntityState.Added && CurrentStudioId.HasValue)
-                {
-                    tenantEntity.StudioId = CurrentStudioId.Value;
-                }
-                else if (entry.State == EntityState.Added && tenantEntity.StudioId == Guid.Empty)
-                {
-                    throw new InvalidOperationException(
-                        $"Cannot add {entry.Entity.GetType().Name} without a studio: no tenant is resolved for this request.");
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    entry.Property(nameof(ITenantEntity.StudioId)).IsModified = false;
-                }
-            }
-        }
-
-        return base.SaveChangesAsync(cancellationToken);
+        modelBuilder.Entity<Client>().HasQueryFilter("SoftDelete", c => !c.IsDeleted);
+        modelBuilder.Entity<Vehicle>().HasQueryFilter("SoftDelete", v => !v.IsDeleted);
+        modelBuilder.Entity<Service>().HasQueryFilter("Active", s => s.IsActive);
     }
 }

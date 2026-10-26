@@ -3,9 +3,9 @@ using Api.Middleware;
 using Core.Constants;
 using Core.Interfaces.Repositories;
 using Core.Models;
-using Core.Services;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
+using Shared.Infrastructure.Tenancy;
 
 namespace Unit.Middleware;
 

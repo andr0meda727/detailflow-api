@@ -1,6 +1,6 @@
 using Core.Constants;
 using Core.Models;
-using Core.Services;
+using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.Infrastructure;
 

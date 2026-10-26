@@ -1,6 +1,6 @@
 using Shared.Kernel.Tenancy;
 
-namespace Core.Services;
+namespace Shared.Infrastructure.Tenancy;
 
 public class TenantContext : ITenantContext
 {

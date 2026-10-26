@@ -1,10 +1,10 @@
 using Core.Constants;
 using Shared.Kernel.Tenancy;
 using Core.Models;
-using Core.Services;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
+using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests;
 
