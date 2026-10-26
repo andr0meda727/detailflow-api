@@ -30,8 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBookingMapper, BookingMapper>();
 
         services.AddScoped<IClientsService, ClientsService>();
-        services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IInventoryCategoriesService, InventoryCategoriesService>();
         services.AddScoped<IServicesService, ServicesService>();
         services.AddScoped<IVehiclesService, VehiclesService>();
 
@@ -49,8 +47,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStudioService, StudioService>();
 
         services.AddSingleton<IClientMapper, ClientMapper>();
-        services.AddSingleton<IInventoryMapper, InventoryMapper>();
-        services.AddSingleton<IInventoryCategoryMapper, InventoryCategoryMapper>();
         services.AddSingleton<IServiceMapper, ServiceMapper>();
         services.AddSingleton<IVehicleMapper, VehicleMapper>();
 

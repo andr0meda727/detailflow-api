@@ -1,6 +1,7 @@
 using Api.Extensions;
 using Api.Middleware;
 using Infrastructure.Extensions;
+using Inventory.Api;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -13,6 +14,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add Application Services
 builder.Services.AddApplicationServices(builder.Configuration);
+
+// Modules
+builder.Services.AddInventoryModule(builder.Configuration);
 
 builder.Services.AddOpenApi();
 

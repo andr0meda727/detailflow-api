@@ -1,5 +1,6 @@
 using Core.Constants;
 using Core.Models;
+using Inventory.Domain;
 using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.Infrastructure;
@@ -32,13 +33,6 @@ public sealed class TwoStudiosSeed
                 UserId = studio.OwnerUserId, StudioId = studio.StudioId, RoleId = Roles.Owner, IsActive = true
             });
 
-            var category = new InventoryCategory { Id = studio.InventoryCategoryId, Name = "Chemicals" };
-            db.InventoryCategories.Add(category);
-            db.Inventories.Add(new Inventory
-            {
-                Id = studio.InventoryId, CategoryId = category.Id, Name = "Wax", Unit = "l", Stock = 1, MinStock = 5
-            });
-
             db.Services.Add(new Service { Id = studio.ServiceId, Name = "Polishing" });
 
             db.Clients.Add(new Client { Id = studio.ClientId, Name = "Jan", Phone = SharedClientPhone });
@@ -55,6 +49,16 @@ public sealed class TwoStudiosSeed
             });
 
             await db.SaveChangesAsync();
+
+            // Inventory lives in its own module context; its tables still reference d.studio, so it goes second
+            await using var inventoryDb = PostgresFixture.CreateInventoryDbContext(tenant);
+            var category = new InventoryCategory { Id = studio.InventoryCategoryId, Name = "Chemicals" };
+            inventoryDb.Categories.Add(category);
+            inventoryDb.Items.Add(new InventoryItem
+            {
+                Id = studio.InventoryId, CategoryId = category.Id, Name = "Wax", Unit = "l", Stock = 1, MinStock = 5
+            });
+            await inventoryDb.SaveChangesAsync();
         }
     }
 

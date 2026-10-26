@@ -1,3 +1,5 @@
+using Inventory.Application.Categories;
+using Inventory.Domain;
 using Core.DTOs.Services;
 using Core.DTOs.Vehicles;
 using Core.Interfaces.Mappings;
@@ -337,7 +339,7 @@ public class InventoryCategoriesServiceTests
         var categories = new List<InventoryCategory> { BuildCategory(), BuildCategory() };
         _repository.GetAllAsync().Returns(categories);
         _mapper.MapCategoryToResponse(Arg.Any<InventoryCategory>())
-               .Returns(ci => new Core.DTOs.Inventory.InventoryCategories.CategoryResponseDto(
+               .Returns(ci => new CategoryResponseDto(
                    ci.Arg<InventoryCategory>().Id, "Cat"));
 
         var result = await _sut.GetAllAsync();
@@ -350,7 +352,7 @@ public class InventoryCategoriesServiceTests
     {
         var id = Guid.NewGuid();
         var category = BuildCategory(id);
-        var expected = new Core.DTOs.Inventory.InventoryCategories.CategoryResponseDto(id, "Chemia");
+        var expected = new CategoryResponseDto(id, "Chemia");
 
         _repository.GetByIdAsync(id).Returns(category);
         _mapper.MapCategoryToResponse(category).Returns(expected);
@@ -373,9 +375,9 @@ public class InventoryCategoriesServiceTests
     [Test]
     public async Task CreateAsync_AddsAndReturnsMappedCategory()
     {
-        var dto = new Core.DTOs.Inventory.InventoryCategories.CategoryCreateDto { Name = "Chemia" };
+        var dto = new CategoryCreateDto { Name = "Chemia" };
         var entity = BuildCategory();
-        var expected = new Core.DTOs.Inventory.InventoryCategories.CategoryResponseDto(entity.Id, "Chemia");
+        var expected = new CategoryResponseDto(entity.Id, "Chemia");
 
         _mapper.MapToEntity(dto).Returns(entity);
         _repository.AddAsync(entity).Returns(entity);
@@ -392,7 +394,7 @@ public class InventoryCategoriesServiceTests
         _repository.GetByIdAsync(Arg.Any<Guid>()).ReturnsNull();
 
         var result = await _sut.UpdateAsync(Guid.NewGuid(),
-            new Core.DTOs.Inventory.InventoryCategories.CategoryCreateDto { Name = "X" });
+            new CategoryCreateDto { Name = "X" });
 
         Assert.That(result, Is.Null);
     }
@@ -402,11 +404,11 @@ public class InventoryCategoriesServiceTests
     {
         var id = Guid.NewGuid();
         var entity = BuildCategory(id);
-        var dto = new Core.DTOs.Inventory.InventoryCategories.CategoryCreateDto { Name = "Updated" };
+        var dto = new CategoryCreateDto { Name = "Updated" };
 
         _repository.GetByIdAsync(id).Returns(entity);
         _mapper.MapCategoryToResponse(entity)
-               .Returns(new Core.DTOs.Inventory.InventoryCategories.CategoryResponseDto(id, "Updated"));
+               .Returns(new CategoryResponseDto(id, "Updated"));
 
         await _sut.UpdateAsync(id, dto);
 

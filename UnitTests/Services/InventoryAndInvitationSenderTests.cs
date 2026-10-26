@@ -1,4 +1,5 @@
-using Core.DTOs.Inventory;
+using Inventory.Application.Items;
+using Inventory.Domain;
 using Shared.Kernel.Tenancy;
 using Core.Interfaces.Mappings;
 using Core.Interfaces.Repositories;
@@ -32,9 +33,9 @@ public class InventoryServiceTests
     [Test]
     public async Task GetAllAsync_ReturnsAllItems_WhenIsLowStockNull()
     {
-        var items = new List<Inventory> { BuildInventory(), BuildInventory() };
+        var items = new List<InventoryItem> { BuildInventory(), BuildInventory() };
         _inventoryRepository.GetAllAsync().Returns(items);
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto());
 
         var result = await _sut.GetAllAsync(isLowStock: null);
 
@@ -46,9 +47,9 @@ public class InventoryServiceTests
     [Test]
     public async Task GetAllAsync_ReturnsAllItems_WhenIsLowStockFalse()
     {
-        var items = new List<Inventory> { BuildInventory() };
+        var items = new List<InventoryItem> { BuildInventory() };
         _inventoryRepository.GetAllAsync().Returns(items);
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto());
 
         var result = await _sut.GetAllAsync(isLowStock: false);
 
@@ -59,9 +60,9 @@ public class InventoryServiceTests
     [Test]
     public async Task GetAllAsync_ReturnsLowStockItems_WhenIsLowStockTrue()
     {
-        var lowStock = new List<Inventory> { BuildInventory(stock: 2, minStock: 10) };
+        var lowStock = new List<InventoryItem> { BuildInventory(stock: 2, minStock: 10) };
         _inventoryRepository.GetLowStockAsync().Returns(lowStock);
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto());
 
         var result = await _sut.GetAllAsync(isLowStock: true);
 
@@ -107,11 +108,11 @@ public class InventoryServiceTests
             MinStock = 10,
             CategoryId = Guid.NewGuid()
         };
-        Inventory? captured = null;
+        InventoryItem? captured = null;
 
-        _inventoryRepository.AddAsync(Arg.Do<Inventory>(i => captured = i))
-                            .Returns(ci => ci.Arg<Inventory>());
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
+        _inventoryRepository.AddAsync(Arg.Do<InventoryItem>(i => captured = i))
+                            .Returns(ci => ci.Arg<InventoryItem>());
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto());
 
         await _sut.AddInventory(dto);
 
@@ -127,8 +128,8 @@ public class InventoryServiceTests
     public async Task AddInventory_ReturnsNull_WhenAddedItemNotFound()
     {
         var dto = new InventoryCreateDto { Name = "X", Unit = "szt", Stock = 1 };
-        _inventoryRepository.AddAsync(Arg.Any<Inventory>()).Returns(BuildInventory());
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).ReturnsNull();
+        _inventoryRepository.AddAsync(Arg.Any<InventoryItem>()).Returns(BuildInventory());
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).ReturnsNull();
 
         var result = await _sut.AddInventory(dto);
 
@@ -147,11 +148,11 @@ public class InventoryServiceTests
             MinStock = 20,
             CategoryId = Guid.NewGuid()
         };
-        Inventory? captured = null;
+        InventoryItem? captured = null;
 
         _inventoryRepository.GetByIdAsync(id).Returns(BuildInventory(id));
-        _inventoryRepository.UpdateAsync(Arg.Do<Inventory>(i => captured = i)).Returns(Task.CompletedTask);
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto(id));
+        _inventoryRepository.UpdateAsync(Arg.Do<InventoryItem>(i => captured = i)).Returns(Task.CompletedTask);
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto(id));
 
         await _sut.EditInventory(id, dto);
 
@@ -168,12 +169,12 @@ public class InventoryServiceTests
         var dto = new InventoryCreateDto { Name = "Test", Unit = "szt", Stock = 5 };
 
         _inventoryRepository.GetByIdAsync(id).Returns(BuildInventory(id));
-        _inventoryRepository.UpdateAsync(Arg.Any<Inventory>()).Returns(Task.CompletedTask);
-        _mapper.MapInventoryToResponse(Arg.Any<Inventory>()).Returns(BuildDto());
+        _inventoryRepository.UpdateAsync(Arg.Any<InventoryItem>()).Returns(Task.CompletedTask);
+        _mapper.MapInventoryToResponse(Arg.Any<InventoryItem>()).Returns(BuildDto());
 
         await _sut.EditInventory(id, dto);
 
-        await _inventoryRepository.Received(1).UpdateAsync(Arg.Any<Inventory>());
+        await _inventoryRepository.Received(1).UpdateAsync(Arg.Any<InventoryItem>());
     }
 
     [Test]
@@ -187,10 +188,10 @@ public class InventoryServiceTests
         var result = await _sut.EditInventory(id, dto);
 
         Assert.That(result, Is.Null);
-        await _inventoryRepository.DidNotReceive().UpdateAsync(Arg.Any<Inventory>());
+        await _inventoryRepository.DidNotReceive().UpdateAsync(Arg.Any<InventoryItem>());
     }
 
-    private static Inventory BuildInventory(Guid? id = null, decimal stock = 50, decimal? minStock = 10) => new()
+    private static InventoryItem BuildInventory(Guid? id = null, decimal stock = 50, decimal? minStock = 10) => new()
     {
         Id = id ?? Guid.NewGuid(),
         Name = "Test Item",

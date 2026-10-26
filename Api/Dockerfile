@@ -8,6 +8,10 @@ COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
 COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Api/Shared.Api.csproj", "Shared/Shared.Api/"]
+COPY ["Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj", "Modules/Inventory/Inventory.Domain/"]
+COPY ["Modules/Inventory/Inventory.Application/Inventory.Application.csproj", "Modules/Inventory/Inventory.Application/"]
+COPY ["Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj", "Modules/Inventory/Inventory.Infrastructure/"]
+COPY ["Modules/Inventory/Inventory.Api/Inventory.Api.csproj", "Modules/Inventory/Inventory.Api/"]
 RUN dotnet restore "Api/Api.csproj"
 
 COPY . .

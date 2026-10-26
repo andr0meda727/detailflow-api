@@ -2,6 +2,7 @@ using Core.Constants;
 using Shared.Kernel.Tenancy;
 using Core.Models;
 using Infrastructure.Data;
+using Inventory.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 using Shared.Infrastructure.Tenancy;
@@ -30,8 +31,12 @@ public class PostgresFixture
 
         await _container.StartAsync();
 
+        // Same order as in production: the core baseline creates the tables that modules then adopt
         await using var db = CreateDbContext(new TenantContext());
         await db.Database.MigrateAsync();
+        await using var inventoryDb = CreateInventoryDbContext(new TenantContext());
+        await inventoryDb.Database.MigrateAsync();
+
         await SeedLookupsAsync(db);
     }
 
@@ -48,6 +53,15 @@ public class PostgresFixture
             .Options;
 
         return new ApplicationDbContext(options, tenantContext);
+    }
+
+    public static InventoryDbContext CreateInventoryDbContext(ITenantContext tenantContext)
+    {
+        var options = new DbContextOptionsBuilder<InventoryDbContext>()
+            .UseNpgsql(ConnectionString, npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", InventoryDbContext.Schema))
+            .Options;
+
+        return new InventoryDbContext(options, tenantContext);
     }
 
     private static async Task SeedLookupsAsync(ApplicationDbContext db)

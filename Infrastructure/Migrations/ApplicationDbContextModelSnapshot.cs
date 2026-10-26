@@ -210,103 +210,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("client", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.Inventory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("category_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<decimal?>("MinStock")
-                        .HasColumnType("numeric")
-                        .HasColumnName("min_stock");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<decimal>("Stock")
-                        .HasColumnType("numeric")
-                        .HasColumnName("stock");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("unit");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("inventory_pkey");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("inventory", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.InventoryCategory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("inventory_category_pkey");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("inventory_category", "d");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1035,38 +938,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Studio");
                 });
 
-            modelBuilder.Entity("Core.Models.Inventory", b =>
-                {
-                    b.HasOne("Core.Models.InventoryCategory", "Category")
-                        .WithMany("Inventories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("inventory_category_id_fkey");
-
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Inventories")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("inventory_studio_id_fkey");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Studio");
-                });
-
-            modelBuilder.Entity("Core.Models.InventoryCategory", b =>
-                {
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("InventoryCategories")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("inventory_category_studio_id_fkey");
-
-                    b.Navigation("Studio");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
                     b.HasOne("Core.Models.Studio", "Studio")
@@ -1236,11 +1107,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Vehicles");
                 });
 
-            modelBuilder.Entity("Core.Models.InventoryCategory", b =>
-                {
-                    b.Navigation("Inventories");
-                });
-
             modelBuilder.Entity("Core.Models.Role", b =>
                 {
                     b.Navigation("StudioMembers");
@@ -1256,10 +1122,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("Clients");
-
-                    b.Navigation("Inventories");
-
-                    b.Navigation("InventoryCategories");
 
                     b.Navigation("Payments");
 

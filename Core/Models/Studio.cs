@@ -25,10 +25,6 @@ public class Studio : IAuditableEntity
 
     public ICollection<Client> Clients { get; set; } = new List<Client>();
 
-    public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
-
-    public ICollection<InventoryCategory> InventoryCategories { get; set; } = new List<InventoryCategory>();
-
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public ICollection<Service> Services { get; set; } = new List<Service>();

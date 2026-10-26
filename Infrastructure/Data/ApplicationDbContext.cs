@@ -16,10 +16,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Client> Clients { get; set; }
 
-    public DbSet<Inventory> Inventories { get; set; }
-
-    public DbSet<InventoryCategory> InventoryCategories { get; set; }
-
     public DbSet<Payment> Payments { get; set; }
 
     public DbSet<Role> Roles { get; set; }

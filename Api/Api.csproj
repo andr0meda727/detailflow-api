@@ -25,6 +25,7 @@
       <ProjectReference Include="..\Core\Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
       <ProjectReference Include="..\Shared\Shared.Api\Shared.Api.csproj" />
+      <ProjectReference Include="..\Modules\Inventory\Inventory.Api\Inventory.Api.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,13 +1,13 @@
 using Core.DTOs.Auth;
 using Core.DTOs.Bookings;
-using Core.DTOs.Inventory;
+using Inventory.Application.Items;
 using Core.DTOs.Studio;
 using Core.DTOs.Vehicles;
 using Core.Interfaces.Repositories;
 using Core.Models;
 using Core.Validators;
 using Core.Validators.Bookings;
-using Core.Validators.Inventory;
+using Inventory.Application.Categories;
 using Core.Validators.Vehicles;
 using FluentValidation.TestHelper;
 using NSubstitute;

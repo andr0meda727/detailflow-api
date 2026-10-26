@@ -1,8 +1,5 @@
 using Core.Constants;
-using Core.DTOs.Inventory;
-using Core.Mappings;
 using Core.Models;
-using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using IntegrationTests.Infrastructure;
@@ -83,29 +80,6 @@ public class TenantIsolationTests
     }
 
     [Test]
-    public async Task InventoryCategories_AreScopedToCurrentStudio()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-
-        var categories = await new InventoryCategoryRepository(db).GetAllAsync();
-
-        Assert.That(categories.Select(c => c.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-    }
-
-    [Test]
-    public async Task Inventory_IsScopedToCurrentStudio()
-    {
-        await using var db = DbForStudio(_seed.StudioA.StudioId);
-        var repository = new InventoryRepository(db);
-
-        var all = await repository.GetAllAsync();
-        var lowStock = await repository.GetLowStockAsync();
-
-        Assert.That(all.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-        Assert.That(lowStock.Select(i => i.StudioId), Is.All.EqualTo(_seed.StudioA.StudioId));
-    }
-
-    [Test]
     public async Task GetById_DoesNotReturnOtherStudiosRecord()
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
@@ -114,7 +88,6 @@ public class TenantIsolationTests
         {
             Assert.That(await new BookingRepository(db).GetByIdWithDetailsAsync(_seed.StudioB.BookingId), Is.Null);
             Assert.That(await new ClientRepository(db).GetClientByIdWithVehiclesAsync(_seed.StudioB.ClientId), Is.Null);
-            Assert.That(await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId), Is.Null);
         });
     }
 
@@ -129,8 +102,6 @@ public class TenantIsolationTests
             Assert.That(await new ClientRepository(db).GetAllWithVehiclesAsync(null), Is.Empty);
             Assert.That(await new VehicleRepository(db).GetAllFilteredAsync(), Is.Empty);
             Assert.That(await new ServiceRepository(db).GetAllActiveAsync(), Is.Empty);
-            Assert.That(await new InventoryCategoryRepository(db).GetAllAsync(), Is.Empty);
-            Assert.That(await new InventoryRepository(db).GetAllAsync(), Is.Empty);
         });
     }
 
@@ -143,26 +114,6 @@ public class TenantIsolationTests
         var count = await new ServiceRepository(db).CountExistingAsync(ids);
 
         Assert.That(count, Is.EqualTo(1));
-    }
-
-    [Test]
-    public async Task EditInventory_CannotOverwriteOtherStudiosItem()
-    {
-        await using (var db = DbForStudio(_seed.StudioA.StudioId))
-        {
-            var service = new InventoryService(new InventoryRepository(db), new InventoryMapper());
-
-            var result = await service.EditInventory(_seed.StudioB.InventoryId,
-                new InventoryCreateDto { Name = "Hijacked", Unit = "l", Stock = 0 });
-
-            Assert.That(result, Is.Null);
-        }
-
-        await using (var db = DbForStudio(_seed.StudioB.StudioId))
-        {
-            var item = await new InventoryRepository(db).GetByIdAsync(_seed.StudioB.InventoryId);
-            Assert.That(item!.Name, Is.EqualTo("Wax"));
-        }
     }
 
     [Test]
