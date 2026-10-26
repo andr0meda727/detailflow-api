@@ -5,6 +5,7 @@ using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
 using Core.Services;
+using Core.Settings;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using InviteEmployeeDto = Core.DTOs.Auth.InviteEmployeeDto;
@@ -38,7 +39,8 @@ public class EmployeesServiceTests
 
         _sut = new EmployeesService(
             _invitationSender, _tenantContext,
-            _userRepository, _studioMemberRepository, _invitationRepository);
+            _userRepository, _studioMemberRepository, _invitationRepository,
+            new FrontendSettings("https://app.example.com/"));
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -221,6 +223,25 @@ public class EmployeesServiceTests
 
         await _invitationSender.Received(1).SendInvitationAsync(
             invitation, false, _studioId, Arg.Any<string>());
+    }
+
+    [Test]
+    public async Task InviteEmployeeAsync_SendsAcceptLinkToConfiguredFrontend()
+    {
+        var email = "newuser@studio.pl";
+        var dto = new InviteEmployeeDto { Email = email, RoleId = Roles.Employee };
+        var invitation = BuildInvitation(_studioId, email);
+
+        _userRepository.GetByIdAsync(_invitingUserId).Returns(BuildUser(_invitingUserId, "owner@studio.pl"));
+        _studioMemberRepository.GetByUserEmailAndStudioAsync(email, _studioId).ReturnsNull();
+        _invitationRepository.GetPendingByEmailAndStudioAsync(email, _studioId).ReturnsNull();
+        _invitationRepository.AddAsync(Arg.Any<StudioInvitation>()).Returns(invitation);
+
+        await _sut.InviteEmployeeAsync(dto);
+
+        await _invitationSender.Received(1).SendInvitationAsync(
+            invitation, Arg.Any<bool>(), _studioId,
+            $"https://app.example.com/accept-invitation?token={invitation.Token}");
     }
 
     [Test]

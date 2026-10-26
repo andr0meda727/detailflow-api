@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Core.Models;
+using Core.Settings;
 using InviteEmployeeDto = Core.DTOs.Auth.InviteEmployeeDto;
 
 namespace Core.Services;
@@ -14,7 +15,8 @@ public class EmployeesService(
     ITenantContext tenantContext,
     IUserRepository userRepository,
     IStudioMemberRepository studioMemberRepository,
-    IStudioInvitationRepository invitationRepository) : IEmployeesService
+    IStudioInvitationRepository invitationRepository,
+    FrontendSettings frontendSettings) : IEmployeesService
 {
     public async Task<Result<Guid>> InviteEmployeeAsync(InviteEmployeeDto dto)
     {
@@ -56,7 +58,7 @@ public class EmployeesService(
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         });
 
-        var acceptUrl = $"http://localhost:3000/accept-invitation?token={invitation.Token}";
+        var acceptUrl = frontendSettings.AcceptInvitationUrl(invitation.Token);
 
         var existingUser = await userRepository.GetUserByEmailAsync(dto.Email);
         await invitationSender.SendInvitationAsync(invitation, existingUser != null, studioId, acceptUrl);

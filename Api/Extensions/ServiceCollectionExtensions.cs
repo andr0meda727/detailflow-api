@@ -5,6 +5,7 @@ using Core.Interfaces.Mappings;
 using Core.Interfaces.Services;
 using Core.Mappings;
 using Core.Services;
+using Core.Settings;
 using Core.Validators;
 using Core.Validators.Bookings;
 using FluentValidation;
@@ -32,6 +33,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInventoryCategoriesService, InventoryCategoriesService>();
         services.AddScoped<IServicesService, ServicesService>();
         services.AddScoped<IVehiclesService, VehiclesService>();
+
+        var frontendBaseUrl = configuration["Frontend:BaseUrl"]
+                              ?? throw new InvalidOperationException("Frontend:BaseUrl is missing!");
+        services.AddSingleton(new FrontendSettings(frontendBaseUrl));
 
         services.AddScoped<IEmployeesService, EmployeesService>();
         services.AddScoped<IInvitationService, InvitationService>();
