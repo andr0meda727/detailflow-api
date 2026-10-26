@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.Application", "Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.Domain", "Modules\Inventory\Inventory.Domain\Inventory.Domain.csproj", "{6C47DE8A-1C83-4ABB-8E43-AB0986B4E9EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Application", "Shared\Shared.Application\Shared.Application.csproj", "{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -205,6 +207,18 @@ Global
 		{6C47DE8A-1C83-4ABB-8E43-AB0986B4E9EB}.Release|x64.Build.0 = Release|Any CPU
 		{6C47DE8A-1C83-4ABB-8E43-AB0986B4E9EB}.Release|x86.ActiveCfg = Release|Any CPU
 		{6C47DE8A-1C83-4ABB-8E43-AB0986B4E9EB}.Release|x86.Build.0 = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Debug|x86.Build.0 = Debug|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|x64.Build.0 = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -225,5 +239,6 @@ Global
 		{8134368F-B59B-4290-AC09-7A024078CCED} = {C2A9FA39-BB0C-3A86-D792-F946F771A3DC}
 		{4FD9D2C3-A6FD-44F5-9376-EA28559FD662} = {C2A9FA39-BB0C-3A86-D792-F946F771A3DC}
 		{6C47DE8A-1C83-4ABB-8E43-AB0986B4E9EB} = {C2A9FA39-BB0C-3A86-D792-F946F771A3DC}
+		{1F040B66-3D44-48A9-B5AC-3AFACF38BC50} = {EAE29BB5-41D2-4B57-8163-3170DEB08E83}
 	EndGlobalSection
 EndGlobal
