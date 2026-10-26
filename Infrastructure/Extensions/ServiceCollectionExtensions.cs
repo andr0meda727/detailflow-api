@@ -39,6 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<GenerateBookingsReportConsumer>();
+            x.AddConsumer<BookingCopiesConsumer>();
 
             x.UsingInMemory((context, cfg) =>
             {

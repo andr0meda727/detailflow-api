@@ -6,6 +6,8 @@ using Crm.Application.Vehicles.GetVehicles;
 using Crm.Application.Vehicles.UpdateVehicle;
 using Crm.Infrastructure.Persistence;
 using IntegrationTests.Infrastructure;
+using MassTransit;
+using NSubstitute;
 using Shared.Infrastructure.Tenancy;
 using Shared.Kernel.Pagination;
 
@@ -75,7 +77,7 @@ public class CrmTenantIsolationTests
     {
         await using var db = DbForStudio(_seed.StudioA.StudioId);
 
-        var result = await new UpdateVehicleHandler(db).HandleAsync(_seed.StudioA.VehicleId,
+        var result = await new UpdateVehicleHandler(db, Substitute.For<IPublishEndpoint>()).HandleAsync(_seed.StudioA.VehicleId,
             new VehicleRequest(_seed.StudioB.ClientId, "WA12345", null, null), Ct);
 
         Assert.That(result.ErrorCode, Is.EqualTo("CLIENT_NOT_FOUND"));

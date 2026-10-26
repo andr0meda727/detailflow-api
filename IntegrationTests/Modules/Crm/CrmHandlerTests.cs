@@ -9,7 +9,10 @@ using Crm.Application.Vehicles;
 using Crm.Application.Vehicles.CreateVehicle;
 using Crm.Application.Vehicles.DeleteVehicle;
 using Crm.Application.Vehicles.GetVehicles;
+using Crm.Contracts;
 using IntegrationTests.Infrastructure;
+using MassTransit;
+using NSubstitute;
 using Shared.Kernel.Pagination;
 using static IntegrationTests.Modules.Crm.CrmTenantIsolationTests;
 
@@ -79,11 +82,26 @@ public class CrmHandlerTests
         var phone = NewPhone();
         var client = await new CreateClientHandler(db).HandleAsync(new ClientRequest { Name = "Jan", Phone = phone }, Ct);
 
-        var updated = await new UpdateClientHandler(db).HandleAsync(client.Value!.Id,
+        var updated = await new UpdateClientHandler(db, Substitute.For<IPublishEndpoint>()).HandleAsync(client.Value!.Id,
             new ClientRequest { Name = "Jan Kowalski", Phone = phone, Email = "jan@test.pl" }, Ct);
 
         Assert.That(updated.Value!.Name, Is.EqualTo("Jan Kowalski"));
         Assert.That(updated.Value.Email, Is.EqualTo("jan@test.pl"));
+    }
+
+    [Test]
+    public async Task UpdateClient_PublishesTheNewDetails()
+    {
+        await using var db = DbForStudio(StudioId);
+        var publisher = Substitute.For<IPublishEndpoint>();
+        var phone = NewPhone();
+        var client = await new CreateClientHandler(db).HandleAsync(new ClientRequest { Name = "Ewa", Phone = phone }, Ct);
+
+        await new UpdateClientHandler(db, publisher).HandleAsync(client.Value!.Id,
+            new ClientRequest { Name = "Ewa Nowak", Phone = phone }, Ct);
+
+        await publisher.Received(1).Publish(
+            new ClientDetailsChanged(StudioId, client.Value.Id, "Ewa Nowak", phone, null), Arg.Any<CancellationToken>());
     }
 
     [Test]
