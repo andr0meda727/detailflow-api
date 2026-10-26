@@ -1,4 +1,4 @@
-using Api.Extensions;
+using Shared.Api.Errors;
 using Shared.Kernel.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

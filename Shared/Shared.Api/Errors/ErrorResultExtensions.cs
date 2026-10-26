@@ -1,7 +1,8 @@
 using Shared.Kernel.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Extensions;
+namespace Shared.Api.Errors;
 
 public static class ErrorResultExtensions
 {

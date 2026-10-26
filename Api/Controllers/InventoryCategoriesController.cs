@@ -1,4 +1,4 @@
-using Api.Extensions;
+using Shared.Api.Errors;
 using Shared.Kernel.Results;
 using Core.DTOs.Inventory.InventoryCategories;
 using Core.Interfaces.Services;

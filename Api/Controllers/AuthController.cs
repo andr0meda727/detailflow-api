@@ -1,4 +1,4 @@
-using Api.Extensions;
+using Shared.Api.Errors;
 using Core.DTOs.Auth;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;

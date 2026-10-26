@@ -1,4 +1,4 @@
-using Api.Extensions;
+using Shared.Api.Errors;
 using Shared.Kernel.Results;
 using Core.DTOs.Clients;
 using Core.Interfaces.Services;

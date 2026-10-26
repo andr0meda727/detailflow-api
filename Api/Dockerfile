@@ -7,6 +7,7 @@ COPY ["Core/Core.csproj", "Core/"]
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
 COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
+COPY ["Shared/Shared.Api/Shared.Api.csproj", "Shared/Shared.Api/"]
 RUN dotnet restore "Api/Api.csproj"
 
 COPY . .
