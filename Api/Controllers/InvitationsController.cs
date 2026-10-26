@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Core.DTOs.Results;
 using System.Security.Claims;
 using Core.Interfaces;
 using Core.Interfaces.Services;
@@ -17,7 +18,7 @@ public class InvitationsController(IInvitationService invitationService, ITenant
         var invitation = await invitationService.GetByTokenAsync(token);
 
         if (invitation == null)
-            return NotFound(new { error = "Zaproszenie nie istnieje lub wygasło." });
+            return this.ToProblem(Error.NotFound("INVITATION_NOT_FOUND", "Zaproszenie nie istnieje lub wygasło."));
 
         return Ok(invitation);
     }

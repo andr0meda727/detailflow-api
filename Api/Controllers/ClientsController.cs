@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Core.DTOs.Results;
 using Core.DTOs.Clients;
 using Core.Interfaces.Services;
 using Core.Models;
@@ -25,7 +27,7 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
 
         if (client == null)
         {
-            return NotFound($"Client {id} doesn't exist");
+            return this.ToProblem(Error.NotFound("CLIENT_NOT_FOUND", $"Client {id} not found"));
         }
 
         return Ok(client);
@@ -46,7 +48,7 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
 
         if (result == null)
         {
-            return NotFound($"Client {id} doesn't exist");
+            return this.ToProblem(Error.NotFound("CLIENT_NOT_FOUND", $"Client {id} not found"));
         }
 
         return Ok(result);
@@ -57,7 +59,7 @@ public class ClientsController(IClientsService clientsService) : ControllerBase
     {
         var deleted = await clientsService.DeleteClientAsync(id);
 
-        if (!deleted) return NotFound($"Client {id} doesn't exist");
+        if (!deleted) return this.ToProblem(Error.NotFound("CLIENT_NOT_FOUND", $"Client {id} not found"));
 
         return NoContent();
     }

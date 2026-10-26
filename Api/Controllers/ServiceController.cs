@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Core.DTOs.Results;
 using Core.DTOs.Services;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,7 +31,7 @@ public class ServiceController(IServicesService servicesService) : ControllerBas
     {
         var deleted = await servicesService.DeleteAsync(id);
 
-        if (!deleted) return NotFound($"Service {id} doesn't exist");
+        if (!deleted) return this.ToProblem(Error.NotFound("SERVICE_NOT_FOUND", $"Service {id} not found"));
 
         return NoContent();
     }

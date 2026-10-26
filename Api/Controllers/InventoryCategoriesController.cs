@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Core.DTOs.Results;
 using Core.DTOs.Inventory.InventoryCategories;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +24,7 @@ public class InventoryCategoriesController(IInventoryCategoriesService service) 
     {
         var category = await service.GetByIdAsync(id);
 
-        if (category == null) return NotFound($"Inventory category {id} doesn't exist");
+        if (category == null) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
 
         return Ok(category);
     }
@@ -40,7 +42,7 @@ public class InventoryCategoriesController(IInventoryCategoriesService service) 
     {
         var updatedItem = await service.UpdateAsync(id, inventoryCategoryData);
 
-        if (updatedItem == null) return NotFound();
+        if (updatedItem == null) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
 
         return Ok(updatedItem);
     }
@@ -50,7 +52,7 @@ public class InventoryCategoriesController(IInventoryCategoriesService service) 
     {
         var deleted = await service.DeleteAsync(id);
 
-        if (!deleted) return NotFound($"Inventory category {id} doesn't exist");
+        if (!deleted) return this.ToProblem(Error.NotFound("INVENTORY_CATEGORY_NOT_FOUND", $"Inventory category {id} not found"));
 
         return NoContent();
     }

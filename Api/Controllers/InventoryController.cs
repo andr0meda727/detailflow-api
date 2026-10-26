@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Core.DTOs.Results;
 using Core.DTOs.Inventory;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +23,9 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
     public async Task<ActionResult<InventoryResponseDto>> GetInventoryById(Guid id)
     {
         var item = await inventoryService.GetByIdAsync(id);
+
+        if (item == null) return this.ToProblem(Error.NotFound("INVENTORY_ITEM_NOT_FOUND", $"Inventory item {id} not found"));
+
         return Ok(item);
     }
 
@@ -36,7 +41,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
     {
         var updatedItem = await inventoryService.EditInventory(id, inventoryData);
 
-        if (updatedItem == null) return NotFound($"Inventory item {id} not found");
+        if (updatedItem == null) return this.ToProblem(Error.NotFound("INVENTORY_ITEM_NOT_FOUND", $"Inventory item {id} not found"));
 
         return Ok(updatedItem);
     }

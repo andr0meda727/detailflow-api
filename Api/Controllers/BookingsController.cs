@@ -1,4 +1,6 @@
-﻿using Core.DTOs.Bookings;
+﻿using Api.Extensions;
+using Core.DTOs.Results;
+using Core.DTOs.Bookings;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +20,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
         {
-            return BadRequest("'fromDate' must be less than or equal to 'toDate'.");
+            return this.ToProblem(Error.Validation("INVALID_DATE_RANGE", "'fromDate' must be less than or equal to 'toDate'."));
         }
 
         var bookings = await bookingService.GetAllBookingsAsync(isCompleted, fromDate, toDate);
@@ -29,8 +31,11 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [Authorize]
     public async Task<ActionResult<BookingResponseDto>> GetById(Guid id)
     {
-        var bookings = await bookingService.GetBookingByIdAsync(id);
-        return Ok(bookings);
+        var booking = await bookingService.GetBookingByIdAsync(id);
+
+        if (booking == null) return this.ToProblem(Error.NotFound("BOOKING_NOT_FOUND", $"Booking {id} not found"));
+
+        return Ok(booking);
     }
 
     [HttpPost]
@@ -39,7 +44,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         [FromBody] BookingCreateDto bookingData) {
         var addedBooking = await bookingService.AddBookingAsync(bookingData);
 
-        if (addedBooking == null) return BadRequest("Couldn't add booking.");
+        if (addedBooking == null) return this.ToProblem(Error.Validation("BOOKING_NOT_CREATED", "Couldn't add booking."));
 
         return CreatedAtAction(nameof(GetById), new { id = addedBooking.Id }, addedBooking);
     }
@@ -50,7 +55,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         var editedBooking = await bookingService.EditBookingAsync(id, bookingData);
 
-        if (editedBooking == null) return NotFound("Booking not found.");
+        if (editedBooking == null) return this.ToProblem(Error.NotFound("BOOKING_NOT_FOUND", $"Booking {id} not found"));
 
         return Ok(editedBooking);
     }
@@ -61,7 +66,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         var deleted = await bookingService.DeleteBookingAsync(id);
 
-        if (!deleted) return NotFound($"Booking {id} doesn't exist");
+        if (!deleted) return this.ToProblem(Error.NotFound("BOOKING_NOT_FOUND", $"Booking {id} not found"));
 
         return NoContent();
     }
@@ -72,7 +77,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         var completedBooking = await bookingService.CompleteBookingAsync(id);
 
-        if (completedBooking == null) return NotFound($"Booking {id} not found");
+        if (completedBooking == null) return this.ToProblem(Error.NotFound("BOOKING_NOT_FOUND", $"Booking {id} not found"));
 
         return Ok(completedBooking);
     }
@@ -83,7 +88,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     {
         var cancelledBooking = await bookingService.CancelBookingAsync(id);
 
-        if (cancelledBooking == null) return NotFound($"Booking {id} not found");
+        if (cancelledBooking == null) return this.ToProblem(Error.NotFound("BOOKING_NOT_FOUND", $"Booking {id} not found"));
 
         return Ok(cancelledBooking);
     }

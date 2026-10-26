@@ -1,3 +1,5 @@
+using Api.Extensions;
+using Core.DTOs.Results;
 using Core.DTOs.Vehicles;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +28,7 @@ public class VehicleController(IVehiclesService vehiclesService) : ControllerBas
 
         if (addedVehicle == null)
         {
-            return BadRequest($"Client {vehicleData.ClientId} doesn't exist");
+            return this.ToProblem(Error.Validation("CLIENT_NOT_FOUND", $"Client {vehicleData.ClientId} not found"));
         }
 
         return Ok(addedVehicle);
@@ -39,7 +41,7 @@ public class VehicleController(IVehiclesService vehiclesService) : ControllerBas
 
         if (result == null)
         {
-            return NotFound($"Vehicle {id} doesn't exist");
+            return this.ToProblem(Error.NotFound("VEHICLE_NOT_FOUND", $"Vehicle {id} not found"));
         }
 
         return Ok(result);
@@ -50,7 +52,7 @@ public class VehicleController(IVehiclesService vehiclesService) : ControllerBas
     {
         var deleted = await vehiclesService.DeleteAsync(id);
 
-        if (!deleted) return NotFound($"Vehicle {id} doesn't exist");
+        if (!deleted) return this.ToProblem(Error.NotFound("VEHICLE_NOT_FOUND", $"Vehicle {id} not found"));
 
         return NoContent();
     }
