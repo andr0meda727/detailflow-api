@@ -61,6 +61,20 @@ public class InventoryHandlerTests
     }
 
     [Test]
+    public async Task Item_KeepsFractionalQuantities()
+    {
+        await using var db = DbForStudio(StudioId);
+
+        var created = await new CreateItemHandler(db).HandleAsync(
+            new InventoryCreateDto { Name = "Wosk", Unit = "l", Stock = 0.75m, MinStock = 0.5m }, Ct);
+
+        await using var readDb = DbForStudio(StudioId);
+        var reloaded = await new GetItemHandler(readDb).HandleAsync(created.Id, Ct);
+        Assert.That(reloaded.Value!.Stock, Is.EqualTo(0.75m));
+        Assert.That(reloaded.Value.MinStock, Is.EqualTo(0.5m));
+    }
+
+    [Test]
     public async Task GetItems_LowStockOnly_ReturnsItemsBelowMinimum()
     {
         await using var db = DbForStudio(StudioId);

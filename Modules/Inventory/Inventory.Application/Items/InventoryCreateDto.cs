@@ -6,6 +6,6 @@ public class InventoryCreateDto
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string Unit { get; set; } = string.Empty;
-    public int Stock { get; set; }
-    public int? MinStock { get; set; }
+    public decimal Stock { get; set; }
+    public decimal? MinStock { get; set; }
 }

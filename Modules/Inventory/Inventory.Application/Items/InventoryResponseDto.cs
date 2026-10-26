@@ -9,8 +9,8 @@ public record InventoryResponseDto(
     string Name,
     string? Description,
     string Unit,
-    int Stock,
-    int? MinStock
+    decimal Stock,
+    decimal? MinStock
 )
 {
     /// <remarks>Expects <see cref="InventoryItem.Category"/> to be loaded.</remarks>
@@ -21,6 +21,6 @@ public record InventoryResponseDto(
         item.Name,
         item.Description,
         item.Unit,
-        (int)item.Stock,
-        (int?)item.MinStock);
+        item.Stock,
+        item.MinStock);
 }
