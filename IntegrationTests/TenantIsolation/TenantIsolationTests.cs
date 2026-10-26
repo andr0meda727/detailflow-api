@@ -131,6 +131,17 @@ public class TenantIsolationTests
     }
 
     [Test]
+    public async Task ServiceLookup_DoesNotCountOtherStudiosServices()
+    {
+        await using var db = DbForStudio(_seed.StudioA.StudioId);
+        var ids = new[] { _seed.StudioA.ServiceId, _seed.StudioB.ServiceId };
+
+        var count = await new ServiceRepository(db).CountExistingAsync(ids);
+
+        Assert.That(count, Is.EqualTo(1));
+    }
+
+    [Test]
     public async Task UserWithoutStudio_CannotAddTenantData()
     {
         await using var db = DbForUserWithoutStudio();

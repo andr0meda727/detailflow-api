@@ -134,6 +134,7 @@ public class RegisterOwnerDtoValidatorTests
 public class BookingCreateDtoValidatorTests
 {
     private IVehicleRepository _vehicleRepository;
+    private IServiceRepository _serviceRepository;
     private BookingCreateDtoValidator _validator;
 
     private Guid _vehicleId;
@@ -147,7 +148,11 @@ public class BookingCreateDtoValidatorTests
         _vehicleRepository = Substitute.For<IVehicleRepository>();
         _vehicleRepository.GetByIdAsync(_vehicleId)
                           .Returns(new Vehicle { Id = _vehicleId, ClientId = _clientId, LicensePlate = "KR 1", StudioId = Guid.NewGuid() });
-        _validator = new BookingCreateDtoValidator(_vehicleRepository);
+        // By default every requested service exists in the current studio
+        _serviceRepository = Substitute.For<IServiceRepository>();
+        _serviceRepository.CountExistingAsync(Arg.Any<IReadOnlyCollection<Guid>>())
+                          .Returns(ci => ci.Arg<IReadOnlyCollection<Guid>>().Count);
+        _validator = new BookingCreateDtoValidator(_vehicleRepository, _serviceRepository);
     }
 
     [Test]
@@ -239,6 +244,19 @@ public class BookingCreateDtoValidatorTests
         dto.ServiceIds = Enumerable.Range(0, 20).Select(_ => Guid.NewGuid()).ToList();
         var result = await _validator.TestValidateAsync(dto);
         result.ShouldNotHaveValidationErrorFor(x => x.ServiceIds);
+    }
+
+    [Test]
+    public async Task Validate_FailsWhenServiceNotInStudio()
+    {
+        var dto = ValidDto();
+        dto.ServiceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+
+        // Only one of the two services is visible through the tenant-filtered repository
+        _serviceRepository.CountExistingAsync(Arg.Any<IReadOnlyCollection<Guid>>()).Returns(1);
+
+        var result = await _validator.TestValidateAsync(dto);
+        result.ShouldHaveValidationErrorFor(x => x.ServiceIds);
     }
 
     [Test]

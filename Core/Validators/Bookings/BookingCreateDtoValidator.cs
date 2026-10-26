@@ -7,13 +7,15 @@ namespace Core.Validators.Bookings;
 public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
 {
     private readonly IVehicleRepository _vehicleRepository;
+    private readonly IServiceRepository _serviceRepository;
 
     // Bookings cannot be scheduled further than 2 years into the future
     private static readonly TimeSpan MaxFutureBooking = TimeSpan.FromDays(365 * 2);
 
-    public BookingCreateDtoValidator(IVehicleRepository vehicleRepository)
+    public BookingCreateDtoValidator(IVehicleRepository vehicleRepository, IServiceRepository serviceRepository)
     {
         _vehicleRepository = vehicleRepository;
+        _serviceRepository = serviceRepository;
 
         RuleFor(x => x.ClientId)
             .NotEmpty().WithMessage("ID klienta jest wymagane.");
@@ -37,7 +39,9 @@ public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
             .NotEmpty().WithMessage("Musisz wybrać przynajmniej jedną usługę.")
             .Must(ids => ids.Count <= 30).WithMessage("Możesz wybrać maksymalnie 30 usług na raz.")
             .Must(ids => ids.Distinct().Count() == ids.Count)
-            .WithMessage("Lista usług zawiera duplikaty.");
+            .WithMessage("Lista usług zawiera duplikaty.")
+            .MustAsync(BelongToStudioAsync)
+            .WithMessage("Wybrana usługa nie istnieje.");
 
 
         RuleFor(x => x.ScheduledAt)
@@ -66,5 +70,15 @@ public class BookingCreateDtoValidator : AbstractValidator<BookingCreateDto>
         var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
 
         return vehicle != null && vehicle.ClientId == dto.ClientId;
+    }
+
+    // The service lookup is tenant-filtered, so IDs of another studio's services don't count.
+    private async Task<bool> BelongToStudioAsync(List<Guid> serviceIds, CancellationToken cancellationToken)
+    {
+        if (serviceIds.Count == 0) return true;
+
+        var distinctIds = serviceIds.Distinct().ToList();
+
+        return await _serviceRepository.CountExistingAsync(distinctIds) == distinctIds.Count;
     }
 }

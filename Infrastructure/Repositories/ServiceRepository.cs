@@ -16,4 +16,9 @@ public class ServiceRepository(ApplicationDbContext context)
             .OrderBy(s => s.Name)
             .ToListAsync();
     }
+
+    public async Task<int> CountExistingAsync(IReadOnlyCollection<Guid> ids)
+    {
+        return await DbSet.CountAsync(s => ids.Contains(s.Id));
+    }
 }
