@@ -42,12 +42,24 @@ public static class MessagingExtensions
             options.DeleteDatabase = false;
         });
 
+        // Start-up waits for the bus, so a broken transport fails the deployment instead of failing silently,
+        // and a host that stops right away can't leave receive endpoints starting in the background
+        services.AddOptions<MassTransitHostOptions>().Configure(options =>
+        {
+            options.WaitUntilStarted = true;
+            options.StartTimeout = TimeSpan.FromSeconds(30);
+            options.StopTimeout = TimeSpan.FromSeconds(30);
+        });
+
         services.AddMassTransit(x =>
         {
             x.AddConsumers(consumerAssemblies);
 
             x.UsingPostgres((context, cfg) =>
             {
+                // Queues are woken by database notifications; polling is the fallback when one is missed
+                cfg.PollingInterval = TimeSpan.FromSeconds(1);
+
                 // Consumers are retried a few times before a message goes to the endpoint's error queue
                 cfg.UseMessageRetry(retry => retry.Intervals(
                     TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30)));

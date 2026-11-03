@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace IntegrationTests.Api;
 
@@ -21,6 +22,14 @@ public class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Supabase:Url", "https://supabase.test");
         builder.UseSetting("Supabase:Key", "test-anon-key");
         builder.UseSetting("Supabase:ServiceRoleKey", "test-service-role-key");
+
+        // The Windows Event Log provider is disposed before MassTransit finishes stopping, and its write then fails
+        // the test. Linux hosts don't have it; tests log to the console only.
+        builder.ConfigureLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddConsole();
+        });
 
         builder.ConfigureTestServices(services =>
         {
