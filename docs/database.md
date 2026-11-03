@@ -8,7 +8,7 @@ Each module owns a schema and has its own `DbContext` and migrations:
 
 | Context | Schema | Migrations | History table |
 |---|---|---|---|
-| `ApplicationDbContext` (legacy core) | `d` | `Infrastructure/Migrations` | `public.__EFMigrationsHistory` |
+| `ApplicationDbContext` (core history; maps no tables) | `d` (empty) | `Infrastructure/Migrations` | `public.__EFMigrationsHistory` |
 | `InventoryDbContext` | `inventory` | `Modules/Inventory/Inventory.Infrastructure/Persistence/Migrations` | `inventory.__EFMigrationsHistory` |
 | `CrmDbContext` | `crm` | `Modules/Crm/Crm.Infrastructure/Persistence/Migrations` | `crm.__EFMigrationsHistory` |
 | `SchedulingDbContext` | `scheduling` | `Modules/Scheduling/Scheduling.Infrastructure/Persistence/Migrations` | `scheduling.__EFMigrationsHistory` |
@@ -18,7 +18,7 @@ Each module owns a schema and has its own `DbContext` and migrations:
 that the core baseline created; for example, Inventory moves `d.inventory*` into the `inventory` schema and CRM moves `d.client` and
 `d.vehicle` into `crm`, and Scheduling moves `d.booking`, `d.booking_service`, `d.booking_status` and `d.service`
 into `scheduling`, and Identity moves `d.role`, `d.user`, `d.studio`, `d.studio_member` and `d.studio_invitation`
-into `identity`. Only billing is left in `d`. The order between modules doesn't matter.
+into `identity`. Billing was removed (`RemoveBilling`), so `d` ends up empty. The order between modules doesn't matter.
 
 The integration tests apply all migrations in that order to a fresh Postgres container. If an EF model has changes
 that no migration covers, they fail.
