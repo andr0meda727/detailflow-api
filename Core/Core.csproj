@@ -11,8 +11,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Shared\Shared.Kernel\Shared.Kernel.csproj" />
-      <ProjectReference Include="..\Modules\Scheduling\Scheduling.Contracts\Scheduling.Contracts.csproj" />
-    </ItemGroup>
+      <ProjectReference Include="..\Shared\Shared.Kernel\Shared.Kernel.csproj" />    </ItemGroup>
 
 </Project>

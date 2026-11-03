@@ -11,9 +11,10 @@ namespace ArchitectureTests;
 [TestFixture]
 public class ModuleBoundaryTests
 {
-    public sealed record Module(string Name, Assembly Domain, Assembly Application, Assembly Infrastructure, Assembly Api)
+    // A module without business rules or data of its own (Notifications) has no Domain or Application layer
+    public sealed record Module(string Name, Assembly? Domain, Assembly? Application, Assembly Infrastructure, Assembly Api)
     {
-        public Assembly[] All => [Domain, Application, Infrastructure, Api];
+        public Assembly[] All => new[] { Domain, Application, Infrastructure, Api }.OfType<Assembly>().ToArray();
 
         // Namespaces other code must not touch; *.Contracts is deliberately left out
         public string[] Internals => [$"{Name}.Domain", $"{Name}.Application", $"{Name}.Infrastructure", $"{Name}.Api"];
@@ -42,8 +43,13 @@ public class ModuleBoundaryTests
             typeof(Identity.Domain.Studios.Studio).Assembly,
             typeof(Identity.Application.Abstractions.IIdentityDbContext).Assembly,
             typeof(Identity.Infrastructure.Persistence.IdentityDbContext).Assembly,
-            typeof(Identity.Api.IdentityModule).Assembly)
+            typeof(Identity.Api.IdentityModule).Assembly),
+        new("Notifications", null, null,
+            typeof(Notifications.Infrastructure.Reports.BookingsReportPdf).Assembly,
+            typeof(Notifications.Api.NotificationsModule).Assembly)
     ];
+
+    public static IEnumerable<Module> LayeredModules => Modules.Where(m => m.Domain != null);
 
     private static readonly Assembly[] LegacyAssemblies =
     [
@@ -85,10 +91,10 @@ public class ModuleBoundaryTests
         AssertSuccess(result, $"The {module} module may only use other modules' *.Contracts");
     }
 
-    [TestCaseSource(nameof(Modules))]
+    [TestCaseSource(nameof(LayeredModules))]
     public void Domain_DependsOnNoOtherLayer(Module module)
     {
-        var result = Types.InAssembly(module.Domain)
+        var result = Types.InAssembly(module.Domain!)
             .ShouldNot().HaveDependencyOnAny(
                 $"{module.Name}.Application", $"{module.Name}.Infrastructure", $"{module.Name}.Api",
                 "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore")
@@ -97,10 +103,10 @@ public class ModuleBoundaryTests
         AssertSuccess(result, $"{module}.Domain must stay free of other layers and frameworks");
     }
 
-    [TestCaseSource(nameof(Modules))]
+    [TestCaseSource(nameof(LayeredModules))]
     public void Application_DoesNotDependOnInfrastructureOrWeb(Module module)
     {
-        var result = Types.InAssembly(module.Application)
+        var result = Types.InAssembly(module.Application!)
             .ShouldNot().HaveDependencyOnAny(
                 $"{module.Name}.Infrastructure", $"{module.Name}.Api", "Microsoft.AspNetCore", "Npgsql")
             .GetResult();
@@ -108,12 +114,12 @@ public class ModuleBoundaryTests
         AssertSuccess(result, $"{module}.Application must not use ASP.NET Core, the database provider or outer layers");
     }
 
-    [TestCaseSource(nameof(Modules))]
+    [TestCaseSource(nameof(LayeredModules))]
     public void Application_UsesOnlyEfCoreAbstractions(Module module)
     {
         // Handlers work with DbSet and LINQ (Microsoft.EntityFrameworkCore), but SQL and provider specifics
         // stay in Infrastructure. Namespaces overlap, so check the referenced assemblies instead.
-        var referenced = module.Application.GetReferencedAssemblies().Select(a => a.Name).ToList();
+        var referenced = module.Application!.GetReferencedAssemblies().Select(a => a.Name).ToList();
 
         Assert.That(referenced, Has.None.EqualTo("Microsoft.EntityFrameworkCore.Relational"));
         Assert.That(referenced, Has.None.StartsWith("Npgsql"));
@@ -123,7 +129,8 @@ public class ModuleBoundaryTests
     [
         typeof(Crm.Contracts.IClientDirectory).Assembly,
         typeof(Scheduling.Contracts.IBookingReportSource).Assembly,
-        typeof(Identity.Contracts.EmployeeInvited).Assembly
+        typeof(Identity.Contracts.EmployeeInvited).Assembly,
+        typeof(Notifications.Contracts.GenerateBookingsReport).Assembly
     ];
 
     [TestCaseSource(nameof(ContractAssemblies))]

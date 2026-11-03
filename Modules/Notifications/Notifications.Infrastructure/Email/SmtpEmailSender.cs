@@ -1,11 +1,13 @@
 using System.Net;
 using System.Net.Mail;
-using Core.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Services;
+namespace Notifications.Infrastructure.Email;
 
-public class EmailService(IConfiguration config) : IEmailService
+/// <summary>
+/// Sends the app's emails over SMTP (Mailpit locally, see compose.yaml).
+/// </summary>
+public class SmtpEmailSender(IConfiguration config)
 {
     private readonly string _host = config["Email:Host"]
         ?? throw new InvalidOperationException("Brak Email:Host");

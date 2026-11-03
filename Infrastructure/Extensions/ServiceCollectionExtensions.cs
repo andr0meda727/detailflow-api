@@ -1,6 +1,4 @@
 ﻿using Infrastructure.Data;
-using Core.Interfaces.Services;
-using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +14,6 @@ public static class ServiceCollectionExtensions
         // Add DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(cs));
-
-        // External services
-        services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IReportPdfService, ReportPdfService>();
 
         return services;
     }

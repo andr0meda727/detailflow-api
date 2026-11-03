@@ -1,14 +1,16 @@
-using Core.Interfaces.Services;
 using Scheduling.Contracts;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace Infrastructure.Services;
+namespace Notifications.Infrastructure.Reports;
 
-public class ReportPdfService : IReportPdfService
+/// <summary>
+/// Renders the bookings of a period as a PDF (QuestPDF, community licence).
+/// </summary>
+public class BookingsReportPdf
 {
-    public byte[] GenerateBookingsReport(
+    public byte[] Render(
         IEnumerable<BookingReportRow> bookings, DateTime dateFrom, DateTime dateTo)
     {
         QuestPDF.Settings.License = LicenseType.Community;

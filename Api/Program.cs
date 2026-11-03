@@ -3,9 +3,9 @@ using Api.Middleware;
 using Crm.Api;
 using Identity.Api;
 using Identity.Api.Tenancy;
-using Infrastructure.Consumers;
 using Infrastructure.Extensions;
 using Inventory.Api;
+using Notifications.Api;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Scheduling.Api;
@@ -26,10 +26,11 @@ builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCrmModule(builder.Configuration);
 builder.Services.AddSchedulingModule(builder.Configuration);
+builder.Services.AddNotificationsModule();
 
 // One bus for the host; every assembly with consumers is listed here
 builder.Services.AddMessaging(builder.Configuration,
-    typeof(GenerateBookingsReportConsumer).Assembly, IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly);
+    IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly, NotificationsModule.ConsumersAssembly);
 
 builder.Services.AddOpenApi();
 
