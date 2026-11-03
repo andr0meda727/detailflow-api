@@ -25,7 +25,7 @@ builder.Services.AddCrmModule(builder.Configuration);
 builder.Services.AddSchedulingModule(builder.Configuration);
 
 // One bus for the host; every assembly with consumers is listed here
-builder.Services.AddMessaging(typeof(GenerateBookingsReportConsumer).Assembly, SchedulingModule.ConsumersAssembly);
+builder.Services.AddMessaging(builder.Configuration, typeof(GenerateBookingsReportConsumer).Assembly, SchedulingModule.ConsumersAssembly);
 
 builder.Services.AddOpenApi();
 
