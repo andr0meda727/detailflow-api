@@ -95,3 +95,19 @@ Modules never join each other's tables, and there are no foreign keys between mo
 module's data keeps its own copy and updates it from integration events. For example, `scheduling.booking` stores
 the client's name/phone/email and the vehicle's plate/brand/model, updated by Scheduling's `BookingCopiesConsumer` when CRM
 publishes `ClientDetailsChanged` / `VehicleDetailsChanged`.
+
+## Messaging tables
+
+The message bus runs on MassTransit's PostgreSQL transport in the same database:
+
+- The `transport` schema holds queues, topics and messages. MassTransit creates it on startup if it is missing,
+  together with a `detailflow_transport` role, so it is not part of the EF migrations. The connection user
+  needs permission to create a schema and a role (Supabase's `postgres` user has both).
+- Each module that publishes events has an `outbox_message` table in its own schema (e.g. `crm.outbox_message`),
+  created by that module's migrations. Events are written there in the same transaction as the data change,
+  and a background dispatcher publishes them about once a second.
+
+Delivery is at least once, so consumers must be safe to run twice for the same event. A message that fails
+to publish is retried; after 10 attempts it stays in `outbox_message` with `last_error` set, for inspection.
+Consumer failures are retried three times, then the message moves to the endpoint's `_error` queue in the
+`transport` schema.
