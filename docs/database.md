@@ -67,26 +67,16 @@ Don't use the transaction pooler (port `6543`): migrations need a session connec
 The old `InitialSync` migration was behind the real schema, because `studio_invitation`,
 `studio_member.is_active/updated_at` and `booking_service.updated_at` were added by hand.
 It was replaced by a single `Baseline` migration that matches the current model.
-The existing database already has these tables, so the baseline must be **marked as applied, not run**:
+The existing database already has these tables, so the baseline must be **marked as applied, not run**.
 
-1. Check that the database matches the baseline. Compare
-   `dotnet ef migrations script 0 20261026120857_Baseline -p Infrastructure -s Api -c ApplicationDbContext`
-   with the live schema (Supabase → Database → Tables, or `pg_dump --schema-only --schema=d`).
-2. Record the baseline as applied:
+The live schema was compared with the Baseline on 2026-11-03 (through the Supabase MCP). It was built by hand,
+so its indexes and unique constraints differ; `docs/sql/01-reconcile-live-schema-with-baseline.sql` lists the
+differences, fixes them and records the Baseline, all in one transaction. Run it once, then apply every later
+migration with option A or B above. The whole sequence was rehearsed on a copy shaped like production.
 
-```sql
-CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
-    "MigrationId"    character varying(150) NOT NULL PRIMARY KEY,
-    "ProductVersion" character varying(32)  NOT NULL
-);
-
-DELETE FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260301134918_InitialSync';
-
-INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES ('20261026120857_Baseline', '10.0.3');
-```
-
-After that, apply every later migration with option A or B above.
+Not managed by EF: Supabase's `on_auth_user_created` trigger on `auth.users` calls `d.handle_new_user()`, which
+inserts the `d."user"` profile row for every new account. Registration depends on it, and the function names the
+table with its schema, so moving `user` to another schema must update the function in the same migration.
 
 ## Data that crosses modules
 
