@@ -35,6 +35,4 @@ public class StudioSubscription
     public SubscriptionPlan Plan { get; set; } = null!;
 
     public ICollection<StripeEvent> StripeEvents { get; set; } = new List<StripeEvent>();
-
-    public Studio Studio { get; set; } = null!;
 }

@@ -52,12 +52,8 @@ public class StripeEventConfiguration : IEntityTypeConfiguration<StripeEvent>
         builder.Property(e => e.SubscriptionId)
             .HasColumnName("subscription_id");
 
-        builder
-            .HasOne(d => d.Studio)
-            .WithMany(p => p.StripeEvents)
-            .HasForeignKey(d => d.StudioId)
-            .OnDelete(DeleteBehavior.SetNull)
-            .HasConstraintName("stripe_event_studio_id_fkey");
+        // The studio belongs to the Identity module: a plain ID here; the database foreign key stays
+        builder.HasIndex(e => e.StudioId);
 
         builder
             .HasOne(d => d.Subscription)

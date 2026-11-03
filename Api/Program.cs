@@ -1,6 +1,8 @@
 using Api.Extensions;
 using Api.Middleware;
 using Crm.Api;
+using Identity.Api;
+using Identity.Api.Tenancy;
 using Infrastructure.Consumers;
 using Infrastructure.Extensions;
 using Inventory.Api;
@@ -17,15 +19,17 @@ builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // Add Application Services
-builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 // Modules
+builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCrmModule(builder.Configuration);
 builder.Services.AddSchedulingModule(builder.Configuration);
 
 // One bus for the host; every assembly with consumers is listed here
-builder.Services.AddMessaging(builder.Configuration, typeof(GenerateBookingsReportConsumer).Assembly, SchedulingModule.ConsumersAssembly);
+builder.Services.AddMessaging(builder.Configuration,
+    typeof(GenerateBookingsReportConsumer).Assembly, IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly);
 
 builder.Services.AddOpenApi();
 
@@ -69,6 +73,7 @@ app.UseCors("Frontend");
 
 app.UseAuthentication();
 
+// Needs the routed endpoint (for [AllowWithoutStudio]) and the authenticated user
 app.UseTenantContext();
 
 app.UseAuthorization();

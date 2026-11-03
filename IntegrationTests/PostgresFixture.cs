@@ -1,6 +1,6 @@
-using Core.Constants;
 using Shared.Kernel.Tenancy;
-using Core.Models;
+using Identity.Domain.Studios;
+using Identity.Infrastructure.Persistence;
 using Crm.Infrastructure.Persistence;
 using BookingStatus = Scheduling.Domain.Bookings.BookingStatus;
 using Scheduling.Infrastructure.Persistence;
@@ -42,8 +42,10 @@ public class PostgresFixture
         await crmDb.Database.MigrateAsync();
         await using var schedulingDb = CreateSchedulingDbContext(new TenantContext());
         await schedulingDb.Database.MigrateAsync();
+        await using var identityDb = CreateIdentityDbContext(new TenantContext());
+        await identityDb.Database.MigrateAsync();
 
-        await SeedLookupsAsync(db, schedulingDb);
+        await SeedLookupsAsync(identityDb, schedulingDb);
     }
 
     [OneTimeTearDown]
@@ -88,14 +90,23 @@ public class PostgresFixture
         return new SchedulingDbContext(options, tenantContext);
     }
 
-    private static async Task SeedLookupsAsync(ApplicationDbContext db, SchedulingDbContext schedulingDb)
+    public static IdentityDbContext CreateIdentityDbContext(ITenantContext tenantContext)
     {
-        db.Roles.AddRange(
-            new Role { Id = Roles.Owner, RoleName = "Owner" },
-            new Role { Id = Roles.Manager, RoleName = "Manager" },
-            new Role { Id = Roles.Employee, RoleName = "Employee" });
+        var options = new DbContextOptionsBuilder<IdentityDbContext>()
+            .UseNpgsql(ConnectionString, npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", IdentityDbContext.Schema))
+            .Options;
 
-        await db.SaveChangesAsync();
+        return new IdentityDbContext(options, tenantContext);
+    }
+
+    private static async Task SeedLookupsAsync(IdentityDbContext identityDb, SchedulingDbContext schedulingDb)
+    {
+        identityDb.Roles.AddRange(
+            new Role(Roles.Owner, "Owner"),
+            new Role(Roles.Manager, "Manager"),
+            new Role(Roles.Employee, "Employee"));
+
+        await identityDb.SaveChangesAsync();
 
         schedulingDb.BookingStatuses.AddRange(
             new BookingStatus(BookingStatus.Created, "Created", "#3b82f6", 1),

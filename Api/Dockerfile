@@ -22,6 +22,8 @@ COPY ["Modules/Scheduling/Scheduling.Api/Scheduling.Api.csproj", "Modules/Schedu
 COPY ["Modules/Identity/Identity.Contracts/Identity.Contracts.csproj", "Modules/Identity/Identity.Contracts/"]
 COPY ["Modules/Identity/Identity.Domain/Identity.Domain.csproj", "Modules/Identity/Identity.Domain/"]
 COPY ["Modules/Identity/Identity.Application/Identity.Application.csproj", "Modules/Identity/Identity.Application/"]
+COPY ["Modules/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj", "Modules/Identity/Identity.Infrastructure/"]
+COPY ["Modules/Identity/Identity.Api/Identity.Api.csproj", "Modules/Identity/Identity.Api/"]
 COPY ["Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj", "Modules/Inventory/Inventory.Domain/"]
 COPY ["Modules/Inventory/Inventory.Application/Inventory.Application.csproj", "Modules/Inventory/Inventory.Application/"]
 COPY ["Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj", "Modules/Inventory/Inventory.Infrastructure/"]

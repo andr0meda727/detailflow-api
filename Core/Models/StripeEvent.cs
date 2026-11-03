@@ -22,7 +22,5 @@ public class StripeEvent
 
     public DateTime CreatedAt { get; set; }
 
-    public Studio? Studio { get; set; }
-
     public StudioSubscription? Subscription { get; set; }
 }

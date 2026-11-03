@@ -30,7 +30,5 @@ public class Payment
 
     public DateTime CreatedAt { get; set; }
 
-    public Studio Studio { get; set; } = null!;
-
     public StudioSubscription? Subscription { get; set; }
 }

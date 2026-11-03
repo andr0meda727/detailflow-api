@@ -64,11 +64,8 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(e => e.SubscriptionId)
             .HasColumnName("subscription_id");
 
-        builder
-            .HasOne(d => d.Studio)
-            .WithMany(p => p.Payments)
-            .HasForeignKey(d => d.StudioId)
-            .HasConstraintName("payment_studio_id_fkey");
+        // The studio belongs to the Identity module: a plain ID here; the database foreign key stays
+        builder.HasIndex(e => e.StudioId);
 
         builder
             .HasOne(d => d.Subscription)

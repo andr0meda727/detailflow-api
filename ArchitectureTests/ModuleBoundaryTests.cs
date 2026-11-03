@@ -37,7 +37,12 @@ public class ModuleBoundaryTests
             typeof(Scheduling.Domain.Bookings.Booking).Assembly,
             typeof(Scheduling.Application.Abstractions.ISchedulingDbContext).Assembly,
             typeof(Scheduling.Infrastructure.Persistence.SchedulingDbContext).Assembly,
-            typeof(Scheduling.Api.SchedulingModule).Assembly)
+            typeof(Scheduling.Api.SchedulingModule).Assembly),
+        new("Identity",
+            typeof(Identity.Domain.Studios.Studio).Assembly,
+            typeof(Identity.Application.Abstractions.IIdentityDbContext).Assembly,
+            typeof(Identity.Infrastructure.Persistence.IdentityDbContext).Assembly,
+            typeof(Identity.Api.IdentityModule).Assembly)
     ];
 
     private static readonly Assembly[] LegacyAssemblies =
@@ -117,7 +122,8 @@ public class ModuleBoundaryTests
     private static readonly Assembly[] ContractAssemblies =
     [
         typeof(Crm.Contracts.IClientDirectory).Assembly,
-        typeof(Scheduling.Contracts.IBookingReportSource).Assembly
+        typeof(Scheduling.Contracts.IBookingReportSource).Assembly,
+        typeof(Identity.Contracts.EmployeeInvited).Assembly
     ];
 
     [TestCaseSource(nameof(ContractAssemblies))]

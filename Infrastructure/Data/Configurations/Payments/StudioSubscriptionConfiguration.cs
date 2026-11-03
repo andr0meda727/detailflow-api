@@ -71,10 +71,7 @@ public class StudioSubscriptionConfiguration : IEntityTypeConfiguration<StudioSu
             .OnDelete(DeleteBehavior.ClientSetNull)
             .HasConstraintName("studio_subscription_plan_id_fkey");
 
-        builder
-            .HasOne(d => d.Studio)
-            .WithMany(p => p.StudioSubscriptions)
-            .HasForeignKey(d => d.StudioId)
-            .HasConstraintName("studio_subscription_studio_id_fkey");
+        // The studio belongs to the Identity module: a plain ID here; the database foreign key stays
+        builder.HasIndex(e => e.StudioId);
     }
 }

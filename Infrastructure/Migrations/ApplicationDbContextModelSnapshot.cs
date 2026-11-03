@@ -101,29 +101,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("payment", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.Role", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("role_name");
-
-                    b.HasKey("Id")
-                        .HasName("role_pkey");
-
-                    b.HasIndex(new[] { "RoleName" }, "role_role_name_key")
-                        .IsUnique();
-
-                    b.ToTable("role", "d");
-                });
-
             modelBuilder.Entity("Core.Models.StripeEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -184,164 +161,6 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("stripe_event", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.Studio", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("text")
-                        .HasColumnName("address");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("text")
-                        .HasColumnName("phone");
-
-                    b.Property<string>("StripeCustomerId")
-                        .HasColumnType("text")
-                        .HasColumnName("stripe_customer_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("studio_pkey");
-
-                    b.HasIndex(new[] { "StripeCustomerId" }, "studio_stripe_customer_id_key")
-                        .IsUnique();
-
-                    b.ToTable("studio", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.StudioInvitation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
-
-                    b.Property<Guid>("InvitedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("invited_by");
-
-                    b.Property<long>("RoleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("role_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<Guid>("Token")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("token")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("studio_invitation_pkey");
-
-                    b.HasIndex("InvitedBy");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.HasIndex("StudioId", "Email")
-                        .IsUnique();
-
-                    b.ToTable("studio_invitation", "d");
-                });
-
-            modelBuilder.Entity("Core.Models.StudioMember", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("studio_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<long>("RoleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("role_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("UserId", "StudioId")
-                        .HasName("studio_member_pkey");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("studio_member", "d");
                 });
 
             modelBuilder.Entity("Core.Models.StudioSubscription", b =>
@@ -523,149 +342,26 @@ namespace Infrastructure.Migrations
                     b.ToTable("subscription_plan", "d");
                 });
 
-            modelBuilder.Entity("Core.Models.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("text")
-                        .HasColumnName("first_name");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("text")
-                        .HasColumnName("last_name");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("user_pkey");
-
-                    b.HasIndex(new[] { "Email" }, "user_email_key")
-                        .IsUnique();
-
-                    b.ToTable("user", "d");
-                });
-
             modelBuilder.Entity("Core.Models.Payment", b =>
                 {
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("Payments")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("payment_studio_id_fkey");
-
                     b.HasOne("Core.Models.StudioSubscription", "Subscription")
                         .WithMany("Payments")
                         .HasForeignKey("SubscriptionId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("payment_subscription_id_fkey");
 
-                    b.Navigation("Studio");
-
                     b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("Core.Models.StripeEvent", b =>
                 {
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("StripeEvents")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("stripe_event_studio_id_fkey");
-
                     b.HasOne("Core.Models.StudioSubscription", "Subscription")
                         .WithMany("StripeEvents")
                         .HasForeignKey("SubscriptionId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("stripe_event_subscription_id_fkey");
 
-                    b.Navigation("Studio");
-
                     b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("Core.Models.StudioInvitation", b =>
-                {
-                    b.HasOne("Core.Models.User", "InvitedByUser")
-                        .WithMany()
-                        .HasForeignKey("InvitedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_invitation_invited_by_fkey");
-
-                    b.HasOne("Core.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_invitation_role_id_fkey");
-
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany()
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_invitation_studio_id_fkey");
-
-                    b.Navigation("InvitedByUser");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Studio");
-                });
-
-            modelBuilder.Entity("Core.Models.StudioMember", b =>
-                {
-                    b.HasOne("Core.Models.Role", "Role")
-                        .WithMany("StudioMembers")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("studio_member_role_id_fkey");
-
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("StudioMembers")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_member_studio_id_fkey");
-
-                    b.HasOne("Core.Models.User", "User")
-                        .WithMany("StudioMembers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_member_user_id_fkey");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Studio");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Core.Models.StudioSubscription", b =>
@@ -676,32 +372,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("studio_subscription_plan_id_fkey");
 
-                    b.HasOne("Core.Models.Studio", "Studio")
-                        .WithMany("StudioSubscriptions")
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("studio_subscription_studio_id_fkey");
-
                     b.Navigation("Plan");
-
-                    b.Navigation("Studio");
-                });
-
-            modelBuilder.Entity("Core.Models.Role", b =>
-                {
-                    b.Navigation("StudioMembers");
-                });
-
-            modelBuilder.Entity("Core.Models.Studio", b =>
-                {
-                    b.Navigation("Payments");
-
-                    b.Navigation("StripeEvents");
-
-                    b.Navigation("StudioMembers");
-
-                    b.Navigation("StudioSubscriptions");
                 });
 
             modelBuilder.Entity("Core.Models.StudioSubscription", b =>
@@ -714,11 +385,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Models.SubscriptionPlan", b =>
                 {
                     b.Navigation("StudioSubscriptions");
-                });
-
-            modelBuilder.Entity("Core.Models.User", b =>
-                {
-                    b.Navigation("StudioMembers");
                 });
 #pragma warning restore 612, 618
         }
