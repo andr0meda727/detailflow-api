@@ -1,25 +1,19 @@
-using Core.DTOs.Auth;
-using Core.DTOs.Studio;
-using Core.Interfaces.Repositories;
-using Core.Models;
-using Core.Validators;
+using Identity.Application;
 using FluentValidation.TestHelper;
-using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 
-namespace Unit.Validators;
+namespace Unit.Modules.Identity;
 
 // ════════════════════════════════════════════════════════════════════════════
-// RegisterOwnerDtoValidator
+// RegisterOwnerRequestValidator
 // ════════════════════════════════════════════════════════════════════════════
 
 [TestFixture]
-public class RegisterOwnerDtoValidatorTests
+public class RegisterOwnerRequestValidatorTests
 {
-    private RegisterOwnerDtoValidator _validator;
+    private RegisterOwnerRequestValidator _validator;
 
     [SetUp]
-    public void SetUp() => _validator = new RegisterOwnerDtoValidator();
+    public void SetUp() => _validator = new RegisterOwnerRequestValidator();
 
     [Test]
     public void Validate_PassesForValidDto()
@@ -114,13 +108,13 @@ public class RegisterOwnerDtoValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.Password);
     }
 
-    private static RegisterOwnerDto ValidDto() => new()
+    private static RegisterOwnerRequest ValidDto() => new()
     {
         Email = "owner@test.pl",
         Password = "TestPass1!",
         FirstName = "Jan",
         LastName = "Kowalski",
-        Studio = new CreateStudioDto { Name = "Detail Studio" }
+        Studio = new StudioDetails { Name = "Detail Studio" }
     };
 }
 

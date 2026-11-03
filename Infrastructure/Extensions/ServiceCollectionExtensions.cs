@@ -1,7 +1,5 @@
 ﻿using Infrastructure.Data;
-using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
-using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,15 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(cs));
 
-        // Add repositories
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IStudioMemberRepository, StudioMemberRepository>();
-        services.AddScoped<IStudioInvitationRepository, StudioInvitationRepository>();
-        services.AddScoped<IStudioRepository, StudioRepository>();
-
         // External services
-        services.AddScoped<IAuthService, SupabaseAuthService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IReportPdfService, ReportPdfService>();
 

@@ -47,7 +47,7 @@ public class ModuleBoundaryTests
 
     private static readonly Assembly[] LegacyAssemblies =
     [
-        typeof(Core.Models.Studio).Assembly,
+        typeof(Core.Models.Payment).Assembly,
         typeof(Infrastructure.Data.ApplicationDbContext).Assembly
     ];
 
