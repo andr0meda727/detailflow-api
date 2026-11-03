@@ -33,7 +33,12 @@ public sealed class OutboxDispatcher<TContext>(
             {
                 dispatched = await DispatchBatchAsync(stoppingToken);
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception) when (stoppingToken.IsCancellationRequested)
+            {
+                // Shutting down: whatever was interrupted is retried on the next start
+                return;
+            }
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Outbox dispatch for {Context} failed", typeof(TContext).Name);
                 dispatched = 0;

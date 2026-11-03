@@ -3,6 +3,7 @@ using Crm.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Infrastructure.Messaging;
 
 namespace Crm.Infrastructure;
 
@@ -16,6 +17,8 @@ public static class CrmInfrastructureExtensions
                 npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", CrmDbContext.Schema)));
 
         services.AddScoped<ICrmDbContext>(sp => sp.GetRequiredService<CrmDbContext>());
+
+        services.AddOutbox<CrmDbContext>();
 
         return services;
     }

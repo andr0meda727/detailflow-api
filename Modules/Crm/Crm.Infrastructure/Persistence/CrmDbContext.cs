@@ -2,6 +2,7 @@ using Crm.Application.Abstractions;
 using Crm.Domain;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Persistence;
+using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Kernel.Tenancy;
 
 namespace Crm.Infrastructure.Persistence;
@@ -22,5 +23,10 @@ public class CrmDbContext(DbContextOptions<CrmDbContext> options, ITenantContext
 
         modelBuilder.Entity<Client>().HasQueryFilter("SoftDelete", c => !c.IsDeleted);
         modelBuilder.Entity<Vehicle>().HasQueryFilter("SoftDelete", v => !v.IsDeleted);
+
+        modelBuilder.AddOutbox();
     }
+
+    public void Enqueue<TEvent>(TEvent integrationEvent) where TEvent : class =>
+        Set<OutboxMessage>().Add(OutboxMessage.Create(integrationEvent, DateTime.UtcNow));
 }

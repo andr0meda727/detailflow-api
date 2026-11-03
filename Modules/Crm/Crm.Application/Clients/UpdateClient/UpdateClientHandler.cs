@@ -1,12 +1,11 @@
 using Crm.Application.Abstractions;
 using Crm.Contracts;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Kernel.Results;
 
 namespace Crm.Application.Clients.UpdateClient;
 
-public sealed class UpdateClientHandler(ICrmDbContext db, IPublishEndpoint publisher)
+public sealed class UpdateClientHandler(ICrmDbContext db)
 {
     public async Task<Result<ClientResponseDto>> HandleAsync(
         Guid id, ClientRequest request, CancellationToken cancellationToken)
@@ -18,11 +17,10 @@ public sealed class UpdateClientHandler(ICrmDbContext db, IPublishEndpoint publi
 
         // Vehicles are managed through their own endpoints, so request.Vehicle is ignored here
         client.UpdateDetails(request.Name, request.Phone, request.Email, request.Nip);
-        await db.SaveChangesAsync(cancellationToken);
 
-        // Other modules keep copies of these details (bookings, for example)
-        await publisher.Publish(
-            new ClientDetailsChanged(client.StudioId, client.Id, client.Name, client.Phone, client.Email), cancellationToken);
+        // Other modules keep copies of these details (bookings, for example); saved together with the change
+        db.Enqueue(new ClientDetailsChanged(client.StudioId, client.Id, client.Name, client.Phone, client.Email));
+        await db.SaveChangesAsync(cancellationToken);
 
         return ClientResponseDto.From(client);
     }

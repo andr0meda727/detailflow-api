@@ -134,6 +134,47 @@ namespace Crm.Infrastructure.Persistence.Migrations
                     b.ToTable("vehicle", "crm");
                 });
 
+            modelBuilder.Entity("Shared.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("content");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("outbox_message_pkey");
+
+                    b.HasIndex(new[] { "OccurredAt" }, "outbox_message_pending_idx")
+                        .HasFilter("processed_at IS NULL");
+
+                    b.ToTable("outbox_message", "crm");
+                });
+
             modelBuilder.Entity("Crm.Domain.Vehicle", b =>
                 {
                     b.HasOne("Crm.Domain.Client", null)

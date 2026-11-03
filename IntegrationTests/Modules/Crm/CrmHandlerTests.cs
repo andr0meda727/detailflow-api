@@ -11,8 +11,8 @@ using Crm.Application.Vehicles.DeleteVehicle;
 using Crm.Application.Vehicles.GetVehicles;
 using Crm.Contracts;
 using IntegrationTests.Infrastructure;
-using MassTransit;
-using NSubstitute;
+using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Kernel.Pagination;
 using static IntegrationTests.Modules.Crm.CrmTenantIsolationTests;
 
@@ -82,7 +82,7 @@ public class CrmHandlerTests
         var phone = NewPhone();
         var client = await new CreateClientHandler(db).HandleAsync(new ClientRequest { Name = "Jan", Phone = phone }, Ct);
 
-        var updated = await new UpdateClientHandler(db, Substitute.For<IPublishEndpoint>()).HandleAsync(client.Value!.Id,
+        var updated = await new UpdateClientHandler(db).HandleAsync(client.Value!.Id,
             new ClientRequest { Name = "Jan Kowalski", Phone = phone, Email = "jan@test.pl" }, Ct);
 
         Assert.That(updated.Value!.Name, Is.EqualTo("Jan Kowalski"));
@@ -90,18 +90,19 @@ public class CrmHandlerTests
     }
 
     [Test]
-    public async Task UpdateClient_PublishesTheNewDetails()
+    public async Task UpdateClient_StoresTheEventInTheOutboxWithTheChange()
     {
         await using var db = DbForStudio(StudioId);
-        var publisher = Substitute.For<IPublishEndpoint>();
         var phone = NewPhone();
         var client = await new CreateClientHandler(db).HandleAsync(new ClientRequest { Name = "Ewa", Phone = phone }, Ct);
 
-        await new UpdateClientHandler(db, publisher).HandleAsync(client.Value!.Id,
+        await new UpdateClientHandler(db).HandleAsync(client.Value!.Id,
             new ClientRequest { Name = "Ewa Nowak", Phone = phone }, Ct);
 
-        await publisher.Received(1).Publish(
-            new ClientDetailsChanged(StudioId, client.Value.Id, "Ewa Nowak", phone, null), Arg.Any<CancellationToken>());
+        await using var readDb = DbForStudio(StudioId);
+        var events = (await readDb.Set<OutboxMessage>().AsNoTracking().ToListAsync())
+            .Select(m => m.Deserialize()).OfType<ClientDetailsChanged>();
+        Assert.That(events, Does.Contain(new ClientDetailsChanged(StudioId, client.Value.Id, "Ewa Nowak", phone, null)));
     }
 
     [Test]
