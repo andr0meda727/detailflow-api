@@ -3,7 +3,6 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["Api/Api.csproj", "Api/"]
-COPY ["Core/Core.csproj", "Core/"]
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
 COPY ["Shared/Shared.Application/Shared.Application.csproj", "Shared/Shared.Application/"]

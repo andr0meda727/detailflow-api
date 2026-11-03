@@ -4,7 +4,7 @@ using NetArchTest.Rules;
 namespace ArchitectureTests;
 
 /// <summary>
-/// Modules are isolated from the legacy Core/Infrastructure projects and from each other,
+/// Modules are isolated from the legacy Infrastructure project and from each other,
 /// and keep their own layers pointing inwards: Api → Infrastructure → Application → Domain.
 /// The only way into a module from outside is its *.Contracts project.
 /// </summary>
@@ -53,11 +53,10 @@ public class ModuleBoundaryTests
 
     private static readonly Assembly[] LegacyAssemblies =
     [
-        typeof(Core.Models.Payment).Assembly,
         typeof(Infrastructure.Data.ApplicationDbContext).Assembly
     ];
 
-    private static readonly string[] LegacyNamespaces = ["Core", "Infrastructure", "Api"];
+    private static readonly string[] LegacyNamespaces = ["Infrastructure", "Api"];
 
     [TestCaseSource(nameof(Modules))]
     public void Module_DoesNotDependOnLegacyProjects(Module module)
@@ -66,7 +65,7 @@ public class ModuleBoundaryTests
             .ShouldNot().HaveDependencyOnAny(LegacyNamespaces)
             .GetResult();
 
-        AssertSuccess(result, $"The {module} module must not use Core, Infrastructure or the Api host");
+        AssertSuccess(result, $"The {module} module must not use the legacy Infrastructure or the Api host");
     }
 
     [TestCaseSource(nameof(Modules))]
@@ -76,7 +75,7 @@ public class ModuleBoundaryTests
             .ShouldNot().HaveDependencyOnAny(module.Internals)
             .GetResult();
 
-        AssertSuccess(result, $"Core and Infrastructure may only use {module}.Contracts");
+        AssertSuccess(result, $"The legacy Infrastructure may only use {module}.Contracts");
     }
 
     [TestCaseSource(nameof(Modules))]
