@@ -103,3 +103,15 @@ pages and doesn't suit infinite scroll.
 - Behind the production reverse proxy, the API takes the client IP from `X-Forwarded-For` (trusted from loopback
   and private addresses only), so the proxy must set it. Nginx needs
   `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`; Caddy sends it by default.
+
+## Customer accounts (`/api/me`)
+
+- A customer is any signed-in Supabase account; customers sign up with Supabase from the frontend, and the
+  `handle_new_user` trigger creates their profile row. They belong to no studio, and `/api/me` endpoints never ask
+  for one (staff can use them too, for their own car).
+- `GET/PUT /api/me/profile` `{ "name": "Anna Nowak", "phone": "500 600 700" }`: the contact details that go on booking
+  requests. Before the first save, GET is 404 `CUSTOMER_PROFILE_NOT_FOUND`.
+- `GET/POST /api/me/vehicles`, `PUT/DELETE /api/me/vehicles/{id}`
+  `{ "licensePlate": "KR 12345", "brand": "Volvo", "model": "XC90", "size": "Large" }`: the garage. `size` is required
+  (it sets the price), there are at most ten cars (`CUSTOMER_GARAGE_FULL`), one per plate (`CUSTOMER_VEHICLE_EXISTS`).
+- Everything is limited to the caller's own rows: another customer's car ID is 404 `CUSTOMER_VEHICLE_NOT_FOUND`.

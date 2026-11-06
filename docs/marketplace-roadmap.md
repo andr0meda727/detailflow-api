@@ -31,12 +31,15 @@ each request, so the customer only suggests a time.
   - `GET /api/public/studios/{id}` returns the profile, services with prices and recent reviews.
 - Listings are public by design, so they are not `ITenantEntity`. Owner edits filter by the caller's studio explicitly.
 
-## 3. Customer accounts and the garage (new Customers module)
+## 3. Customer accounts and the garage (new Customers module) (done)
 - Customers sign up with Supabase from the frontend, and the `handle_new_user` trigger creates their profile row.
   A customer is a user with no studio membership; one person can be both.
 - `CustomerProfile(UserId, Name, Phone)` and `CustomerVehicle(Id, UserId, LicensePlate, Brand, Model, VehicleSize)`.
 - `/api/me/profile` and `/api/me/vehicles` are `[AllowWithoutStudio]` and scoped to the caller. The saved cars fill
   in booking requests.
+- Rows are per account: an `Owner` query filter (like the tenant filter, failing closed) limits them to the
+  signed-in user. At most ten cars, one per plate. The plate, phone and size rules are shared with CRM
+  (`Shared.Application.Validation`).
 
 ## 4. Booking requests and booking history (Scheduling)
 - `BookingRequest` holds:

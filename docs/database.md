@@ -14,6 +14,7 @@ Each module owns a schema and has its own `DbContext` and migrations:
 | `SchedulingDbContext` | `scheduling` | `Modules/Scheduling/Scheduling.Infrastructure/Persistence/Migrations` | `scheduling.__EFMigrationsHistory` |
 | `IdentityDbContext` | `identity` | `Modules/Identity/Identity.Infrastructure/Persistence/Migrations` | `identity.__EFMigrationsHistory` |
 | `MarketplaceDbContext` | `marketplace` | `Modules/Marketplace/Marketplace.Infrastructure/Persistence/Migrations` | `marketplace.__EFMigrationsHistory` |
+| `CustomersDbContext` | `customers` | `Modules/Customers/Customers.Infrastructure/Persistence/Migrations` | `customers.__EFMigrationsHistory` |
 
 **Order matters:** apply `ApplicationDbContext` first, then the modules. Module migrations may adopt tables
 that the core baseline created; for example, Inventory moves `d.inventory*` into the `inventory` schema and CRM moves `d.client` and
@@ -33,6 +34,7 @@ dotnet ef migrations add <Name> -p Modules/Crm/Crm.Infrastructure -s Api -c CrmD
 dotnet ef migrations add <Name> -p Modules/Scheduling/Scheduling.Infrastructure -s Api -c SchedulingDbContext -o Persistence/Migrations
 dotnet ef migrations add <Name> -p Modules/Identity/Identity.Infrastructure -s Api -c IdentityDbContext -o Persistence/Migrations
 dotnet ef migrations add <Name> -p Modules/Marketplace/Marketplace.Infrastructure -s Api -c MarketplaceDbContext -o Persistence/Migrations
+dotnet ef migrations add <Name> -p Modules/Customers/Customers.Infrastructure -s Api -c CustomersDbContext -o Persistence/Migrations
 ```
 
 Review the generated `Up`/`Down` code before committing it.
@@ -126,6 +128,7 @@ dotnet ef migrations script -p Modules/Crm/Crm.Infrastructure -s Api -c CrmDbCon
 dotnet ef migrations script -p Modules/Scheduling/Scheduling.Infrastructure -s Api -c SchedulingDbContext -o 5-scheduling.sql
 dotnet ef migrations script -p Modules/Identity/Identity.Infrastructure -s Api -c IdentityDbContext -o 6-identity.sql
 dotnet ef migrations script -p Modules/Marketplace/Marketplace.Infrastructure -s Api -c MarketplaceDbContext -o 7-marketplace.sql
+dotnet ef migrations script -p Modules/Customers/Customers.Infrastructure -s Api -c CustomersDbContext -o 8-customers.sql
 ```
 
 4. Deploy the new API version. On start it creates the `transport` schema for the message bus.
