@@ -25,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Api.Authorization;
 using Shared.Infrastructure.Tenancy;
 using Shared.Kernel.Tenancy;
 
@@ -37,7 +38,7 @@ namespace Identity.Api;
 /// </summary>
 public static class IdentityModule
 {
-    public const string OwnerOnlyPolicy = "OwnerOnly";
+    public const string OwnerOnlyPolicy = Policies.OwnerOnly;
 
     public static Assembly ConsumersAssembly => typeof(AccountInviteConsumer).Assembly;
 
