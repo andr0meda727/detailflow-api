@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Api.Extensions;
 using Api.Middleware;
 using Crm.Api;
@@ -14,7 +15,9 @@ using Shared.Kernel.Time;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+// Enums travel as their names ("Interior"), not numbers, so the API stays readable and reordering them is safe
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // Add Infrastructure (Database, Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
