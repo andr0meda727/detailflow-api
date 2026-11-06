@@ -16,6 +16,10 @@ using Scheduling.Application.Catalog.CreateService;
 using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
 using Scheduling.Application.Catalog.UpdateService;
+using Scheduling.Application.Requests.Estimate;
+using Scheduling.Application.Requests.GetMyRequests;
+using Scheduling.Application.Requests.Submit;
+using Scheduling.Application.Requests.Withdraw;
 using Scheduling.Infrastructure;
 using Scheduling.Infrastructure.Consumers;
 
@@ -43,6 +47,11 @@ public static class SchedulingModule
         services.AddScoped<CreateServiceHandler>();
         services.AddScoped<UpdateServiceHandler>();
         services.AddScoped<DeleteServiceHandler>();
+
+        services.AddScoped<EstimateHandler>();
+        services.AddScoped<SubmitBookingRequestHandler>();
+        services.AddScoped<GetMyBookingRequestsHandler>();
+        services.AddScoped<WithdrawBookingRequestHandler>();
 
         services.TryAddSingleton(TimeProvider.System);
 

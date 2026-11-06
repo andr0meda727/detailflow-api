@@ -22,6 +22,12 @@ public class SchedulingDbContext(DbContextOptions<SchedulingDbContext> options, 
 
     public DbSet<OnlineBookingRequest> BookingRequests => Set<OnlineBookingRequest>();
 
+    public IQueryable<Service> ServicesOfAnyStudio => Services.IgnoreQueryFilters([TenantFilter]);
+
+    public IQueryable<Booking> BookingsOfAnyStudio => Bookings.IgnoreQueryFilters([TenantFilter]);
+
+    public IQueryable<OnlineBookingRequest> BookingRequestsOfAnyStudio => BookingRequests.IgnoreQueryFilters([TenantFilter]);
+
     // No "Active" filter on services: past bookings must still load deactivated ones.
     // Queries that offer services for new bookings filter on IsActive themselves.
     protected override void ConfigureModel(ModelBuilder modelBuilder)
