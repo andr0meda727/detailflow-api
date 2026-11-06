@@ -51,7 +51,12 @@ public class ModuleBoundaryTests
             typeof(Marketplace.Domain.StudioListing).Assembly,
             typeof(Marketplace.Application.Abstractions.IMarketplaceDbContext).Assembly,
             typeof(Marketplace.Infrastructure.Persistence.MarketplaceDbContext).Assembly,
-            typeof(Marketplace.Api.MarketplaceModule).Assembly)
+            typeof(Marketplace.Api.MarketplaceModule).Assembly),
+        new("Customers",
+            typeof(Customers.Domain.CustomerVehicle).Assembly,
+            typeof(Customers.Application.Abstractions.ICustomersDbContext).Assembly,
+            typeof(Customers.Infrastructure.Persistence.CustomersDbContext).Assembly,
+            typeof(Customers.Api.CustomersModule).Assembly)
     ];
 
     public static IEnumerable<Module> LayeredModules => Modules.Where(m => m.Domain != null);

@@ -33,6 +33,7 @@
       <ProjectReference Include="..\Modules\Identity\Identity.Api\Identity.Api.csproj" />
       <ProjectReference Include="..\Modules\Notifications\Notifications.Api\Notifications.Api.csproj" />
       <ProjectReference Include="..\Modules\Marketplace\Marketplace.Api\Marketplace.Api.csproj" />
+      <ProjectReference Include="..\Modules\Customers\Customers.Api\Customers.Api.csproj" />
     </ItemGroup>
 
 </Project>
