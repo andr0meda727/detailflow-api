@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Notifications.Infrastructure.Email;
 
 namespace IntegrationTests.Api;
 
@@ -13,10 +14,13 @@ namespace IntegrationTests.Api;
 /// Boots the real API host against the test Postgres container.
 /// Scope and build validation are on, so a missing or captive registration fails at startup.
 /// Supabase JWT auth is replaced by <see cref="TestAuthHandler"/>; use <see cref="CreateClientFor"/> to act as a user.
+/// Supabase and SMTP are replaced by <see cref="Auth"/> and <see cref="Email"/>, which record what was sent.
 /// </summary>
 public class ApiFactory : WebApplicationFactory<Program>
 {
     public FakeAuthProvider Auth { get; } = new();
+
+    public FakeEmailSender Email { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -37,6 +41,7 @@ public class ApiFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services.AddSingleton<IAuthProvider>(Auth);
+            services.AddSingleton<IEmailSender>(Email);
 
             services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
@@ -60,10 +65,11 @@ public class ApiFactory : WebApplicationFactory<Program>
         return base.CreateHost(builder);
     }
 
-    public HttpClient CreateClientFor(Guid userId)
+    public HttpClient CreateClientFor(Guid userId, string? email = null)
     {
         var client = CreateClient();
         client.DefaultRequestHeaders.Add(TestAuthHandler.UserIdHeader, userId.ToString());
+        if (email != null) client.DefaultRequestHeaders.Add(TestAuthHandler.EmailHeader, email);
         return client;
     }
 }

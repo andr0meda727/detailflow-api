@@ -164,6 +164,28 @@ public class IdentityEndpointTests
     }
 
     [Test]
+    public async Task Invite_PersonWithAnAccount_GetsOurEmailInsteadOfASupabaseInvite()
+    {
+        var userId = Guid.NewGuid();
+        var email = $"{userId:N}@test.pl";
+        await using (var db = PostgresFixture.CreateIdentityDbContext(new TenantContext()))
+        {
+            db.Users.Add(new User(userId, email, null, null));
+            await db.SaveChangesAsync();
+        }
+        using var owner = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var invite = await owner.PostAsJsonAsync("/api/employees/invite", new { email, roleId = Roles.Employee });
+        Assert.That(invite.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (_factory.Email.Invitations.All(i => i.To != email) && DateTime.UtcNow < deadline) await Task.Delay(100);
+
+        Assert.That(_factory.Email.Invitations.Count(i => i.To == email), Is.EqualTo(1));
+        Assert.That(_factory.Email.Invitations.Single(i => i.To == email).AcceptUrl, Does.Contain("token="));
+        Assert.That(_factory.Auth.Invites.Any(i => i.Email == email), Is.False);
+    }
+    [Test]
     public async Task Register_CreatesTheStudioWithItsOwner()
     {
         var email = $"{Guid.NewGuid():N}@test.pl";

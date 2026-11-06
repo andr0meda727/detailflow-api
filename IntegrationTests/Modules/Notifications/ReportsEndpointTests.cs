@@ -32,4 +32,35 @@ public class ReportsEndpointTests
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
+
+    [Test]
+    public async Task Request_IsEmailedAsAPdfToTheCaller()
+    {
+        var email = $"report-{Guid.NewGuid():N}@test.pl";
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId, email);
+
+        var response = await client.PostAsJsonAsync("/api/reports/bookings",
+            new { dateFrom = DateTime.UtcNow.AddDays(-7), dateTo = DateTime.UtcNow.AddDays(1) });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
+
+        // The report is built by a consumer on the bus, so it arrives a moment later
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (_factory.Email.Reports.All(r => r.To != email) && DateTime.UtcNow < deadline) await Task.Delay(100);
+
+        var report = _factory.Email.Reports.SingleOrDefault(r => r.To == email);
+        Assert.That(report.Pdf, Is.Not.Null, "No report email arrived");
+        Assert.That(report.Pdf.AsSpan().StartsWith("%PDF"u8), Is.True);
+    }
+
+    [Test]
+    public async Task WithoutAnEmailInTheToken_IsUnauthorized()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var response = await client.PostAsJsonAsync("/api/reports/bookings",
+            new { dateFrom = DateTime.UtcNow.AddDays(-7), dateTo = DateTime.UtcNow });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
 }
