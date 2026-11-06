@@ -19,7 +19,7 @@ public static class NotificationsModule
 
     public static IServiceCollection AddNotificationsModule(this IServiceCollection services)
     {
-        services.AddScoped<SmtpEmailSender>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddSingleton<BookingsReportPdf>();
 
         services.AddValidatorsFromAssemblyContaining<BookingsReportRequestValidator>();

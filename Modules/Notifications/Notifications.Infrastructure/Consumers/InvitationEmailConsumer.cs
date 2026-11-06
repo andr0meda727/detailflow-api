@@ -8,7 +8,7 @@ namespace Notifications.Infrastructure.Consumers;
 /// Emails the accept link to an invited person who already has a login. People without one get
 /// Supabase's sign-up email instead, sent by the Identity module.
 /// </summary>
-public class InvitationEmailConsumer(SmtpEmailSender emailSender) : IConsumer<EmployeeInvited>
+public class InvitationEmailConsumer(IEmailSender emailSender) : IConsumer<EmployeeInvited>
 {
     public async Task Consume(ConsumeContext<EmployeeInvited> context)
     {

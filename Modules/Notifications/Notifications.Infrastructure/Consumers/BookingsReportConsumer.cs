@@ -9,7 +9,7 @@ namespace Notifications.Infrastructure.Consumers;
 public class BookingsReportConsumer(
     IBookingReportSource bookingReportSource,
     BookingsReportPdf reportPdf,
-    SmtpEmailSender emailSender) : IConsumer<GenerateBookingsReport>
+    IEmailSender emailSender) : IConsumer<GenerateBookingsReport>
 {
     public async Task Consume(ConsumeContext<GenerateBookingsReport> context)
     {

@@ -7,7 +7,7 @@ namespace Notifications.Infrastructure.Email;
 /// <summary>
 /// Sends the app's emails over SMTP (Mailpit locally, see compose.yaml).
 /// </summary>
-public class SmtpEmailSender(IConfiguration config)
+public class SmtpEmailSender(IConfiguration config) : IEmailSender
 {
     private readonly string _host = config["Email:Host"]
         ?? throw new InvalidOperationException("Brak Email:Host");
