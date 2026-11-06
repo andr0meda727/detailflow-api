@@ -1,17 +1,20 @@
-using Scheduling.Contracts;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Scheduling.Contracts;
+using Shared.Kernel.Time;
 
 namespace Notifications.Infrastructure.Reports;
 
 /// <summary>
-/// Renders the bookings of a period as a PDF (QuestPDF, community licence).
+/// Renders the bookings of a period as a PDF (QuestPDF, community licence). Times are stored in UTC and printed in
+/// the studio's time zone, which the header names.
 /// </summary>
 public class BookingsReportPdf
 {
     public byte[] Render(
-        IEnumerable<BookingReportRow> bookings, DateTime dateFrom, DateTime dateTo)
+        IEnumerable<BookingReportRow> bookings, DateOnly dateFrom, DateOnly dateTo, TimeZoneInfo timeZone,
+        DateTime generatedAtUtc)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
@@ -30,7 +33,7 @@ public class BookingsReportPdf
                     col.Item().Text("DetailFlow — Raport wizyt")
                         .Bold().FontSize(18);
                     col.Item().Text(
-                        $"Okres: {dateFrom:dd.MM.yyyy} — {dateTo:dd.MM.yyyy}")
+                        $"Okres: {dateFrom:dd.MM.yyyy} — {dateTo:dd.MM.yyyy}  |  Strefa czasowa: {timeZone.Id}")
                         .FontSize(11).FontColor(Colors.Grey.Medium);
                     col.Item().PaddingTop(4).LineHorizontal(1)
                         .LineColor(Colors.Grey.Lighten2);
@@ -85,7 +88,7 @@ public class BookingsReportPdf
                             var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
 
                             table.Cell().Background(bg).Padding(6)
-                                .Text(booking.ScheduledAt.ToString("dd.MM.yyyy HH:mm"));
+                                .Text(TimeZones.ToLocal(booking.ScheduledAt, timeZone).ToString("dd.MM.yyyy HH:mm"));
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.ClientName);
                             table.Cell().Background(bg).Padding(6)
@@ -99,8 +102,8 @@ public class BookingsReportPdf
                 page.Footer().AlignCenter().Text(text =>
                 {
                     text.Span("Wygenerowano: ");
-                    text.Span(DateTime.UtcNow.ToString("dd.MM.yyyy HH:mm"));
-                    text.Span(" UTC  |  Strona ");
+                    text.Span(TimeZones.ToLocal(generatedAtUtc, timeZone).ToString("dd.MM.yyyy HH:mm"));
+                    text.Span("  |  Strona ");
                     text.CurrentPageNumber();
                     text.Span(" z ");
                     text.TotalPages();

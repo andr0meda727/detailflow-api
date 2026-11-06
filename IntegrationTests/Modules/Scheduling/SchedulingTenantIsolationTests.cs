@@ -1,5 +1,6 @@
 using Crm.Contracts;
 using IntegrationTests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using Scheduling.Application.Bookings;
@@ -114,5 +115,21 @@ public class SchedulingTenantIsolationTests
         Assert.That(row.ClientName, Is.EqualTo("Jan"));
         Assert.That(row.Services, Is.EqualTo(new[] { "Polishing" }));
         Assert.That(row.Status, Is.EqualTo("Created"));
+    }
+
+    [Test]
+    public async Task ReportSource_IncludesTheStartAndExcludesTheEnd()
+    {
+        await using var db = PostgresFixture.CreateSchedulingDbContext(new TenantContext());
+        var scheduledAt = await db.Bookings.IgnoreQueryFilters()
+            .Where(b => b.Id == _seed.StudioA.BookingId).Select(b => b.ScheduledAt).SingleAsync(Ct);
+        var source = new BookingReportSource(db);
+
+        // Back-to-back ranges (one local day after another) must not count a booking twice
+        var endsAtIt = await source.GetBookingsAsync(_seed.StudioA.StudioId, scheduledAt.AddHours(-1), scheduledAt, Ct);
+        var startsAtIt = await source.GetBookingsAsync(_seed.StudioA.StudioId, scheduledAt, scheduledAt.AddHours(1), Ct);
+
+        Assert.That(endsAtIt, Is.Empty);
+        Assert.That(startsAtIt, Has.Count.EqualTo(1));
     }
 }

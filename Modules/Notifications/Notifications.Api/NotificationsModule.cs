@@ -1,6 +1,7 @@
 using System.Reflection;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Notifications.Api.Controllers;
 using Notifications.Infrastructure.Consumers;
 using Notifications.Infrastructure.Email;
@@ -21,6 +22,7 @@ public static class NotificationsModule
     {
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddSingleton<BookingsReportPdf>();
+        services.TryAddSingleton(TimeProvider.System);
 
         services.AddValidatorsFromAssemblyContaining<BookingsReportRequestValidator>();
 

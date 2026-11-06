@@ -4,6 +4,7 @@ using FluentValidation;
 using Identity.Api.Controllers;
 using Identity.Application;
 using Identity.Application.Abstractions;
+using Identity.Application.Directory;
 using Identity.Application.Employees.ChangeEmployeeRole;
 using Identity.Application.Employees.GetEmployees;
 using Identity.Application.Employees.InviteEmployee;
@@ -15,6 +16,7 @@ using Identity.Application.Studios.ChangeStudioTimeZone;
 using Identity.Application.Studios.GetMyStudios;
 using Identity.Application.Studios.RegisterOwner;
 using Identity.Application.Tenancy;
+using Identity.Contracts;
 using Identity.Domain.Studios;
 using Identity.Infrastructure;
 using Identity.Infrastructure.Consumers;
@@ -55,6 +57,9 @@ public static class IdentityModule
         services.AddScoped<AcceptInvitationHandler>();
         services.AddScoped<DeclineInvitationHandler>();
         services.AddScoped<ResolveCallerHandler>();
+
+        // Other modules read studio facts (the time zone) only through this
+        services.AddScoped<IStudioDirectory, StudioDirectory>();
 
         var frontendBaseUrl = configuration["Frontend:BaseUrl"]
                               ?? throw new InvalidOperationException("Frontend:BaseUrl is missing.");

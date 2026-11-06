@@ -8,6 +8,8 @@ namespace IntegrationTests.Modules.Notifications;
 [TestFixture]
 public class ReportsEndpointTests
 {
+    private static readonly DateOnly Today = DateOnly.FromDateTime(DateTime.UtcNow);
+
     private ApiFactory _factory = null!;
     private TwoStudiosSeed _seed = null!;
 
@@ -28,7 +30,19 @@ public class ReportsEndpointTests
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
 
         var response = await client.PostAsJsonAsync("/api/reports/bookings",
-            new { dateFrom = DateTime.UtcNow, dateTo = DateTime.UtcNow.AddDays(-1) });
+            new { dateFrom = Today, dateTo = Today.AddDays(-1) });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public async Task ATimestampInsteadOfADate_IsRejected()
+    {
+        // The period is a range of the studio's calendar days, so a moment in time is ambiguous
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId, "owner@test.pl");
+
+        var response = await client.PostAsJsonAsync("/api/reports/bookings",
+            new { dateFrom = "2026-10-01T00:00:00Z", dateTo = "2026-10-31" });
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
@@ -40,7 +54,7 @@ public class ReportsEndpointTests
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId, email);
 
         var response = await client.PostAsJsonAsync("/api/reports/bookings",
-            new { dateFrom = DateTime.UtcNow.AddDays(-7), dateTo = DateTime.UtcNow.AddDays(1) });
+            new { dateFrom = Today.AddDays(-7), dateTo = Today.AddDays(1) });
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
 
@@ -51,6 +65,7 @@ public class ReportsEndpointTests
         var report = _factory.Email.Reports.SingleOrDefault(r => r.To == email);
         Assert.That(report.Pdf, Is.Not.Null, "No report email arrived");
         Assert.That(report.Pdf.AsSpan().StartsWith("%PDF"u8), Is.True);
+        Assert.That(report.DateFrom, Is.EqualTo(Today.AddDays(-7)));
     }
 
     [Test]
@@ -59,7 +74,7 @@ public class ReportsEndpointTests
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
 
         var response = await client.PostAsJsonAsync("/api/reports/bookings",
-            new { dateFrom = DateTime.UtcNow.AddDays(-7), dateTo = DateTime.UtcNow });
+            new { dateFrom = Today.AddDays(-7), dateTo = Today });
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
     }

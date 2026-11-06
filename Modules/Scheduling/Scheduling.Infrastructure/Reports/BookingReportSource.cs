@@ -8,13 +8,13 @@ namespace Scheduling.Infrastructure.Reports;
 public class BookingReportSource(SchedulingDbContext db) : IBookingReportSource
 {
     public async Task<IReadOnlyList<BookingReportRow>> GetBookingsAsync(
-        Guid studioId, DateTime dateFrom, DateTime dateTo, CancellationToken cancellationToken = default)
+        Guid studioId, DateTime fromUtc, DateTime toUtcExclusive, CancellationToken cancellationToken = default)
     {
         // Report jobs run on the bus without a tenant, so the studio comes from the caller
         var bookings = await db.Bookings
             .IgnoreQueryFilters([TenantDbContext.TenantFilter])
             .AsNoTracking()
-            .Where(b => b.StudioId == studioId && b.ScheduledAt >= dateFrom && b.ScheduledAt <= dateTo)
+            .Where(b => b.StudioId == studioId && b.ScheduledAt >= fromUtc && b.ScheduledAt < toUtcExclusive)
             .OrderBy(b => b.ScheduledAt)
             .Select(b => new
             {

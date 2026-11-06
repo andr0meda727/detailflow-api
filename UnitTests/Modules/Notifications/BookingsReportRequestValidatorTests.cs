@@ -6,7 +6,7 @@ namespace Unit.Modules.Notifications;
 [TestFixture]
 public class BookingsReportRequestValidatorTests
 {
-    private static readonly DateTime From = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly DateOnly From = new(2028, 1, 1);
     private readonly BookingsReportRequestValidator _validator = new();
 
     [Test]
@@ -16,15 +16,15 @@ public class BookingsReportRequestValidatorTests
     }
 
     [Test]
-    public void Passes_ForAFullLeapYear()
+    public void Passes_ForAWholeLeapYear()
     {
-        _validator.TestValidate(new BookingsReportRequest(From, From.AddDays(366))).ShouldNotHaveAnyValidationErrors();
+        _validator.TestValidate(new BookingsReportRequest(From, new DateOnly(2028, 12, 31))).ShouldNotHaveAnyValidationErrors();
     }
 
     [Test]
     public void Rejects_MoreThanAYear()
     {
-        _validator.TestValidate(new BookingsReportRequest(From, From.AddDays(366).AddSeconds(1)))
+        _validator.TestValidate(new BookingsReportRequest(From, new DateOnly(2029, 1, 1)))
             .ShouldHaveValidationErrorFor(x => x.DateTo);
     }
 

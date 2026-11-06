@@ -8,5 +8,5 @@ public interface IEmailSender
     /// <param name="expiresAt">UTC; the email shows it in <paramref name="timeZone"/>.</param>
     Task SendInvitationEmailAsync(string to, string studioName, string acceptUrl, DateTime expiresAt, TimeZoneInfo timeZone);
 
-    Task SendReportEmailAsync(string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes);
+    Task SendReportEmailAsync(string to, DateOnly dateFrom, DateOnly dateTo, byte[] pdfBytes);
 }

@@ -43,7 +43,7 @@ public static class EmailTemplates
         return new EmailContent($"Zaproszenie do studia {SingleLine(studioName)}", html);
     }
 
-    public static EmailContent BookingsReport(DateTime dateFrom, DateTime dateTo) => new(
+    public static EmailContent BookingsReport(DateOnly dateFrom, DateOnly dateTo) => new(
         $"Raport wizyt {dateFrom:dd.MM.yyyy}–{dateTo:dd.MM.yyyy}",
         $"""
          <p>Cześć,</p>

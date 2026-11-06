@@ -44,7 +44,7 @@ public class EmailTemplatesTests
     [Test]
     public void BookingsReport_ShowsThePeriod()
     {
-        var email = EmailTemplates.BookingsReport(new DateTime(2026, 10, 1), new DateTime(2026, 10, 31));
+        var email = EmailTemplates.BookingsReport(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31));
 
         Assert.That(email.Subject, Is.EqualTo("Raport wizyt 01.10.2026–31.10.2026"));
         Assert.That(email.Html, Does.Contain("01.10.2026 — 31.10.2026"));

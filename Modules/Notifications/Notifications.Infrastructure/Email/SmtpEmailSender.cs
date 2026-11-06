@@ -27,7 +27,7 @@ public class SmtpEmailSender(IConfiguration config) : IEmailSender
         await SendAsync(message);
     }
 
-    public async Task SendReportEmailAsync(string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes)
+    public async Task SendReportEmailAsync(string to, DateOnly dateFrom, DateOnly dateTo, byte[] pdfBytes)
     {
         using var message = Compose(to, EmailTemplates.BookingsReport(dateFrom, dateTo));
         message.Attachments.Add(new Attachment(
