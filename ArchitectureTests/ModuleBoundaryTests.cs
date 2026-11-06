@@ -46,7 +46,12 @@ public class ModuleBoundaryTests
             typeof(Identity.Api.IdentityModule).Assembly),
         new("Notifications", null, null,
             typeof(Notifications.Infrastructure.Reports.BookingsReportPdf).Assembly,
-            typeof(Notifications.Api.NotificationsModule).Assembly)
+            typeof(Notifications.Api.NotificationsModule).Assembly),
+        new("Marketplace",
+            typeof(Marketplace.Domain.StudioListing).Assembly,
+            typeof(Marketplace.Application.Abstractions.IMarketplaceDbContext).Assembly,
+            typeof(Marketplace.Infrastructure.Persistence.MarketplaceDbContext).Assembly,
+            typeof(Marketplace.Api.MarketplaceModule).Assembly)
     ];
 
     public static IEnumerable<Module> LayeredModules => Modules.Where(m => m.Domain != null);

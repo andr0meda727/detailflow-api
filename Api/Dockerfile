@@ -30,6 +30,10 @@ COPY ["Modules/Inventory/Inventory.Domain/Inventory.Domain.csproj", "Modules/Inv
 COPY ["Modules/Inventory/Inventory.Application/Inventory.Application.csproj", "Modules/Inventory/Inventory.Application/"]
 COPY ["Modules/Inventory/Inventory.Infrastructure/Inventory.Infrastructure.csproj", "Modules/Inventory/Inventory.Infrastructure/"]
 COPY ["Modules/Inventory/Inventory.Api/Inventory.Api.csproj", "Modules/Inventory/Inventory.Api/"]
+COPY ["Modules/Marketplace/Marketplace.Domain/Marketplace.Domain.csproj", "Modules/Marketplace/Marketplace.Domain/"]
+COPY ["Modules/Marketplace/Marketplace.Application/Marketplace.Application.csproj", "Modules/Marketplace/Marketplace.Application/"]
+COPY ["Modules/Marketplace/Marketplace.Infrastructure/Marketplace.Infrastructure.csproj", "Modules/Marketplace/Marketplace.Infrastructure/"]
+COPY ["Modules/Marketplace/Marketplace.Api/Marketplace.Api.csproj", "Modules/Marketplace/Marketplace.Api/"]
 RUN dotnet restore "Api/Api.csproj"
 
 COPY . .

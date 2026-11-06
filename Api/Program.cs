@@ -6,6 +6,7 @@ using Identity.Api;
 using Identity.Api.Tenancy;
 using Infrastructure.Extensions;
 using Inventory.Api;
+using Marketplace.Api;
 using Notifications.Api;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -31,6 +32,7 @@ builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddCrmModule(builder.Configuration);
 builder.Services.AddSchedulingModule(builder.Configuration);
 builder.Services.AddNotificationsModule();
+builder.Services.AddMarketplaceModule(builder.Configuration);
 
 // One bus for the host; every assembly with consumers is listed here
 builder.Services.AddMessaging(builder.Configuration,

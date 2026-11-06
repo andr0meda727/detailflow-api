@@ -6,6 +6,7 @@ using BookingStatus = Scheduling.Domain.Bookings.BookingStatus;
 using Scheduling.Infrastructure.Persistence;
 using Infrastructure.Data;
 using Inventory.Infrastructure.Persistence;
+using Marketplace.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 using Shared.Infrastructure.Tenancy;
@@ -44,6 +45,8 @@ public class PostgresFixture
         await schedulingDb.Database.MigrateAsync();
         await using var identityDb = CreateIdentityDbContext(new TenantContext());
         await identityDb.Database.MigrateAsync();
+        await using var marketplaceDb = CreateMarketplaceDbContext(new TenantContext());
+        await marketplaceDb.Database.MigrateAsync();
 
         await SeedLookupsAsync(identityDb, schedulingDb);
     }
@@ -97,6 +100,15 @@ public class PostgresFixture
             .Options;
 
         return new IdentityDbContext(options, tenantContext);
+    }
+
+    public static MarketplaceDbContext CreateMarketplaceDbContext(ITenantContext tenantContext)
+    {
+        var options = new DbContextOptionsBuilder<MarketplaceDbContext>()
+            .UseNpgsql(ConnectionString, npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", MarketplaceDbContext.Schema))
+            .Options;
+
+        return new MarketplaceDbContext(options, tenantContext);
     }
 
     private static async Task SeedLookupsAsync(IdentityDbContext identityDb, SchedulingDbContext schedulingDb)
