@@ -27,6 +27,9 @@ public class Client : IAuditableEntity, ITenantEntity
 
     public string? Nip { get; private set; }
 
+    // The customer account this client books from on the public map, once linked
+    public Guid? CustomerUserId { get; private set; }
+
     public bool IsDeleted { get; private set; }
 
     public DateTime CreatedAt { get; set; }
@@ -61,6 +64,17 @@ public class Client : IAuditableEntity, ITenantEntity
         var vehicle = Vehicle.Create(Id, licensePlate, brand, model, size);
         _vehicles.Add(vehicle);
         return vehicle;
+    }
+
+    /// <summary>
+    /// Links the client to the customer account that booked online. An existing link is kept: two accounts with the
+    /// same phone number are one client to the studio, and the first account stays its owner.
+    /// </summary>
+    public void LinkCustomer(Guid customerUserId)
+    {
+        if (customerUserId == Guid.Empty) throw new ArgumentException("A customer account is required.", nameof(customerUserId));
+
+        CustomerUserId ??= customerUserId;
     }
 
     /// <summary>

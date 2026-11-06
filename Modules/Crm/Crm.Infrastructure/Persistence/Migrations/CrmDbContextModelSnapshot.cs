@@ -37,6 +37,10 @@ namespace Crm.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<Guid?>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
                     b.Property<string>("Email")
                         .HasColumnType("text")
                         .HasColumnName("email");
@@ -71,6 +75,8 @@ namespace Crm.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("client_pkey");
+
+                    b.HasIndex(new[] { "StudioId", "CustomerUserId" }, "IX_client_studio_id_customer_user_id");
 
                     b.HasIndex(new[] { "StudioId", "Phone" }, "client_studio_id_phone_key")
                         .IsUnique()

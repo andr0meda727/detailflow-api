@@ -22,6 +22,11 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .IsUnique()
             .HasFilter("is_deleted = false");
 
+        // Finding the client an online customer books as
+        builder.HasIndex(e => new { e.StudioId, e.CustomerUserId }, "IX_client_studio_id_customer_user_id");
+
+        builder.Property(e => e.CustomerUserId).HasColumnName("customer_user_id");
+
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
