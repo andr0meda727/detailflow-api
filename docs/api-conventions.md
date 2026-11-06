@@ -85,3 +85,21 @@ pages and doesn't suit infinite scroll.
   - `PUT /api/service/{id}` takes the same body. Left out, `category` and `prices` stay as they are; a sent `prices`
     list replaces the old one (`[]` clears it).
 - CRM vehicles have a `size` (default `Medium`). Left out on edit, it stays as it is.
+
+## Public endpoints (customer map)
+
+- `GET /api/public/studios` and `GET /api/public/studios/{id}` need no login, never ask for a studio (no
+  `X-Studio-Id`, even for staff of several studios), and are rate-limited per client IP
+  (`RateLimiting:PublicPermitLimit` requests per minute, 120 by default; over it, 429).
+- Search takes the visible map area and optional filters:
+  `?minLat=50.0&maxLat=50.1&minLng=19.8&maxLng=20.1&category=Interior&vehicleSize=Large&page=1&pageSize=50`.
+  It returns published studios as pins: `studioId`, `name`, `city`, `latitude`, `longitude`, `categories`, and
+  `fromPrice` (the cheapest price for that vehicle size within the category; null means "price on request").
+- Only published listings are visible; an unpublished or unknown studio is 404 `LISTING_NOT_FOUND`.
+- The owner manages the listing with `GET/PUT /api/marketplace/listing` (name, description, address, city, phone,
+  `latitude`/`longitude` from a pin on a map) and `POST /api/marketplace/listing/publish` or `/unpublish`.
+  A new listing copies the studio's current services; later service changes follow automatically.
+  Publishing needs at least one service (`LISTING_HAS_NO_SERVICES`).
+- Behind the production reverse proxy, the API takes the client IP from `X-Forwarded-For` (trusted from loopback
+  and private addresses only), so the proxy must set it. Nginx needs
+  `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`; Caddy sends it by default.

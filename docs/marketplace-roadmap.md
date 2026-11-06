@@ -14,7 +14,7 @@ each request, so the customer only suggests a time.
 - CRM vehicles have a size.
 - See "Services, categories and vehicle sizes" in `api-conventions.md`.
 
-## 2. Public studio profile and map search (new Marketplace module)
+## 2. Public studio profile and map search (new Marketplace module) (done)
 - Module `Modules/Marketplace`, schema `marketplace`. Add it to `ModuleBoundaryTests.Modules`, the Dockerfile and the solution.
 - `StudioListing`, one per studio. The owner edits it through a staff endpoint:
   - description, address and city;
@@ -22,7 +22,8 @@ each request, so the customer only suggests a time.
   - phone and `IsPublished` (off until the owner publishes).
 - Marketplace keeps its own copy of each studio's services, categories and prices. A new Scheduling event,
   `ServiceCatalogChanged`, feeds it from the outbox, the same way `BookingCopiesConsumer` keeps booking copies.
-  The studio name comes from Identity events, and a one-time backfill seeds existing studios.
+  A new listing pulls the current catalogue through `Scheduling.Contracts.IServiceCatalogSource`, so existing
+  studios need no backfill. The public name is the listing's own (the owner enters it), not Identity's studio name.
 - Public, anonymous, rate-limited endpoints (`AddRateLimiter`):
   - `GET /api/public/studios?minLat&maxLat&minLng&maxLng&category&vehicleSize&page` searches the visible map area.
     It uses a lat/lng index (no PostGIS yet) and returns the pin, name, rating, categories and the "from" price for
