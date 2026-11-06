@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Scheduling.Application.Abstractions;
 using Scheduling.Domain.Bookings;
 using Scheduling.Domain.Catalog;
+using Scheduling.Domain.Requests;
 using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Infrastructure.Persistence;
 using Shared.Kernel.Tenancy;
@@ -18,6 +19,8 @@ public class SchedulingDbContext(DbContextOptions<SchedulingDbContext> options, 
     public DbSet<BookingStatus> BookingStatuses => Set<BookingStatus>();
 
     public DbSet<Service> Services => Set<Service>();
+
+    public DbSet<OnlineBookingRequest> BookingRequests => Set<OnlineBookingRequest>();
 
     // No "Active" filter on services: past bookings must still load deactivated ones.
     // Queries that offer services for new bookings filter on IsActive themselves.

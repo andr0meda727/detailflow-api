@@ -63,6 +63,10 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<Guid?>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("notes");
@@ -112,6 +116,9 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                     b.HasIndex("ClientId");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("CustomerUserId")
+                        .HasDatabaseName("IX_booking_customer_user_id");
 
                     b.HasIndex("StatusId");
 
@@ -236,6 +243,122 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Scheduling.Domain.Requests.OnlineBookingRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("customer_email");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<Guid>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("decided_at");
+
+                    b.Property<long>("EstimatedPriceInCents")
+                        .HasColumnType("bigint")
+                        .HasColumnName("estimated_price_cents");
+
+                    b.Property<bool>("HasUnpricedServices")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_unpriced_services");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("notes");
+
+                    b.Property<DateTime>("PreferredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("preferred_at");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<string>("StudioName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("studio_name");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("VehicleBrand")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("vehicle_brand");
+
+                    b.Property<string>("VehicleLicensePlate")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("vehicle_license_plate");
+
+                    b.Property<string>("VehicleModel")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("vehicle_model");
+
+                    b.Property<string>("VehicleSize")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_size");
+
+                    b.HasKey("Id")
+                        .HasName("booking_request_pkey");
+
+                    b.HasIndex(new[] { "CustomerUserId", "CreatedAt" }, "IX_booking_request_customer_user_id_created_at");
+
+                    b.HasIndex(new[] { "StudioId", "Status", "CreatedAt" }, "IX_booking_request_studio_id_status_created_at");
+
+                    b.ToTable("booking_request", "scheduling");
+                });
+
             modelBuilder.Entity("Shared.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -338,6 +461,41 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("Scheduling.Domain.Requests.OnlineBookingRequest", b =>
+                {
+                    b.OwnsMany("Scheduling.Domain.Requests.RequestedService", "Services", b1 =>
+                        {
+                            b1.Property<Guid>("RequestId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("request_id");
+
+                            b1.Property<Guid>("ServiceId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid")
+                                .HasColumnName("service_id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("name");
+
+                            b1.Property<long?>("PriceInCents")
+                                .HasColumnType("bigint")
+                                .HasColumnName("price_cents");
+
+                            b1.HasKey("RequestId", "ServiceId")
+                                .HasName("booking_request_service_pkey");
+
+                            b1.ToTable("booking_request_service", "scheduling");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RequestId")
+                                .HasConstraintName("booking_request_service_request_id_fkey");
+                        });
+
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("Scheduling.Domain.Bookings.Booking", b =>

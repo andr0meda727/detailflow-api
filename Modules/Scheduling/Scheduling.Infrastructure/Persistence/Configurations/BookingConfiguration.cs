@@ -26,6 +26,9 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasIndex(e => e.VehicleId);
         builder.HasIndex(e => e.CreatedBy);
 
+        // A customer's bookings across studios
+        builder.HasIndex(e => e.CustomerUserId).HasDatabaseName("IX_booking_customer_user_id");
+
         builder.Property(e => e.Id)
             .HasDefaultValueSql("gen_random_uuid()")
             .HasColumnName("id");
@@ -48,6 +51,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(e => e.TotalPrice).HasColumnName("total_price");
         builder.Property(e => e.Notes).HasColumnName("notes");
         builder.Property(e => e.CreatedBy).HasColumnName("created_by");
+        builder.Property(e => e.CustomerUserId).HasColumnName("customer_user_id");
 
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")

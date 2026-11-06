@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Scheduling.Domain.Bookings;
 using Scheduling.Domain.Catalog;
+using Scheduling.Domain.Requests;
 using Shared.Application.Messaging;
 
 namespace Scheduling.Application.Abstractions;
@@ -16,6 +17,8 @@ public interface ISchedulingDbContext : IOutbox
     DbSet<BookingStatus> BookingStatuses { get; }
 
     DbSet<Service> Services { get; }
+
+    DbSet<OnlineBookingRequest> BookingRequests { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

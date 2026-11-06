@@ -50,6 +50,9 @@ public class Booking : IAuditableEntity, ITenantEntity
 
     public Guid? CreatedBy { get; private set; }
 
+    // The customer account the booking was requested from on the public map; null for bookings staff entered
+    public Guid? CustomerUserId { get; private set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
@@ -62,9 +65,12 @@ public class Booking : IAuditableEntity, ITenantEntity
 
     public static Booking Create(
         BookingClient client, BookingVehicle vehicle, DateTime scheduledAt, long priceInCents, string? notes,
-        IReadOnlyCollection<Guid> serviceIds, Guid? createdBy)
+        IReadOnlyCollection<Guid> serviceIds, Guid? createdBy, Guid? customerUserId = null)
     {
-        var booking = new Booking { Id = Guid.NewGuid(), StatusId = BookingStatus.Created, CreatedBy = createdBy };
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(), StatusId = BookingStatus.Created, CreatedBy = createdBy, CustomerUserId = customerUserId
+        };
         booking.Apply(client, vehicle, scheduledAt, priceInCents, notes, serviceIds);
         return booking;
     }
