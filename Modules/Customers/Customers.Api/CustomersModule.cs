@@ -6,7 +6,9 @@ using Customers.Application.Garage.GetMyVehicles;
 using Customers.Application.Garage.UpdateVehicle;
 using Customers.Application.Profile.GetMyProfile;
 using Customers.Application.Profile.SaveMyProfile;
+using Customers.Contracts;
 using Customers.Infrastructure;
+using Customers.Infrastructure.Directory;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,9 @@ public static class CustomersModule
         services.AddScoped<DeleteVehicleHandler>();
 
         services.AddValidatorsFromAssemblyContaining<ProfileRequestValidator>();
+
+        // Other modules read customer data only through this
+        services.AddScoped<ICustomerDirectory, CustomerDirectory>();
 
         services.AddCustomersInfrastructure(configuration);
 

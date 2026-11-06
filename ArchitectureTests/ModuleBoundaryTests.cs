@@ -139,7 +139,9 @@ public class ModuleBoundaryTests
         typeof(Crm.Contracts.IClientDirectory).Assembly,
         typeof(Scheduling.Contracts.IBookingReportSource).Assembly,
         typeof(Identity.Contracts.EmployeeInvited).Assembly,
-        typeof(Notifications.Contracts.GenerateBookingsReport).Assembly
+        typeof(Notifications.Contracts.GenerateBookingsReport).Assembly,
+        typeof(Customers.Contracts.ICustomerDirectory).Assembly,
+        typeof(Marketplace.Contracts.IPublicStudios).Assembly
     ];
 
     [TestCaseSource(nameof(ContractAssemblies))]

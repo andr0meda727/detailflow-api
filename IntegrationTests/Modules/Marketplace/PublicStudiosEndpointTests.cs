@@ -5,6 +5,7 @@ using Identity.Domain.Studios;
 using Identity.Domain.Users;
 using IntegrationTests.Api;
 using IntegrationTests.Infrastructure;
+using Marketplace.Application.Directory;
 using Shared.Infrastructure.Tenancy;
 
 namespace IntegrationTests.Modules.Marketplace;
@@ -105,6 +106,16 @@ public class PublicStudiosEndpointTests
         var ceramic = page.GetProperty("services").EnumerateArray().Single(s => s.GetProperty("id").GetGuid() == _ceramicId);
         Assert.That(ceramic.GetProperty("prices")[0].GetProperty("vehicleSize").GetString(), Is.EqualTo("Large"));
         Assert.That(hidden.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+
+    [Test]
+    public async Task PublicStudios_KnowsOnlyPublishedStudios()
+    {
+        await using var db = PostgresFixture.CreateMarketplaceDbContext(new TenantContext());
+        var studios = new PublicStudios(db);
+
+        Assert.That((await studios.FindPublishedAsync(_seed.StudioA.StudioId))?.Name, Is.EqualTo("Studio A"));
+        Assert.That(await studios.FindPublishedAsync(_seed.StudioB.StudioId), Is.Null);
     }
 
     [Test]

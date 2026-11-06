@@ -1,12 +1,14 @@
 using System.Reflection;
 using FluentValidation;
 using Marketplace.Api.Controllers;
+using Marketplace.Application.Directory;
 using Marketplace.Application.Listings;
 using Marketplace.Application.Listings.GetMyListing;
 using Marketplace.Application.Listings.PublishListing;
 using Marketplace.Application.Listings.SaveListing;
 using Marketplace.Application.Search.GetPublicStudio;
 using Marketplace.Application.Search.SearchStudios;
+using Marketplace.Contracts;
 using Marketplace.Infrastructure;
 using Marketplace.Infrastructure.Consumers;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +35,9 @@ public static class MarketplaceModule
         services.AddScoped<GetPublicStudioHandler>();
 
         services.AddValidatorsFromAssemblyContaining<ListingRequestValidator>();
+
+        // Other modules ask which studios are public through this
+        services.AddScoped<IPublicStudios, PublicStudios>();
 
         services.AddMarketplaceInfrastructure(configuration);
 
