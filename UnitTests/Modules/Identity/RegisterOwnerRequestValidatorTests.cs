@@ -23,6 +23,22 @@ public class RegisterOwnerRequestValidatorTests
         result.ShouldNotHaveAnyValidationErrors();
     }
 
+    [TestCase("Europe/Warsaw")]
+    [TestCase("Europe/Berlin")]
+    public void Validate_AcceptsAnIanaTimeZone(string timeZone)
+    {
+        var dto = ValidDto(); dto.Studio.TimeZone = timeZone;
+        _validator.TestValidate(dto).ShouldNotHaveAnyValidationErrors();
+    }
+
+    [TestCase("Warsaw")]
+    [TestCase("Central European Standard Time")]
+    public void Validate_FailsForAnUnknownTimeZone(string timeZone)
+    {
+        var dto = ValidDto(); dto.Studio.TimeZone = timeZone;
+        _validator.TestValidate(dto).ShouldHaveValidationErrorFor(x => x.Studio.TimeZone);
+    }
+
     [Test]
     public void Validate_FailsWhenEmailEmpty()
     {

@@ -18,7 +18,8 @@ public sealed class RegisterOwnerHandler(IIdentityDbContext db, IAuthProvider au
 
         // The studio and its owner membership are saved in one transaction
         var studio = Studio.Register(
-            request.Studio.Name, request.Studio.Phone, request.Studio.Email, request.Studio.Address, userId);
+            request.Studio.Name, request.Studio.Phone, request.Studio.Email, request.Studio.Address, userId,
+            request.Studio.TimeZone);
         db.Studios.Add(studio);
 
         try

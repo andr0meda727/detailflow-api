@@ -142,6 +142,13 @@ namespace Identity.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone");
 
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Europe/Warsaw")
+                        .HasColumnName("time_zone");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")

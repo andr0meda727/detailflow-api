@@ -87,4 +87,29 @@ public class StudioTests
         });
         Assert.That(studio.FindMember(employee)!.RoleId, Is.EqualTo(Roles.Manager));
     }
+
+    [Test]
+    public void Register_DefaultsToWarsawTime()
+    {
+        Assert.That(NewStudio().TimeZone, Is.EqualTo("Europe/Warsaw"));
+        Assert.That(Studio.Register("X", null, null, null, Owner, "Europe/London").TimeZone, Is.EqualTo("Europe/London"));
+    }
+
+    [Test]
+    public void Register_RejectsAnUnknownTimeZone()
+    {
+        Assert.That(() => Studio.Register("X", null, null, null, Owner, "Poland/Krakow"), Throws.ArgumentException);
+    }
+
+    [Test]
+    public void ChangeTimeZone_AcceptsOnlyIanaNames()
+    {
+        var studio = NewStudio();
+
+        Assert.That(studio.ChangeTimeZone("Central European Standard Time").Error, Is.EqualTo(StudioErrors.InvalidTimeZone));
+        Assert.That(studio.TimeZone, Is.EqualTo("Europe/Warsaw"));
+
+        Assert.That(studio.ChangeTimeZone("America/New_York").Success, Is.True);
+        Assert.That(studio.TimeZone, Is.EqualTo("America/New_York"));
+    }
 }

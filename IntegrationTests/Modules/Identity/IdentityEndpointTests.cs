@@ -185,6 +185,31 @@ public class IdentityEndpointTests
         Assert.That(_factory.Email.Invitations.Single(i => i.To == email).AcceptUrl, Does.Contain("token="));
         Assert.That(_factory.Auth.Invites.Any(i => i.Email == email), Is.False);
     }
+
+    [Test]
+    public async Task Owner_ChangesTheStudioTimeZone()
+    {
+        using var owner = _factory.CreateClientFor(_seed.StudioB.OwnerUserId);
+
+        var invalid = await owner.PutAsJsonAsync("/api/studios/time-zone", new { timeZone = "Mars/Olympus" });
+        var valid = await owner.PutAsJsonAsync("/api/studios/time-zone", new { timeZone = "Europe/Lisbon" });
+
+        Assert.That(invalid.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(valid.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+        var studios = await owner.GetFromJsonAsync<JsonElement>("/api/studios/my");
+        Assert.That(studios[0].GetProperty("timeZone").GetString(), Is.EqualTo("Europe/Lisbon"));
+    }
+
+    [Test]
+    public async Task Employee_CannotChangeTheStudioTimeZone()
+    {
+        using var employee = _factory.CreateClientFor(await CreateMemberOfBothStudiosAsync());
+        employee.DefaultRequestHeaders.Add("X-Studio-Id", _seed.StudioA.StudioId.ToString());
+
+        var response = await employee.PutAsJsonAsync("/api/studios/time-zone", new { timeZone = "Europe/Lisbon" });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+    }
     [Test]
     public async Task Register_CreatesTheStudioWithItsOwner()
     {
@@ -202,6 +227,7 @@ public class IdentityEndpointTests
         var studios = await owner.GetFromJsonAsync<JsonElement>("/api/studios/my");
         Assert.That(studios[0].GetProperty("name").GetString(), Is.EqualTo("Nowe Studio"));
         Assert.That(studios[0].GetProperty("role").GetString(), Is.EqualTo("Owner"));
+        Assert.That(studios[0].GetProperty("timeZone").GetString(), Is.EqualTo("Europe/Warsaw"));
     }
 
     [Test]

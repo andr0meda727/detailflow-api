@@ -1,5 +1,6 @@
 using FluentValidation;
 using Identity.Domain.Studios;
+using Shared.Kernel.Time;
 
 namespace Identity.Application;
 
@@ -20,6 +21,9 @@ public class StudioDetails
     public string? Phone { get; set; }
     public string? Email { get; set; }
     public string? Address { get; set; }
+
+    // IANA name, e.g. "Europe/Warsaw"; Europe/Warsaw when left out
+    public string? TimeZone { get; set; }
 }
 
 public class InviteEmployeeRequest
@@ -30,7 +34,9 @@ public class InviteEmployeeRequest
 
 public sealed record ChangeEmployeeRoleRequest(Guid UserId, long RoleId);
 
-public sealed record UserStudioDto(Guid StudioId, string Name, string Role, string? Address);
+public sealed record UserStudioDto(Guid StudioId, string Name, string Role, string? Address, string TimeZone);
+
+public sealed record ChangeStudioTimeZoneRequest(string TimeZone);
 
 public sealed record StudioEmployeeDto(
     Guid UserId, string Email, string? FirstName, string? LastName, long RoleId, string RoleName);
@@ -64,6 +70,10 @@ public class RegisterOwnerRequestValidator : AbstractValidator<RegisterOwnerRequ
             .NotEmpty().WithMessage("Nazwa studia jest wymagana.")
             .MaximumLength(100)
             .When(x => x.Studio != null);
+
+        RuleFor(x => x.Studio.TimeZone)
+            .Must(TimeZones.IsValid).WithMessage("Nieznana strefa czasowa. Podaj nazwę IANA, np. Europe/Warsaw.")
+            .When(x => x.Studio is { TimeZone: not null });
     }
 }
 
@@ -83,5 +93,14 @@ public class InviteEmployeeRequestValidator : AbstractValidator<InviteEmployeeRe
             .Must(Roles.IsAssignable).WithMessage(
                 "Możesz zaprosić użytkownika tylko na rolę Pracownika lub Managera. " +
                 "Nie można bezpośrednio przyznać roli Właściciela.");
+    }
+}
+
+public class ChangeStudioTimeZoneRequestValidator : AbstractValidator<ChangeStudioTimeZoneRequest>
+{
+    public ChangeStudioTimeZoneRequestValidator()
+    {
+        RuleFor(x => x.TimeZone)
+            .Must(TimeZones.IsValid).WithMessage("Nieznana strefa czasowa. Podaj nazwę IANA, np. Europe/Warsaw.");
     }
 }

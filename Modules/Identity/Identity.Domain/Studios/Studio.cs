@@ -1,5 +1,6 @@
 using Shared.Kernel.Auditing;
 using Shared.Kernel.Results;
+using Shared.Kernel.Time;
 
 namespace Identity.Domain.Studios;
 
@@ -23,6 +24,9 @@ public class Studio : IAuditableEntity
 
     public string? Address { get; private set; }
 
+    // IANA name, e.g. "Europe/Warsaw". Moments are stored in UTC; this says how the studio reads them.
+    public string TimeZone { get; private set; } = TimeZones.Default;
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
@@ -32,9 +36,12 @@ public class Studio : IAuditableEntity
     /// <summary>
     /// Creates a studio with its owner, who is a member from the start.
     /// </summary>
-    public static Studio Register(string name, string? phone, string? email, string? address, Guid ownerUserId)
+    public static Studio Register(
+        string name, string? phone, string? email, string? address, Guid ownerUserId, string? timeZone = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (timeZone != null && !TimeZones.IsValid(timeZone))
+            throw new ArgumentException($"Unknown time zone {timeZone}.", nameof(timeZone));
 
         var studio = new Studio
         {
@@ -42,7 +49,8 @@ public class Studio : IAuditableEntity
             Name = name.Trim(),
             Phone = Blank(phone),
             Email = Blank(email),
-            Address = Blank(address)
+            Address = Blank(address),
+            TimeZone = timeZone ?? TimeZones.Default
         };
         studio._members.Add(new StudioMember(studio.Id, ownerUserId, Roles.Owner));
         return studio;
@@ -90,6 +98,14 @@ public class Studio : IAuditableEntity
         if (!Roles.IsAssignable(roleId)) return StudioErrors.InvalidRole;
 
         member.ChangeRole(roleId);
+        return Result.Ok();
+    }
+
+    public Result ChangeTimeZone(string timeZone)
+    {
+        if (!TimeZones.IsValid(timeZone)) return StudioErrors.InvalidTimeZone;
+
+        TimeZone = timeZone;
         return Result.Ok();
     }
 
@@ -149,4 +165,7 @@ public static class StudioErrors
         Error.Conflict("CANNOT_CHANGE_OWNER_ROLE", "Nie można zmienić roli właściciela.");
 
     public static readonly Error InvalidRole = Error.Validation("INVALID_ROLE", "Podana rola jest nieprawidłowa.");
+
+    public static readonly Error InvalidTimeZone =
+        Error.Validation("INVALID_TIME_ZONE", "Nieznana strefa czasowa. Podaj nazwę IANA, np. Europe/Warsaw.");
 }

@@ -25,6 +25,10 @@ public class StudioConfiguration : IEntityTypeConfiguration<Studio>
         builder.Property(e => e.Email).HasColumnName("email");
         builder.Property(e => e.Address).HasColumnName("address");
 
+        builder.Property(e => e.TimeZone)
+            .HasDefaultValue(Shared.Kernel.Time.TimeZones.Default)
+            .HasColumnName("time_zone");
+
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("created_at");
