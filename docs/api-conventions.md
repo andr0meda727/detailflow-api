@@ -72,3 +72,16 @@ pages and doesn't suit infinite scroll.
   clock change.
 - In code, convert with `Shared.Kernel.Time.TimeZones` (`DaysToUtc`, `ToLocal`), and use half-open ranges
   (`>= from && < toExclusive`) so consecutive days never share a booking.
+
+## Services, categories and vehicle sizes
+
+- Fixed lists travel as names (strings), never numbers; the frontend translates them for display.
+  - Service categories: `ExteriorWash`, `Interior`, `Polishing`, `Ceramic`, `Ppf`, `WheelsAndTyres`, `Other`.
+  - Vehicle sizes: `Small` (city car), `Medium` (compact/sedan), `Large` (SUV/estate), `XL` (van/pickup).
+- A service has one category and an optional price per vehicle size (złoty, at most two decimals). A size without a
+  price means "price on request".
+  - `POST /api/service` `{ "name": "Pranie tapicerki", "category": "Interior", "prices": [{ "vehicleSize": "Large", "price": 349.99 }] }`.
+    Only `name` is required: a service without the rest is `Other` with no prices.
+  - `PUT /api/service/{id}` takes the same body. Left out, `category` and `prices` stay as they are; a sent `prices`
+    list replaces the old one (`[]` clears it).
+- CRM vehicles have a `size` (default `Medium`). Left out on edit, it stays as it is.

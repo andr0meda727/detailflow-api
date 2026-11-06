@@ -1,0 +1,73 @@
+# Customer marketplace roadmap
+
+The goal is a Booksy-like customer side next to the studio back office:
+- Customers see studios near them on a map, with ratings and the kinds of work they do.
+- They pick services, get an approximate price for their car and send a booking request, which the studio accepts.
+- They can keep an account with their cars and past bookings, and rate a studio after a visit.
+
+Each step ships on its own. Opening hours and free-slot calculation are not needed yet: the studio confirms
+each request, so the customer only suggests a time.
+
+## 1. Service categories and prices per vehicle size (done)
+- Services have a category from a fixed list (`Scheduling.Contracts.ServiceCategory`) and an optional price per
+  vehicle size (`Shared.Kernel.Vehicles.VehicleSize`) in `scheduling.service_price`.
+- CRM vehicles have a size.
+- See "Services, categories and vehicle sizes" in `api-conventions.md`.
+
+## 2. Public studio profile and map search (new Marketplace module)
+- Module `Modules/Marketplace`, schema `marketplace`. Add it to `ModuleBoundaryTests.Modules`, the Dockerfile and the solution.
+- `StudioListing`, one per studio. The owner edits it through a staff endpoint:
+  - description, address and city;
+  - `Latitude`/`Longitude` (the owner places a pin; no geocoding service);
+  - phone and `IsPublished` (off until the owner publishes).
+- Marketplace keeps its own copy of each studio's services, categories and prices. A new Scheduling event,
+  `ServiceCatalogChanged`, feeds it from the outbox, the same way `BookingCopiesConsumer` keeps booking copies.
+  The studio name comes from Identity events, and a one-time backfill seeds existing studios.
+- Public, anonymous, rate-limited endpoints (`AddRateLimiter`):
+  - `GET /api/public/studios?minLat&maxLat&minLng&maxLng&category&vehicleSize&page` searches the visible map area.
+    It uses a lat/lng index (no PostGIS yet) and returns the pin, name, rating, categories and the "from" price for
+    the chosen size.
+  - `GET /api/public/studios/{id}` returns the profile, services with prices and recent reviews.
+- Listings are public by design, so they are not `ITenantEntity`. Owner edits filter by the caller's studio explicitly.
+
+## 3. Customer accounts and the garage (new Customers module)
+- Customers sign up with Supabase from the frontend, and the `handle_new_user` trigger creates their profile row.
+  A customer is a user with no studio membership; one person can be both.
+- `CustomerProfile(UserId, Name, Phone)` and `CustomerVehicle(Id, UserId, LicensePlate, Brand, Model, VehicleSize)`.
+- `/api/me/profile` and `/api/me/vehicles` are `[AllowWithoutStudio]` and scoped to the caller. The saved cars fill
+  in booking requests.
+
+## 4. Booking requests and booking history (Scheduling)
+- `BookingRequest` holds:
+  - the studio and the customer user;
+  - a snapshot of the customer and car (name, phone, email, plate, brand, model, size);
+  - the services, a preferred time (UTC, shown in the studio's zone) and notes;
+  - the estimated price and a status (`Pending`, `Accepted`, `Rejected`, `Withdrawn`).
+- Customer endpoints:
+  - `POST /api/me/booking-requests` sends a request;
+  - `POST /api/public/studios/{id}/estimate` previews the price without logging in.
+  - The server always recomputes the estimate from the per-size prices. A service without a price for that size
+    shows as "price on request".
+- Staff endpoints:
+  - `GET /api/booking-requests` lists requests, pending first;
+  - `POST .../{id}/accept` takes an optional final price and time;
+  - `POST .../{id}/reject` takes a reason.
+- On acceptance:
+  - A new CRM contract method, `IClientDirectory.EnsureCustomerAsync`, finds or creates the studio's client (linked
+    by customer user ID) and vehicle (by plate). It is idempotent.
+  - A normal `Booking` is then created with a nullable `CustomerUserId`, so the visit shows in the calendar.
+- `GET /api/me/bookings` returns the customer's requests and bookings across studios. It bypasses only the `Tenant`
+  filter, by name, and filters by the caller.
+- Emails go through the outbox:
+  - a new request goes to the studio's staff (via `IStudioDirectory`);
+  - accepted and rejected go to the customer, with times in the studio's zone.
+
+## 5. Reviews (Marketplace)
+- Scheduling publishes `BookingCompleted(StudioId, BookingId, CustomerUserId?)`. Marketplace records that the customer may review that booking.
+- `POST /api/me/reviews` takes `{ bookingId, rating 1–5, comment }`. It's allowed once per completed booking, only
+  by that customer.
+- The listing keeps its average rating and review count. Reviews are shown paged on the studio page.
+
+## Later
+Opening hours and instant booking, photos (Supabase Storage), PostGIS "nearest first", studio replies to
+reviews, SMS.
