@@ -91,4 +91,57 @@ public class BookingTests
         Assert.That(booking.Services, Does.Contain(keptLine));
         Assert.That(booking.ScheduledAt, Is.EqualTo(Now.AddDays(2)));
     }
+
+    [Test]
+    public void Cancel_FinishesTheBookingAndRecordsWhen()
+    {
+        var booking = NewBooking();
+
+        Assert.That(booking.ChangeStatus(BookingStatus.Cancelled, Now).Success, Is.True);
+        Assert.That(booking.StatusId, Is.EqualTo(BookingStatus.Cancelled));
+        Assert.That(booking.CompletedAt, Is.EqualTo(Now));
+    }
+
+    [Test]
+    public void Create_ListsARepeatedServiceOnce()
+    {
+        var service = Guid.NewGuid();
+
+        var booking = NewBooking(service, service);
+
+        Assert.That(booking.Services, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void Create_RejectsANegativePrice()
+    {
+        Assert.That(() => Booking.Create(Client, Vehicle, Now, -1, null, [Guid.NewGuid()], null),
+            Throws.InstanceOf<ArgumentOutOfRangeException>());
+    }
+
+    [Test]
+    public void Edit_TurnsBlankNotesIntoNoneAndRefreshesCopies()
+    {
+        var booking = NewBooking();
+        var renamed = Client with { Name = "Jan Kowalski", Email = "jan@example.com" };
+
+        var result = booking.Edit(renamed, Vehicle with { LicensePlate = "KR 2" }, Now, 100, "   ", [Guid.NewGuid()]);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Success, Is.True);
+            Assert.That(booking.Notes, Is.Null);
+            Assert.That(booking.ClientName, Is.EqualTo("Jan Kowalski"));
+            Assert.That(booking.ClientEmail, Is.EqualTo("jan@example.com"));
+            Assert.That(booking.VehicleLicensePlate, Is.EqualTo("KR 2"));
+        });
+    }
+
+    [Test]
+    public void Edit_WithoutServices_IsRejected()
+    {
+        var booking = NewBooking();
+
+        Assert.That(() => booking.Edit(Client, Vehicle, Now, 0, null, []), Throws.ArgumentException);
+    }
 }
