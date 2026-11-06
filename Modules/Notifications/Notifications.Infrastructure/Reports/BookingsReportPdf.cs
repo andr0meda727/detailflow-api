@@ -79,17 +79,17 @@ public class BookingsReportPdf
                         });
 
                         // Wiersze
-                        foreach (var booking in bookingList.OrderBy(b => b.ScheduledAt))
+                        // Stripe by position in the sorted table, not in the unsorted input
+                        foreach (var (booking, index) in bookingList.OrderBy(b => b.ScheduledAt).Select((b, i) => (b, i)))
                         {
-                            var isEven = bookingList.IndexOf(booking) % 2 == 0;
-                            var bg = isEven ? Colors.White : Colors.Grey.Lighten5;
+                            var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
 
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.ScheduledAt.ToString("dd.MM.yyyy HH:mm"));
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.ClientName);
                             table.Cell().Background(bg).Padding(6)
-                                .Text(booking.Services.FirstOrDefault() ?? "—");
+                                .Text(ServicesCell(booking.Services));
                             table.Cell().Background(bg).Padding(6)
                                 .Text(booking.Status);
                         }
@@ -108,4 +108,10 @@ public class BookingsReportPdf
             });
         }).GeneratePdf();
     }
+
+    /// <summary>
+    /// A booking can have several services; the report lists all of them, not just the first.
+    /// </summary>
+    public static string ServicesCell(IReadOnlyList<string> services) =>
+        services.Count == 0 ? "—" : string.Join(", ", services);
 }
