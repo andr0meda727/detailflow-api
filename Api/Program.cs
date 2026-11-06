@@ -36,7 +36,8 @@ builder.Services.AddMarketplaceModule(builder.Configuration);
 
 // One bus for the host; every assembly with consumers is listed here
 builder.Services.AddMessaging(builder.Configuration,
-    IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly, NotificationsModule.ConsumersAssembly);
+    IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly, NotificationsModule.ConsumersAssembly,
+    MarketplaceModule.ConsumersAssembly);
 
 builder.Services.AddOpenApi();
 

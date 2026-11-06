@@ -30,6 +30,10 @@ public class StudioListingConfiguration : IEntityTypeConfiguration<StudioListing
         builder.Property(e => e.CreatedAt).HasDefaultValueSql("now()").HasColumnName("created_at");
         builder.Property(e => e.UpdatedAt).HasDefaultValueSql("now()").HasColumnName("updated_at");
 
+        // Mapped by Npgsql to Postgres' xmin system column (no column is added): two catalogue updates of one listing
+        // can't silently overwrite each other
+        builder.Property<uint>("Version").IsRowVersion();
+
         // The map search: published studios inside the visible area
         builder.HasIndex(e => new { e.Latitude, e.Longitude }, "IX_studio_listing_location")
             .HasFilter("is_published");
