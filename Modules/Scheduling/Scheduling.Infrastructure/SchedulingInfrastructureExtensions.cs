@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scheduling.Application.Abstractions;
 using Scheduling.Contracts;
+using Scheduling.Infrastructure.Catalog;
 using Scheduling.Infrastructure.Persistence;
 using Scheduling.Infrastructure.Reports;
+using Shared.Infrastructure.Messaging;
 
 namespace Scheduling.Infrastructure;
 
@@ -20,6 +22,9 @@ public static class SchedulingInfrastructureExtensions
         services.AddScoped<ISchedulingDbContext>(sp => sp.GetRequiredService<SchedulingDbContext>());
 
         services.AddScoped<IBookingReportSource, BookingReportSource>();
+        services.AddScoped<IServiceCatalogSource, ServiceCatalogSource>();
+
+        services.AddOutbox<SchedulingDbContext>();
 
         return services;
     }

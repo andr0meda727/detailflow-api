@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Scheduling.Application.Abstractions;
 using Scheduling.Domain.Bookings;
 using Scheduling.Domain.Catalog;
+using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Infrastructure.Persistence;
 using Shared.Kernel.Tenancy;
 
@@ -24,5 +25,10 @@ public class SchedulingDbContext(DbContextOptions<SchedulingDbContext> options, 
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SchedulingDbContext).Assembly);
+
+        modelBuilder.AddOutbox();
     }
+
+    public void Enqueue<TEvent>(TEvent integrationEvent) where TEvent : class =>
+        Set<OutboxMessage>().Add(OutboxMessage.Create(integrationEvent, DateTime.UtcNow));
 }

@@ -1,5 +1,6 @@
 using Crm.Contracts;
 using IntegrationTests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using Scheduling.Application.Bookings;
@@ -16,7 +17,9 @@ using Scheduling.Application.Catalog.GetServices;
 using Scheduling.Application.Catalog.UpdateService;
 using Scheduling.Contracts;
 using Scheduling.Domain.Bookings;
+using Scheduling.Infrastructure.Catalog;
 using Scheduling.Infrastructure.Persistence;
+using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Infrastructure.Tenancy;
 using Shared.Kernel.Pagination;
 using Shared.Kernel.Vehicles;
@@ -106,7 +109,7 @@ public class SchedulingHandlerTests
     public async Task Update_SwapsServicesAndReschedules()
     {
         await using var setup = Db();
-        var extra = await new CreateServiceHandler(setup).HandleAsync(new ServiceRequest("Ceramika"), Ct);
+        var extra = await new CreateServiceHandler(setup, Tenant(), _clock).HandleAsync(new ServiceRequest("Ceramika"), Ct);
         var created = await CreateAsync(Request(3));
 
         await using var db = Db();
@@ -137,10 +140,10 @@ public class SchedulingHandlerTests
     public async Task DeactivatedService_DisappearsFromTheListButStaysOnBookings()
     {
         await using var db = Db();
-        var service = await new CreateServiceHandler(db).HandleAsync(new ServiceRequest("Pranie tapicerki"), Ct);
+        var service = await new CreateServiceHandler(db, Tenant(), _clock).HandleAsync(new ServiceRequest("Pranie tapicerki"), Ct);
         var created = await CreateAsync(Request(3, service.Id));
 
-        await new DeleteServiceHandler(db).HandleAsync(service.Id, Ct);
+        await new DeleteServiceHandler(db, _clock).HandleAsync(service.Id, Ct);
 
         await using var readDb = Db();
         Assert.That((await new GetServicesHandler(readDb).HandleAsync(Ct)).Select(s => s.Id), Does.Not.Contain(service.Id));
@@ -188,7 +191,7 @@ public class SchedulingHandlerTests
         ServiceResponseDto created;
         await using (var db = Db())
         {
-            created = await new CreateServiceHandler(db).HandleAsync(new ServiceRequest("Pranie tapicerki",
+            created = await new CreateServiceHandler(db, Tenant(), _clock).HandleAsync(new ServiceRequest("Pranie tapicerki",
                 ServiceCategory.Interior,
                 [new ServicePriceDto(VehicleSize.Large, 349.99m), new ServicePriceDto(VehicleSize.Small, 249m)]), Ct);
         }
@@ -209,13 +212,13 @@ public class SchedulingHandlerTests
         Guid id;
         await using (var db = Db())
         {
-            id = (await new CreateServiceHandler(db).HandleAsync(new ServiceRequest("Powłoka", ServiceCategory.Ceramic,
+            id = (await new CreateServiceHandler(db, Tenant(), _clock).HandleAsync(new ServiceRequest("Powłoka", ServiceCategory.Ceramic,
                 [new ServicePriceDto(VehicleSize.Small, 1000m), new ServicePriceDto(VehicleSize.Medium, 1200m)]), Ct)).Id;
         }
 
         await using (var db = Db())
         {
-            var replaced = await new UpdateServiceHandler(db).HandleAsync(id,
+            var replaced = await new UpdateServiceHandler(db, _clock).HandleAsync(id,
                 new ServiceRequest("Powłoka", null, [new ServicePriceDto(VehicleSize.XL, 2000m)]), Ct);
             Assert.That(replaced.Value!.Prices, Is.EqualTo(new[] { new ServicePriceDto(VehicleSize.XL, 2000m) }));
             Assert.That(replaced.Value.Category, Is.EqualTo(ServiceCategory.Ceramic));
@@ -223,7 +226,7 @@ public class SchedulingHandlerTests
 
         await using (var db = Db())
         {
-            await new UpdateServiceHandler(db).HandleAsync(id, new ServiceRequest("Powłoka 3 lata"), Ct);
+            await new UpdateServiceHandler(db, _clock).HandleAsync(id, new ServiceRequest("Powłoka 3 lata"), Ct);
         }
 
         await using var read = Db();
@@ -237,8 +240,53 @@ public class SchedulingHandlerTests
     {
         await using var db = Db();
 
-        var result = await new UpdateServiceHandler(db).HandleAsync(_seed.StudioB.ServiceId, new ServiceRequest("Przejęta"), Ct);
+        var result = await new UpdateServiceHandler(db, _clock).HandleAsync(_seed.StudioB.ServiceId, new ServiceRequest("Przejęta"), Ct);
 
         Assert.That(result.ErrorCode, Is.EqualTo("SERVICE_NOT_FOUND"));
+    }
+
+    // The newest catalogue snapshot queued for the studio
+    private async Task<ServiceCatalogChanged> LatestCatalogAsync()
+    {
+        await using var db = Db();
+        var messages = await db.Set<OutboxMessage>().AsNoTracking().OrderBy(m => m.OccurredAt).ToListAsync(Ct);
+        return messages.Select(m => m.Deserialize()).OfType<ServiceCatalogChanged>()
+            .Last(c => c.StudioId == _seed.StudioA.StudioId);
+    }
+
+    [Test]
+    public async Task ChangingServices_QueuesTheWholeActiveCatalogue()
+    {
+        Guid ceramicId;
+        await using (var db = Db())
+        {
+            ceramicId = (await new CreateServiceHandler(db, Tenant(), _clock).HandleAsync(new ServiceRequest("Ceramika",
+                ServiceCategory.Ceramic, [new ServicePriceDto(VehicleSize.Large, 1500m)]), Ct)).Id;
+        }
+
+        var afterCreate = await LatestCatalogAsync();
+        Assert.That(afterCreate.Services.Select(s => s.ServiceId), Is.EquivalentTo(new[] { _seed.StudioA.ServiceId, ceramicId }));
+        var ceramic = afterCreate.Services.Single(s => s.ServiceId == ceramicId);
+        Assert.That(ceramic.Category, Is.EqualTo("Ceramic"));
+        Assert.That(ceramic.Prices, Is.EqualTo(new[] { new CatalogPrice("Large", 150000) }));
+
+        await using (var db = Db())
+        {
+            await new DeleteServiceHandler(db, _clock).HandleAsync(_seed.StudioA.ServiceId, Ct);
+        }
+
+        var afterDelete = await LatestCatalogAsync();
+        Assert.That(afterDelete.Services.Select(s => s.ServiceId), Is.EqualTo(new[] { ceramicId }));
+    }
+
+    [Test]
+    public async Task CatalogSource_ReturnsTheStudiosActiveServices_WithoutATenant()
+    {
+        await using var db = PostgresFixture.CreateSchedulingDbContext(new TenantContext());
+
+        var catalog = await new ServiceCatalogSource(db, _clock).GetCatalogAsync(_seed.StudioB.StudioId, Ct);
+
+        Assert.That(catalog.StudioId, Is.EqualTo(_seed.StudioB.StudioId));
+        Assert.That(catalog.Services.Select(s => s.ServiceId), Is.EqualTo(new[] { _seed.StudioB.ServiceId }));
     }
 }

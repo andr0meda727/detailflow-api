@@ -4,7 +4,7 @@ using Shared.Kernel.Results;
 
 namespace Scheduling.Application.Catalog.UpdateService;
 
-public sealed class UpdateServiceHandler(ISchedulingDbContext db)
+public sealed class UpdateServiceHandler(ISchedulingDbContext db, TimeProvider clock)
 {
     public async Task<Result<ServiceResponseDto>> HandleAsync(
         Guid id, ServiceRequest request, CancellationToken cancellationToken)
@@ -16,6 +16,7 @@ public sealed class UpdateServiceHandler(ISchedulingDbContext db)
         // Left out, the category and prices stay; sent, the price list is replaced as a whole ([] clears it)
         var prices = request.Prices == null ? service.Prices.ToList() : request.ToPrices();
         service.Update(request.Name, request.Category ?? service.Category, prices);
+        await db.EnqueueCatalogChangedAsync(service.StudioId, clock.GetUtcNow().UtcDateTime, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
         return ServiceResponseDto.From(service);
