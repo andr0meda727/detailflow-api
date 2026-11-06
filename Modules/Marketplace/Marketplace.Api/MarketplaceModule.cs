@@ -5,6 +5,8 @@ using Marketplace.Application.Listings;
 using Marketplace.Application.Listings.GetMyListing;
 using Marketplace.Application.Listings.PublishListing;
 using Marketplace.Application.Listings.SaveListing;
+using Marketplace.Application.Search.GetPublicStudio;
+using Marketplace.Application.Search.SearchStudios;
 using Marketplace.Infrastructure;
 using Marketplace.Infrastructure.Consumers;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +29,8 @@ public static class MarketplaceModule
         services.AddScoped<GetMyListingHandler>();
         services.AddScoped<SaveListingHandler>();
         services.AddScoped<PublishListingHandler>();
+        services.AddScoped<SearchStudiosHandler>();
+        services.AddScoped<GetPublicStudioHandler>();
 
         services.AddValidatorsFromAssemblyContaining<ListingRequestValidator>();
 

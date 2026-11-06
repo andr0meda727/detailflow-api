@@ -39,6 +39,9 @@ builder.Services.AddMessaging(builder.Configuration,
     IdentityModule.ConsumersAssembly, SchedulingModule.ConsumersAssembly, NotificationsModule.ConsumersAssembly,
     MarketplaceModule.ConsumersAssembly);
 
+builder.Services.AddProxySupport();
+builder.Services.AddPublicRateLimiting(builder.Configuration);
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -63,6 +66,9 @@ TimeZones.Find(TimeZones.Default);
 
 var app = builder.Build();
 
+// First, so everything after it (rate limits, HTTPS redirection, logs) sees the client's real IP and scheme
+app.UseForwardedHeaders();
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -81,6 +87,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors("Frontend");
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 

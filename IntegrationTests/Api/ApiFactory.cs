@@ -15,8 +15,9 @@ namespace IntegrationTests.Api;
 /// Scope and build validation are on, so a missing or captive registration fails at startup.
 /// Supabase JWT auth is replaced by <see cref="TestAuthHandler"/>; use <see cref="CreateClientFor"/> to act as a user.
 /// Supabase and SMTP are replaced by <see cref="Auth"/> and <see cref="Email"/>, which record what was sent.
+/// Extra <paramref name="settings"/> override the configuration, e.g. a low rate limit.
 /// </summary>
-public class ApiFactory : WebApplicationFactory<Program>
+public class ApiFactory(IReadOnlyDictionary<string, string?>? settings = null) : WebApplicationFactory<Program>
 {
     public FakeAuthProvider Auth { get; } = new();
 
@@ -29,6 +30,7 @@ public class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Supabase:Url", "https://supabase.test");
         builder.UseSetting("Supabase:Key", "test-anon-key");
         builder.UseSetting("Supabase:ServiceRoleKey", "test-service-role-key");
+        foreach (var (key, value) in settings ?? new Dictionary<string, string?>()) builder.UseSetting(key, value);
 
         // The Windows Event Log provider is disposed before MassTransit finishes stopping, and its write then fails
         // the test. Linux hosts don't have it; tests log to the console only.
