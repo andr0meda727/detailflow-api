@@ -214,4 +214,67 @@ public class BookingRequestEndpointTests
         Assert.That(first.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
         Assert.That(await ProblemCodeAsync(second), Is.EqualTo("BOOKING_REQUEST_ALREADY_DECIDED"));
     }
+    private async Task<Guid> PendingRequestAsync()
+    {
+        var (customer, _, carId) = await NewCustomerAsync();
+        var response = await SubmitAsync(customer, carId);
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+    }
+
+    [Test]
+    public async Task Staff_AcceptARequest_IntoANormalBookingTheCustomerCanFollow()
+    {
+        var (customer, _, carId) = await NewCustomerAsync();
+        var id = (await (await SubmitAsync(customer, carId)).Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        using var owner = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+        var agreedTime = InTwoDays.AddHours(3);
+
+        var pending = await owner.GetFromJsonAsync<JsonElement>("/api/booking-requests?status=Pending");
+        var accept = await owner.PostAsJsonAsync($"/api/booking-requests/{id}/accept", new { scheduledAt = agreedTime, price = 450m });
+
+        Assert.That(pending.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("id").GetGuid()), Does.Contain(id));
+        Assert.That(accept.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        var bookingId = (await accept.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("booking").GetProperty("id").GetGuid();
+
+        // A normal booking in the studio's calendar, for a CRM client and car made from the request
+        var booking = await owner.GetFromJsonAsync<JsonElement>($"/api/bookings/{bookingId}");
+        Assert.That(booking.GetProperty("client").GetProperty("name").GetString(), Is.EqualTo("Anna Nowak"));
+        Assert.That(booking.GetProperty("totalPrice").GetDecimal(), Is.EqualTo(450m));
+        Assert.That(booking.GetProperty("scheduledAt").GetDateTime(), Is.EqualTo(agreedTime));
+
+        // ...and the customer's history shows it
+        var mine = await customer.GetFromJsonAsync<JsonElement>("/api/me/booking-requests");
+        var request = mine.GetProperty("items").EnumerateArray().Single(r => r.GetProperty("id").GetGuid() == id);
+        Assert.That(request.GetProperty("status").GetString(), Is.EqualTo("Accepted"));
+        Assert.That(request.GetProperty("booking").GetProperty("id").GetGuid(), Is.EqualTo(bookingId));
+        Assert.That(request.GetProperty("booking").GetProperty("status").GetString(), Is.EqualTo("Created"));
+    }
+
+    [Test]
+    public async Task Staff_RejectARequest_WithAReason_AndCannotAnswerItTwice()
+    {
+        var id = await PendingRequestAsync();
+        using var owner = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var reject = await owner.PostAsJsonAsync($"/api/booking-requests/{id}/reject", new { reason = "Brak terminów" });
+        var acceptAfter = await owner.PostAsJsonAsync($"/api/booking-requests/{id}/accept", new { });
+
+        var rejected = await reject.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.That(rejected.GetProperty("status").GetString(), Is.EqualTo("Rejected"));
+        Assert.That(rejected.GetProperty("rejectionReason").GetString(), Is.EqualTo("Brak terminów"));
+        Assert.That(await ProblemCodeAsync(acceptAfter), Is.EqualTo("BOOKING_REQUEST_ALREADY_DECIDED"));
+    }
+
+    [Test]
+    public async Task AnotherStudio_CannotSeeOrAnswerTheRequest()
+    {
+        var id = await PendingRequestAsync();
+        using var otherOwner = _factory.CreateClientFor(_seed.StudioB.OwnerUserId);
+
+        var list = await otherOwner.GetFromJsonAsync<JsonElement>("/api/booking-requests");
+        var accept = await otherOwner.PostAsJsonAsync($"/api/booking-requests/{id}/accept", new { });
+
+        Assert.That(list.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("id").GetGuid()), Does.Not.Contain(id));
+        Assert.That(accept.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
 }
