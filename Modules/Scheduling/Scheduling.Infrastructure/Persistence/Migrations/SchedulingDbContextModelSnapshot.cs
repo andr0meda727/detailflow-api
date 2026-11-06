@@ -191,6 +191,13 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Other")
+                        .HasColumnName("category");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -258,6 +265,38 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasConstraintName("booking_service_service_id_fkey");
 
                     b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Scheduling.Domain.Catalog.Service", b =>
+                {
+                    b.OwnsMany("Scheduling.Domain.Catalog.ServicePrice", "Prices", b1 =>
+                        {
+                            b1.Property<Guid>("ServiceId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("service_id");
+
+                            b1.Property<string>("Size")
+                                .HasColumnType("text")
+                                .HasColumnName("vehicle_size");
+
+                            b1.Property<long>("AmountInCents")
+                                .HasColumnType("bigint")
+                                .HasColumnName("amount_cents");
+
+                            b1.HasKey("ServiceId", "Size")
+                                .HasName("service_price_pkey");
+
+                            b1.ToTable("service_price", "scheduling", t =>
+                                {
+                                    t.HasCheckConstraint("CK_service_price_amount_cents", "amount_cents >= 0");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("ServiceId")
+                                .HasConstraintName("service_price_service_id_fkey");
+                        });
+
+                    b.Navigation("Prices");
                 });
 
             modelBuilder.Entity("Scheduling.Domain.Bookings.Booking", b =>

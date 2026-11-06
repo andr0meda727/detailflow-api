@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Scheduling.Contracts;
 using Scheduling.Domain.Catalog;
+using Shared.Kernel.Vehicles;
 
 namespace Scheduling.Infrastructure.Persistence.Configurations;
 
@@ -38,5 +40,28 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         builder.Property(e => e.UpdatedAt)
             .HasDefaultValueSql("now()")
             .HasColumnName("updated_at");
+
+        // Stored by name so the table reads well and reordering the enum changes nothing
+        builder.Property(e => e.Category)
+            .HasConversion<string>()
+            .HasDefaultValue(ServiceCategory.Other)
+            .HasSentinel(ServiceCategory.Other)
+            .HasColumnName("category");
+
+        // One row per vehicle size that has a price; the list is replaced as a whole on update
+        builder.OwnsMany(e => e.Prices, price =>
+        {
+            price.ToTable("service_price", SchedulingDbContext.Schema, tb =>
+                tb.HasCheckConstraint("CK_service_price_amount_cents", "amount_cents >= 0"));
+
+            price.WithOwner().HasForeignKey("ServiceId").HasConstraintName("service_price_service_id_fkey");
+            price.Property<Guid>("ServiceId").HasColumnName("service_id");
+            price.HasKey("ServiceId", nameof(ServicePrice.Size)).HasName("service_price_pkey");
+
+            price.Property(p => p.Size).HasConversion<string>().HasColumnName("vehicle_size");
+            price.Property(p => p.AmountInCents).HasColumnName("amount_cents");
+        });
+
+        builder.Navigation(e => e.Prices).HasField("_prices");
     }
 }
