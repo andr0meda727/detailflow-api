@@ -6,6 +6,8 @@ namespace Identity.Contracts;
 /// <summary>
 /// Someone was invited to join a studio. When <paramref name="HasAccount"/> is false the person has no login yet,
 /// so the invitation goes out as an account invite; otherwise it is a normal email with the accept link.
+/// <paramref name="StudioTimeZone"/> is the studio's IANA zone, for showing <paramref name="ExpiresAt"/> (UTC) in local time;
+/// messages queued before it existed have none.
 /// </summary>
 public sealed record EmployeeInvited(
     Guid StudioId,
@@ -14,4 +16,5 @@ public sealed record EmployeeInvited(
     string StudioName,
     string AcceptUrl,
     DateTime ExpiresAt,
-    bool HasAccount);
+    bool HasAccount,
+    string? StudioTimeZone = null);

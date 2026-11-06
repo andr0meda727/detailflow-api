@@ -30,7 +30,7 @@ public class InvitationDeliveryTests
         var context = Substitute.For<ConsumeContext<EmployeeInvited>>();
         context.Message.Returns(new EmployeeInvited(Guid.NewGuid(), Guid.NewGuid(), "anna@example.com", "Detail Studio",
             "https://app.test/accept-invitation?token=1", new DateTime(2026, 11, 13, 12, 0, 0, DateTimeKind.Utc),
-            hasAccount));
+            hasAccount, "Europe/Lisbon"));
         return context;
     }
 
@@ -47,7 +47,7 @@ public class InvitationDeliveryTests
 
         await _auth.Received(1).InviteUserAsync("anna@example.com", "https://app.test/accept-invitation?token=1",
             Arg.Any<CancellationToken>());
-        await _email.DidNotReceiveWithAnyArgs().SendInvitationEmailAsync(default!, default!, default!, default);
+        await _email.DidNotReceiveWithAnyArgs().SendInvitationEmailAsync(default!, default!, default!, default, default!);
     }
 
     [Test]
@@ -56,7 +56,21 @@ public class InvitationDeliveryTests
         await DeliverAsync(Invited(hasAccount: true));
 
         await _email.Received(1).SendInvitationEmailAsync("anna@example.com", "Detail Studio",
-            "https://app.test/accept-invitation?token=1", new DateTime(2026, 11, 13, 12, 0, 0, DateTimeKind.Utc));
+            "https://app.test/accept-invitation?token=1", new DateTime(2026, 11, 13, 12, 0, 0, DateTimeKind.Utc),
+            Arg.Is<TimeZoneInfo>(z => z.Id == "Europe/Lisbon"));
         await _auth.DidNotReceiveWithAnyArgs().InviteUserAsync(default!, default!, default);
+    }
+
+    [Test]
+    public async Task AMessageFromBeforeTimeZones_IsShownInWarsawTime()
+    {
+        var context = Substitute.For<ConsumeContext<EmployeeInvited>>();
+        context.Message.Returns(new EmployeeInvited(Guid.NewGuid(), Guid.NewGuid(), "anna@example.com", "Detail Studio",
+            "https://app.test/accept", DateTime.UtcNow, HasAccount: true));
+
+        await new InvitationEmailConsumer(_email).Consume(context);
+
+        await _email.Received(1).SendInvitationEmailAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<DateTime>(), Arg.Is<TimeZoneInfo>(z => z.Id == "Europe/Warsaw"));
     }
 }

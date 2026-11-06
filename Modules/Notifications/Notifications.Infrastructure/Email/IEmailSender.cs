@@ -5,7 +5,8 @@ namespace Notifications.Infrastructure.Email;
 /// </summary>
 public interface IEmailSender
 {
-    Task SendInvitationEmailAsync(string to, string studioName, string acceptUrl, DateTime expiresAt);
+    /// <param name="expiresAt">UTC; the email shows it in <paramref name="timeZone"/>.</param>
+    Task SendInvitationEmailAsync(string to, string studioName, string acceptUrl, DateTime expiresAt, TimeZoneInfo timeZone);
 
     Task SendReportEmailAsync(string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes);
 }

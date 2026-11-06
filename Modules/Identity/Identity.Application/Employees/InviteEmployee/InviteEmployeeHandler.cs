@@ -58,13 +58,15 @@ public sealed class InviteEmployeeHandler(
             invitation.Reissue(request.RoleId, invitingUserId, now);
         }
 
-        var studioName = await db.Studios.Where(s => s.Id == studioId).Select(s => s.Name).SingleAsync(cancellationToken);
+        var studio = await db.Studios.Where(s => s.Id == studioId)
+            .Select(s => new { s.Name, s.TimeZone })
+            .SingleAsync(cancellationToken);
 
         // The email (or the account invite for someone without a login) is sent from the event,
         // so a mail outage is retried instead of failing the request
         db.Enqueue(new EmployeeInvited(
-            studioId, invitation.Id, invitation.Email, studioName, frontend.AcceptInvitationUrl(invitation.Token),
-            invitation.ExpiresAt, HasAccount: existingUser != null));
+            studioId, invitation.Id, invitation.Email, studio.Name, frontend.AcceptInvitationUrl(invitation.Token),
+            invitation.ExpiresAt, HasAccount: existingUser != null, studio.TimeZone));
 
         await db.SaveChangesAsync(cancellationToken);
 

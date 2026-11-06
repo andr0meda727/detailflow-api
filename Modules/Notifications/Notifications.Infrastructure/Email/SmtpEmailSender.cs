@@ -19,9 +19,10 @@ public class SmtpEmailSender(IConfiguration config) : IEmailSender
 
     private readonly string _fromName = config["Email:FromName"] ?? "DetailFlow";
 
-    public async Task SendInvitationEmailAsync(string to, string studioName, string acceptUrl, DateTime expiresAt)
+    public async Task SendInvitationEmailAsync(
+        string to, string studioName, string acceptUrl, DateTime expiresAt, TimeZoneInfo timeZone)
     {
-        using var message = Compose(to, EmailTemplates.Invitation(studioName, acceptUrl, expiresAt));
+        using var message = Compose(to, EmailTemplates.Invitation(studioName, acceptUrl, expiresAt, timeZone));
 
         await SendAsync(message);
     }

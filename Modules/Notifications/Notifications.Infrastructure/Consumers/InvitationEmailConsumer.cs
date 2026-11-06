@@ -1,6 +1,7 @@
 using Identity.Contracts;
 using MassTransit;
 using Notifications.Infrastructure.Email;
+using Shared.Kernel.Time;
 
 namespace Notifications.Infrastructure.Consumers;
 
@@ -15,6 +16,7 @@ public class InvitationEmailConsumer(IEmailSender emailSender) : IConsumer<Emplo
         var message = context.Message;
         if (!message.HasAccount) return;
 
-        await emailSender.SendInvitationEmailAsync(message.Email, message.StudioName, message.AcceptUrl, message.ExpiresAt);
+        await emailSender.SendInvitationEmailAsync(
+            message.Email, message.StudioName, message.AcceptUrl, message.ExpiresAt, TimeZones.Find(message.StudioTimeZone));
     }
 }

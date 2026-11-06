@@ -1,4 +1,5 @@
 using System.Net;
+using Shared.Kernel.Time;
 
 namespace Notifications.Infrastructure.Email;
 
@@ -11,10 +12,11 @@ public sealed record EmailContent(string Subject, string Html);
 /// </summary>
 public static class EmailTemplates
 {
-    public static EmailContent Invitation(string studioName, string acceptUrl, DateTime expiresAt)
+    public static EmailContent Invitation(string studioName, string acceptUrl, DateTime expiresAt, TimeZoneInfo timeZone)
     {
         var name = WebUtility.HtmlEncode(studioName);
         var url = WebUtility.HtmlEncode(acceptUrl);
+        var expires = TimeZones.ToLocal(expiresAt, timeZone);
 
         var html = $"""
             <!DOCTYPE html>
@@ -29,7 +31,7 @@ public static class EmailTemplates
                     Akceptuj zaproszenie
                 </a>
                 <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
-                    Zaproszenie wygasa: {expiresAt:dd.MM.yyyy HH:mm} UTC
+                    Zaproszenie wygasa: {expires:dd.MM.yyyy HH:mm} ({WebUtility.HtmlEncode(timeZone.Id)})
                 </p>
                 <p style="color: #6b7280; font-size: 12px;">
                     Jeśli nie spodziewałeś się tego zaproszenia, możesz zignorować tę wiadomość.
