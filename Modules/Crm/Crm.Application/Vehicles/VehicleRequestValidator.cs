@@ -1,6 +1,7 @@
 using Crm.Application.Abstractions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Shared.Application.Validation;
 
 namespace Crm.Application.Vehicles;
 

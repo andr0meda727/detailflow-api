@@ -1,14 +1,10 @@
-using Crm.Application.Vehicles;
 using FluentValidation;
+using Shared.Application.Validation;
 
 namespace Crm.Application.Clients;
 
 public class ClientRequestValidator : AbstractValidator<ClientRequest>
 {
-    // Polish phone numbers: 9 digits, optionally in groups of 3 separated by spaces or dashes,
-    // optionally prefixed with +48 or 0048
-    private const string PhoneRegex = @"^(\+48|0048)?[\s\-]?(\d{3}[\s\-]?\d{3}[\s\-]?\d{3})$";
-
     private const string NipRegex = @"^\d{10}$";
 
     public ClientRequestValidator()
@@ -27,8 +23,7 @@ public class ClientRequestValidator : AbstractValidator<ClientRequest>
         // The phone identifies the client within the studio, and the database requires it
         RuleFor(x => x.Phone)
             .NotEmpty().WithMessage("Numer telefonu klienta jest wymagany.")
-            .Matches(PhoneRegex).WithMessage(
-                "Podaj prawidłowy numer telefonu (np. 500 600 700, +48500600700 lub 48-500-600-700).");
+            .ValidPhone();
 
         RuleFor(x => x.Nip)
             .Matches(NipRegex).WithMessage("NIP musi składać się z dokładnie 10 cyfr.")

@@ -1,8 +1,11 @@
 using FluentValidation;
 using Shared.Kernel.Vehicles;
 
-namespace Crm.Application.Vehicles;
+namespace Shared.Application.Validation;
 
+/// <summary>
+/// Vehicle rules shared by every place a car is entered: a studio's client cars (CRM) and a customer's garage.
+/// </summary>
 public static class VehicleRules
 {
     // \p{L} matches letters of any alphabet, so foreign plates are accepted too
