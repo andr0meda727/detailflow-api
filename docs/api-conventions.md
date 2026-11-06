@@ -115,3 +115,30 @@ pages and doesn't suit infinite scroll.
   `{ "licensePlate": "KR 12345", "brand": "Volvo", "model": "XC90", "size": "Large" }`: the garage. `size` is required
   (it sets the price), there are at most ten cars (`CUSTOMER_GARAGE_FULL`), one per plate (`CUSTOMER_VEHICLE_EXISTS`).
 - Everything is limited to the caller's own rows: another customer's car ID is 404 `CUSTOMER_VEHICLE_NOT_FOUND`.
+
+## Online booking requests
+
+The customer asks, the studio answers; nothing is booked until staff accept.
+
+Customer (signed in, `/api/me`, no studio needed):
+- `POST /api/public/studios/{studioId}/estimate` `{ "serviceIds": [..], "vehicleSize": "Large" }` (no login): `services`
+  with each `price` (null = on request), `total` of the priced ones, `hasUnpricedServices`.
+- `POST /api/me/booking-requests`
+  `{ "studioId", "serviceIds": [..], "vehicleId": "<garage car>" | "vehicle": { "licensePlate", "brand", "model", "size" },
+  "preferredAt": "2026-11-20T08:00:00Z", "notes" }` → 201 with the request (`status: "Pending"`, `estimatedPrice`).
+  The name and phone come from `/api/me/profile`, the email from the account. Prices are always the studio's own, worked
+  out on the server. Errors: `STUDIO_NOT_FOUND` (not published), `CUSTOMER_PROFILE_REQUIRED`, `CUSTOMER_VEHICLE_NOT_FOUND`,
+  `BOOKING_REQUEST_UNKNOWN_SERVICES`, `BOOKING_REQUEST_LIMIT` (three pending per studio). Rate-limited like the map.
+- `GET /api/me/booking-requests` (paged, newest first): the customer's history at every studio. Each item has `status`
+  (`Pending`, `Accepted`, `Rejected`, `Withdrawn`), `rejectionReason`, and for accepted ones `booking` (its current
+  `scheduledAt`, `status`, `totalPrice`).
+- `POST /api/me/booking-requests/{id}/withdraw` while pending.
+
+Studio staff (normal studio context):
+- `GET /api/booking-requests?status=Pending` (paged; without `status`, pending first, then newest).
+- `POST /api/booking-requests/{id}/accept` `{ "scheduledAt"?, "price"? }`: creates a normal booking (preferred time and
+  estimate unless given) for the CRM client and car matched to the customer (by account, then phone, else created).
+- `POST /api/booking-requests/{id}/reject` `{ "reason"? }`.
+- Answering twice is `BOOKING_REQUEST_ALREADY_DECIDED`; another studio's request is `BOOKING_REQUEST_NOT_FOUND`.
+
+Emails: the studio's owners get each new request; the customer gets the answer. Times are in the studio's time zone.

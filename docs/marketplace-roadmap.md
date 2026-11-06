@@ -41,7 +41,7 @@ each request, so the customer only suggests a time.
   signed-in user. At most ten cars, one per plate. The plate, phone and size rules are shared with CRM
   (`Shared.Application.Validation`).
 
-## 4. Booking requests and booking history (Scheduling)
+## 4. Booking requests and booking history (Scheduling) (done)
 - `BookingRequest` holds:
   - the studio and the customer user;
   - a snapshot of the customer and car (name, phone, email, plate, brand, model, size);
@@ -57,7 +57,7 @@ each request, so the customer only suggests a time.
   - `POST .../{id}/accept` takes an optional final price and time;
   - `POST .../{id}/reject` takes a reason.
 - On acceptance:
-  - A new CRM contract method, `IClientDirectory.EnsureCustomerAsync`, finds or creates the studio's client (linked
+  - A new CRM contract method, `IClientDirectory.EnsureOnlineCustomerAsync`, finds or creates the studio's client (linked
     by customer user ID) and vehicle (by plate). It is idempotent.
   - A normal `Booking` is then created with a nullable `CustomerUserId`, so the visit shows in the calendar.
 - `GET /api/me/bookings` returns the customer's requests and bookings across studios. It bypasses only the `Tenant`
