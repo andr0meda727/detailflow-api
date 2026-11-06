@@ -277,4 +277,30 @@ public class BookingRequestEndpointTests
         Assert.That(list.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("id").GetGuid()), Does.Not.Contain(id));
         Assert.That(accept.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
     }
+    [Test]
+    public async Task TheOwnerHearsAboutTheRequest_AndTheCustomerAboutTheAnswer()
+    {
+        var (customer, userId, carId) = await NewCustomerAsync();
+        var id = (await (await SubmitAsync(customer, carId)).Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        var ownerEmail = $"owner-{_seed.StudioA.OwnerUserId:N}@test.pl";
+        var customerEmail = $"{userId:N}@test.pl";
+
+        await WaitForEmailAsync(ownerEmail, "Nowa prośba");
+        using var owner = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+        (await owner.PostAsJsonAsync($"/api/booking-requests/{id}/accept", new { })).EnsureSuccessStatusCode();
+        await WaitForEmailAsync(customerEmail, "potwierdza");
+    }
+
+    // Emails are sent by bus consumers, so they arrive a moment later
+    private async Task WaitForEmailAsync(string to, string subjectPart)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (!_factory.Email.Sent.Any(e => e.To == to && e.Content.Subject.Contains(subjectPart)) && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(100);
+        }
+
+        Assert.That(_factory.Email.Sent.Any(e => e.To == to && e.Content.Subject.Contains(subjectPart)), Is.True,
+            $"No '{subjectPart}' email reached {to}");
+    }
 }

@@ -12,6 +12,8 @@ public sealed class FakeEmailSender : IEmailSender
 
     public ConcurrentBag<(string To, DateOnly DateFrom, DateOnly DateTo, byte[] Pdf)> Reports { get; } = [];
 
+    public ConcurrentBag<(string To, EmailContent Content)> Sent { get; } = [];
+
     public Task SendInvitationEmailAsync(
         string to, string studioName, string acceptUrl, DateTime expiresAt, TimeZoneInfo timeZone)
     {
@@ -22,6 +24,12 @@ public sealed class FakeEmailSender : IEmailSender
     public Task SendReportEmailAsync(string to, DateOnly dateFrom, DateOnly dateTo, byte[] pdfBytes)
     {
         Reports.Add((to, dateFrom, dateTo, pdfBytes));
+        return Task.CompletedTask;
+    }
+
+    public Task SendAsync(string to, EmailContent content)
+    {
+        Sent.Add((to, content));
         return Task.CompletedTask;
     }
 }

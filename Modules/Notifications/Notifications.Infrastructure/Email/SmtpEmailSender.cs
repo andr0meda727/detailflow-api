@@ -36,6 +36,13 @@ public class SmtpEmailSender(IConfiguration config) : IEmailSender
         await SendAsync(message);
     }
 
+    public async Task SendAsync(string to, EmailContent content)
+    {
+        using var message = Compose(to, content);
+
+        await SendAsync(message);
+    }
+
     private MailMessage Compose(string to, EmailContent content)
     {
         var message = new MailMessage
