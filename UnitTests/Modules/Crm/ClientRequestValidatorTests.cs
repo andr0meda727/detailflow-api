@@ -52,4 +52,13 @@ public class ClientRequestValidatorTests
 
         _validator.TestValidate(request).ShouldHaveValidationErrorFor("Vehicle.LicensePlate");
     }
+
+    [Test]
+    public void ValidatesEmbeddedVehicleSize()
+    {
+        var request = Valid();
+        request.Vehicle = new ClientVehicleRequest("KR 1", null, null, (global::Shared.Kernel.Vehicles.VehicleSize)9);
+
+        _validator.TestValidate(request).ShouldHaveValidationErrorFor("Vehicle.Size");
+    }
 }

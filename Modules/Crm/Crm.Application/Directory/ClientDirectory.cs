@@ -22,6 +22,6 @@ public sealed class ClientDirectory(ICrmDbContext db) : IClientDirectory
 
         return new BookingParties(
             new ClientSummary(client.Id, client.Name, client.Phone, client.Email),
-            new VehicleSummary(vehicle.Id, vehicle.ClientId, vehicle.LicensePlate, vehicle.Brand, vehicle.Model));
+            new VehicleSummary(vehicle.Id, vehicle.ClientId, vehicle.LicensePlate, vehicle.Brand, vehicle.Model, vehicle.Size.ToString()));
     }
 }

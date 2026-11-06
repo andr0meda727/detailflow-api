@@ -15,6 +15,8 @@ public interface IClientDirectory
 
 public sealed record ClientSummary(Guid Id, string Name, string Phone, string? Email);
 
-public sealed record VehicleSummary(Guid Id, Guid ClientId, string LicensePlate, string? Brand, string? Model);
+// Size is the size class by name, as in VehicleDetailsChanged
+public sealed record VehicleSummary(
+    Guid Id, Guid ClientId, string LicensePlate, string? Brand, string? Model, string Size = "Medium");
 
 public sealed record BookingParties(ClientSummary Client, VehicleSummary Vehicle);

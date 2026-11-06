@@ -38,6 +38,7 @@ public class ClientRequestValidator : AbstractValidator<ClientRequest>
         RuleFor(x => x.Vehicle!.LicensePlate).ValidLicensePlate().When(x => x.Vehicle != null);
         RuleFor(x => x.Vehicle!.Brand).ValidBrandOrModel("Marka").When(x => x.Vehicle != null);
         RuleFor(x => x.Vehicle!.Model).ValidBrandOrModel("Model").When(x => x.Vehicle != null);
+        RuleFor(x => x.Vehicle!.Size).ValidVehicleSize().When(x => x.Vehicle != null);
     }
 
     /// <summary>

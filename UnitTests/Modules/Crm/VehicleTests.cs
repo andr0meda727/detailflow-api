@@ -1,4 +1,5 @@
 using Crm.Domain;
+using Shared.Kernel.Vehicles;
 
 namespace Unit.Modules.Crm;
 
@@ -28,9 +29,27 @@ public class VehicleTests
         var vehicle = Vehicle.Create(Guid.NewGuid(), "KR 1", null, null);
         var newOwner = Guid.NewGuid();
 
-        vehicle.Update(newOwner, "KR 1", "Audi", null);
+        vehicle.Update(newOwner, "KR 1", "Audi", null, VehicleSize.Medium);
 
         Assert.That(vehicle.ClientId, Is.EqualTo(newOwner));
         Assert.That(vehicle.Brand, Is.EqualTo("Audi"));
+    }
+
+    [Test]
+    public void Create_WithoutASize_IsMedium()
+    {
+        Assert.That(Vehicle.Create(Guid.NewGuid(), "KR 1", null, null).Size, Is.EqualTo(VehicleSize.Medium));
+    }
+
+    [Test]
+    public void Update_ChangesTheSizeAndRejectsUnknownOnes()
+    {
+        var vehicle = Vehicle.Create(Guid.NewGuid(), "KR 1", null, null);
+
+        vehicle.Update(vehicle.ClientId, "KR 1", "Volvo", "XC90", VehicleSize.Large);
+
+        Assert.That(vehicle.Size, Is.EqualTo(VehicleSize.Large));
+        Assert.That(() => vehicle.Update(vehicle.ClientId, "KR 1", null, null, (VehicleSize)0),
+            Throws.InstanceOf<ArgumentOutOfRangeException>());
     }
 }

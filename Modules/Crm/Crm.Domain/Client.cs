@@ -1,5 +1,6 @@
 using Shared.Kernel.Auditing;
 using Shared.Kernel.Tenancy;
+using Shared.Kernel.Vehicles;
 
 namespace Crm.Domain;
 
@@ -52,11 +53,12 @@ public class Client : IAuditableEntity, ITenantEntity
         Nip = string.IsNullOrWhiteSpace(nip) ? null : nip.Trim();
     }
 
-    public Vehicle AddVehicle(string licensePlate, string? brand, string? model)
+    public Vehicle AddVehicle(
+        string licensePlate, string? brand, string? model, VehicleSize size = VehicleSize.Medium)
     {
         if (IsDeleted) throw new InvalidOperationException("Cannot add a vehicle to a deleted client.");
 
-        var vehicle = Vehicle.Create(Id, licensePlate, brand, model);
+        var vehicle = Vehicle.Create(Id, licensePlate, brand, model, size);
         _vehicles.Add(vehicle);
         return vehicle;
     }

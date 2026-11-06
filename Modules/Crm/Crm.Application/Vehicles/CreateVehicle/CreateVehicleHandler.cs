@@ -1,3 +1,4 @@
+using Shared.Kernel.Vehicles;
 using Crm.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Shared.Kernel.Results;
@@ -12,7 +13,7 @@ public sealed class CreateVehicleHandler(ICrmDbContext db)
         var client = await db.Clients.FirstOrDefaultAsync(c => c.Id == request.ClientId, cancellationToken);
         if (client == null) return CrmErrors.UnknownClient(request.ClientId);
 
-        var vehicle = client.AddVehicle(request.LicensePlate, request.Brand, request.Model);
+        var vehicle = client.AddVehicle(request.LicensePlate, request.Brand, request.Model, request.Size ?? VehicleSize.Medium);
         db.Vehicles.Add(vehicle);
         await db.SaveChangesAsync(cancellationToken);
 

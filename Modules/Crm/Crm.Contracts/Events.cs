@@ -5,5 +5,10 @@ namespace Crm.Contracts;
 
 public sealed record ClientDetailsChanged(Guid StudioId, Guid ClientId, string Name, string Phone, string? Email);
 
+/// <summary>
+/// <paramref name="Size"/> is the size class by name ("Small", "Medium", "Large", "XL"). It is null in messages
+/// queued before sizes existed, which consumers read as Medium.
+/// </summary>
 public sealed record VehicleDetailsChanged(
-    Guid StudioId, Guid VehicleId, Guid ClientId, string LicensePlate, string? Brand, string? Model);
+    Guid StudioId, Guid VehicleId, Guid ClientId, string LicensePlate, string? Brand, string? Model,
+    string? Size = null);

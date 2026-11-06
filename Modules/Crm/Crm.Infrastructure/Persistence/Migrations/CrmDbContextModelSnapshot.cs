@@ -114,6 +114,13 @@ namespace Crm.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("model");
 
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Medium")
+                        .HasColumnName("size");
+
                     b.Property<Guid>("StudioId")
                         .HasColumnType("uuid")
                         .HasColumnName("studio_id");

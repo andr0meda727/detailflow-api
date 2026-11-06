@@ -1,6 +1,7 @@
 using Crm.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Shared.Kernel.Vehicles;
 
 namespace Crm.Infrastructure.Persistence.Configurations;
 
@@ -36,6 +37,13 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
 
         builder.Property(e => e.Model)
             .HasColumnName("model");
+
+        // Stored by name like the service prices; vehicles from before sizes existed are Medium
+        builder.Property(e => e.Size)
+            .HasConversion<string>()
+            .HasDefaultValue(VehicleSize.Medium)
+            .HasSentinel((VehicleSize)0)
+            .HasColumnName("size");
 
         builder.Property(e => e.IsDeleted)
             .HasColumnName("is_deleted");

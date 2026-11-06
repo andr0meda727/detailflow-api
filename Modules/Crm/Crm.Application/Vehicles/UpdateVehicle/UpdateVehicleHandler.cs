@@ -19,10 +19,10 @@ public sealed class UpdateVehicleHandler(ICrmDbContext db)
             return CrmErrors.UnknownClient(request.ClientId);
         }
 
-        vehicle.Update(request.ClientId, request.LicensePlate, request.Brand, request.Model);
+        vehicle.Update(request.ClientId, request.LicensePlate, request.Brand, request.Model, request.Size ?? vehicle.Size);
 
         db.Enqueue(new VehicleDetailsChanged(
-            vehicle.StudioId, vehicle.Id, vehicle.ClientId, vehicle.LicensePlate, vehicle.Brand, vehicle.Model));
+            vehicle.StudioId, vehicle.Id, vehicle.ClientId, vehicle.LicensePlate, vehicle.Brand, vehicle.Model, vehicle.Size.ToString()));
         await db.SaveChangesAsync(cancellationToken);
 
         return VehicleResponseDto.From(vehicle);

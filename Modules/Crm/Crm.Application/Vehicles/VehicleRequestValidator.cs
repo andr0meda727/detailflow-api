@@ -20,6 +20,7 @@ public class VehicleRequestValidator : AbstractValidator<VehicleRequest>
         RuleFor(x => x.LicensePlate).ValidLicensePlate();
         RuleFor(x => x.Brand).ValidBrandOrModel("Marka");
         RuleFor(x => x.Model).ValidBrandOrModel("Model");
+        RuleFor(x => x.Size).ValidVehicleSize();
     }
 
     private async Task<bool> ExistInStudioAsync(Guid clientId, CancellationToken cancellationToken)

@@ -75,6 +75,36 @@ public class CrmEndpointTests
     }
 
     [Test]
+    public async Task VehicleSize_IsSentByName_AndAnEditWithoutItKeepsIt()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var created = await client.PostAsJsonAsync("/api/vehicle",
+            new { clientId = _seed.StudioA.ClientId, licensePlate = "KR SUV1", brand = "Volvo", model = "XC90", size = "Large" });
+        Assert.That(created.StatusCode, Is.EqualTo(HttpStatusCode.Created).Or.EqualTo(HttpStatusCode.OK));
+        var vehicle = await created.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.That(vehicle.GetProperty("size").GetString(), Is.EqualTo("Large"));
+
+        // An older frontend that doesn't know sizes must not reset the SUV to Medium
+        var edited = await client.PutAsJsonAsync($"/api/vehicle/{vehicle.GetProperty("id").GetGuid()}",
+            new { clientId = _seed.StudioA.ClientId, licensePlate = "KR SUV1", brand = "Volvo", model = "XC60" });
+        var body = await edited.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.That(body.GetProperty("model").GetString(), Is.EqualTo("XC60"));
+        Assert.That(body.GetProperty("size").GetString(), Is.EqualTo("Large"));
+    }
+
+    [Test]
+    public async Task UnknownVehicleSize_IsAValidationProblem()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        var response = await client.PostAsJsonAsync("/api/vehicle",
+            new { clientId = _seed.StudioA.ClientId, licensePlate = "KR 77", size = "Huge" });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    [Test]
     public async Task GetOtherStudiosClient_ReturnsNotFound()
     {
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);

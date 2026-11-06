@@ -1,3 +1,5 @@
+using Shared.Kernel.Vehicles;
+
 namespace Crm.Application.Clients;
 
 public class ClientRequest
@@ -11,4 +13,4 @@ public class ClientRequest
     public ClientVehicleRequest? Vehicle { get; set; }
 }
 
-public record ClientVehicleRequest(string LicensePlate, string? Brand, string? Model);
+public record ClientVehicleRequest(string LicensePlate, string? Brand, string? Model, VehicleSize? Size = null);

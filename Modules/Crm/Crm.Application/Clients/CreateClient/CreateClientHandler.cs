@@ -1,3 +1,4 @@
+using Shared.Kernel.Vehicles;
 using Crm.Application.Abstractions;
 using Crm.Domain;
 using Shared.Kernel.Results;
@@ -13,7 +14,7 @@ public sealed class CreateClientHandler(ICrmDbContext db)
         var client = Client.Create(request.Name, request.Phone, request.Email, request.Nip);
         if (request.Vehicle is { } vehicle)
         {
-            client.AddVehicle(vehicle.LicensePlate, vehicle.Brand, vehicle.Model);
+            client.AddVehicle(vehicle.LicensePlate, vehicle.Brand, vehicle.Model, vehicle.Size ?? VehicleSize.Medium);
         }
 
         // Client and vehicle are saved together
