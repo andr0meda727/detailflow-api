@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace Notifications.Infrastructure.Email;
 
 /// <summary>
-/// Sends the app's emails over SMTP (Mailpit locally, see compose.yaml).
+/// Sends the app's emails over SMTP (Mailpit locally, see compose.yaml). The content comes from <see cref="EmailTemplates"/>.
 /// </summary>
 public class SmtpEmailSender(IConfiguration config) : IEmailSender
 {
@@ -19,83 +19,40 @@ public class SmtpEmailSender(IConfiguration config) : IEmailSender
 
     private readonly string _fromName = config["Email:FromName"] ?? "DetailFlow";
 
-    public async Task SendInvitationEmailAsync(
-        string to,
-        string studioName,
-        string acceptUrl,
-        DateTime expiresAt)
+    public async Task SendInvitationEmailAsync(string to, string studioName, string acceptUrl, DateTime expiresAt)
+    {
+        using var message = Compose(to, EmailTemplates.Invitation(studioName, acceptUrl, expiresAt));
+
+        await SendAsync(message);
+    }
+
+    public async Task SendReportEmailAsync(string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes)
+    {
+        using var message = Compose(to, EmailTemplates.BookingsReport(dateFrom, dateTo));
+        message.Attachments.Add(new Attachment(
+            new MemoryStream(pdfBytes), $"raport_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.pdf", "application/pdf"));
+
+        await SendAsync(message);
+    }
+
+    private MailMessage Compose(string to, EmailContent content)
+    {
+        var message = new MailMessage
+        {
+            From = new MailAddress(_from, _fromName),
+            Subject = content.Subject,
+            Body = content.Html,
+            IsBodyHtml = true
+        };
+        message.To.Add(to);
+        return message;
+    }
+
+    private async Task SendAsync(MailMessage message)
     {
         using var client = new SmtpClient(_host, _port);
         client.EnableSsl = false;
         client.Credentials = CredentialCache.DefaultNetworkCredentials;
-
-        var body = BuildInvitationHtml(studioName, acceptUrl, expiresAt);
-
-        var message = new MailMessage
-        {
-            From       = new MailAddress(_from, _fromName),
-            Subject    = $"Zaproszenie do studia {studioName}",
-            Body       = body,
-            IsBodyHtml = true
-        };
-        message.To.Add(to);
-
-        await client.SendMailAsync(message);
-    }
-
-    private static string BuildInvitationHtml(
-        string studioName, string acceptUrl, DateTime expiresAt)
-    {
-        return $"""
-            <!DOCTYPE html>
-            <html>
-            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2>Zaproszenie do {studioName}</h2>
-                <p>Zostałeś zaproszony do dołączenia do studia <strong>{studioName}</strong> w aplikacji DetailFlow.</p>
-                <p>Kliknij przycisk poniżej aby zaakceptować zaproszenie:</p>
-                <a href="{acceptUrl}"
-                   style="display: inline-block; padding: 12px 24px; background-color: #2563eb;
-                          color: white; text-decoration: none; border-radius: 6px;">
-                    Akceptuj zaproszenie
-                </a>
-                <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
-                    Zaproszenie wygasa: {expiresAt:dd.MM.yyyy HH:mm} UTC
-                </p>
-                <p style="color: #6b7280; font-size: 12px;">
-                    Jeśli nie spodziewałeś się tego zaproszenia, możesz zignorować tę wiadomość.
-                </p>
-            </body>
-            </html>
-            """;
-    }
-
-    public async Task SendReportEmailAsync(
-        string to, DateTime dateFrom, DateTime dateTo, byte[] pdfBytes)
-    {
-        using var client = new SmtpClient(_host, _port);
-        client.EnableSsl = false;
-        client.Credentials = CredentialCache.DefaultNetworkCredentials;
-
-        var message = new MailMessage
-        {
-            From       = new MailAddress(_from, _fromName),
-            Subject    = $"Raport wizyt {dateFrom:dd.MM.yyyy}–{dateTo:dd.MM.yyyy}",
-            Body       = $"""
-                          <p>Cześć,</p>
-                          <p>Twój raport wizyt za okres <strong>{dateFrom:dd.MM.yyyy} — {dateTo:dd.MM.yyyy}</strong> jest gotowy.</p>
-                          <p>Znajdziesz go w załączniku.</p>
-                          """,
-            IsBodyHtml = true
-        };
-
-        message.To.Add(to);
-
-        var attachment = new Attachment(
-            new MemoryStream(pdfBytes),
-            $"raport_{dateFrom:yyyyMMdd}_{dateTo:yyyyMMdd}.pdf",
-            "application/pdf");
-
-        message.Attachments.Add(attachment);
 
         await client.SendMailAsync(message);
     }
