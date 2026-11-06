@@ -10,6 +10,7 @@ using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Scheduling.Api;
 using Shared.Infrastructure.Messaging;
+using Shared.Kernel.Time;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+// Fail at startup, not on the first report, if the OS has no time-zone data (Alpine images need tzdata)
+TimeZones.Find(TimeZones.Default);
 
 var app = builder.Build();
 

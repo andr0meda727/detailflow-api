@@ -55,3 +55,20 @@ Small lookup lists (services, inventory categories, employees) are not paged; th
 
 The public marketplace search will use cursor (keyset) pagination instead, since offset gets slow on deep
 pages and doesn't suit infinite scroll.
+
+## Dates and times
+
+- **Moments are UTC.** Responses carry ISO 8601 with `Z` (`"2026-10-03T08:00:00Z"`), and requests must send the same
+  (e.g. `scheduledAt`, the `fromDate`/`toDate` booking filters). The database stores `timestamptz`.
+- **Each studio has an IANA time zone** (`Europe/Warsaw` unless changed). `GET /api/studios/my` returns it as
+  `timeZone`; the owner changes it with `PUT /api/studios/time-zone` `{ "timeZone": "Europe/Berlin" }`. Windows names
+  (`Central European Standard Time`) are rejected with `INVALID_TIME_ZONE`.
+- **Show times in the studio's zone, not the browser's**, so someone abroad still sees the studio's schedule:
+  `new Intl.DateTimeFormat('pl-PL', { timeZone: studio.timeZone, dateStyle: 'short', timeStyle: 'short' })`.
+  When the user picks a local date and time, convert it to UTC in that zone before sending it.
+- **Calendar days are plain dates** (`"yyyy-MM-dd"`), meaning the studio's local days. The bookings report
+  (`POST /api/reports/bookings`, `{ "dateFrom": "2026-10-01", "dateTo": "2026-10-31" }`, both days included) works this
+  way; the server turns the days into UTC with the studio's zone, so a month is the studio's month even across a
+  clock change.
+- In code, convert with `Shared.Kernel.Time.TimeZones` (`DaysToUtc`, `ToLocal`), and use half-open ranges
+  (`>= from && < toExclusive`) so consecutive days never share a booking.

@@ -43,6 +43,9 @@ RUN dotnet publish "Api.csproj" \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 WORKDIR /app
 
+# Time-zone data: studios keep their own zone (e.g. Europe/Warsaw), and the base image has none
+RUN apk add --no-cache tzdata
+
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
