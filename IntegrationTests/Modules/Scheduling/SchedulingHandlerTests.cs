@@ -13,10 +13,13 @@ using Scheduling.Application.Catalog;
 using Scheduling.Application.Catalog.CreateService;
 using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
+using Scheduling.Application.Catalog.UpdateService;
+using Scheduling.Contracts;
 using Scheduling.Domain.Bookings;
 using Scheduling.Infrastructure.Persistence;
 using Shared.Infrastructure.Tenancy;
 using Shared.Kernel.Pagination;
+using Shared.Kernel.Vehicles;
 
 namespace IntegrationTests.Modules.Scheduling;
 
@@ -177,5 +180,65 @@ public class SchedulingHandlerTests
             new PageRequest(), null, Now.UtcDateTime, Now.UtcDateTime.AddDays(-1), Ct);
 
         Assert.That(result.ErrorCode, Is.EqualTo("INVALID_DATE_RANGE"));
+    }
+
+    [Test]
+    public async Task Service_KeepsItsCategoryAndPricesPerSize()
+    {
+        ServiceResponseDto created;
+        await using (var db = Db())
+        {
+            created = await new CreateServiceHandler(db).HandleAsync(new ServiceRequest("Pranie tapicerki",
+                ServiceCategory.Interior,
+                [new ServicePriceDto(VehicleSize.Large, 349.99m), new ServicePriceDto(VehicleSize.Small, 249m)]), Ct);
+        }
+
+        await using var read = Db();
+        var service = (await new GetServicesHandler(read).HandleAsync(Ct)).Single(s => s.Id == created.Id);
+
+        Assert.That(service.Category, Is.EqualTo(ServiceCategory.Interior));
+        Assert.That(service.Prices, Is.EqualTo(new[]
+        {
+            new ServicePriceDto(VehicleSize.Small, 249m), new ServicePriceDto(VehicleSize.Large, 349.99m)
+        }));
+    }
+
+    [Test]
+    public async Task UpdateService_ReplacesPricesWhenSent_AndKeepsThemWhenLeftOut()
+    {
+        Guid id;
+        await using (var db = Db())
+        {
+            id = (await new CreateServiceHandler(db).HandleAsync(new ServiceRequest("Powłoka", ServiceCategory.Ceramic,
+                [new ServicePriceDto(VehicleSize.Small, 1000m), new ServicePriceDto(VehicleSize.Medium, 1200m)]), Ct)).Id;
+        }
+
+        await using (var db = Db())
+        {
+            var replaced = await new UpdateServiceHandler(db).HandleAsync(id,
+                new ServiceRequest("Powłoka", null, [new ServicePriceDto(VehicleSize.XL, 2000m)]), Ct);
+            Assert.That(replaced.Value!.Prices, Is.EqualTo(new[] { new ServicePriceDto(VehicleSize.XL, 2000m) }));
+            Assert.That(replaced.Value.Category, Is.EqualTo(ServiceCategory.Ceramic));
+        }
+
+        await using (var db = Db())
+        {
+            await new UpdateServiceHandler(db).HandleAsync(id, new ServiceRequest("Powłoka 3 lata"), Ct);
+        }
+
+        await using var read = Db();
+        var service = (await new GetServicesHandler(read).HandleAsync(Ct)).Single(s => s.Id == id);
+        Assert.That(service.Name, Is.EqualTo("Powłoka 3 lata"));
+        Assert.That(service.Prices, Is.EqualTo(new[] { new ServicePriceDto(VehicleSize.XL, 2000m) }));
+    }
+
+    [Test]
+    public async Task UpdateService_OfAnotherStudio_IsNotFound()
+    {
+        await using var db = Db();
+
+        var result = await new UpdateServiceHandler(db).HandleAsync(_seed.StudioB.ServiceId, new ServiceRequest("Przejęta"), Ct);
+
+        Assert.That(result.ErrorCode, Is.EqualTo("SERVICE_NOT_FOUND"));
     }
 }

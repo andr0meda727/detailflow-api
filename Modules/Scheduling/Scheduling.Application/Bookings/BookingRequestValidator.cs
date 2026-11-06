@@ -32,11 +32,7 @@ public class BookingRequestValidator : AbstractValidator<BookingRequest>
             .WithMessage("Notatki nie mogą składać się tylko z białych znaków.")
             .When(x => !string.IsNullOrEmpty(x.Notes));
 
-        RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Cena nie może być ujemna.")
-            .LessThan(1_000_000).WithMessage("Cena przekracza dozwolony limit systemu.")
-            .Must(price => decimal.Round(price, 2) == price)
-            .WithMessage("Cena może mieć co najwyżej dwa miejsca po przecinku.");
+        RuleFor(x => x.Price).ValidPrice();
 
         RuleFor(x => x.ServiceIds)
             .NotEmpty().WithMessage("Musisz wybrać przynajmniej jedną usługę.")

@@ -15,6 +15,7 @@ using Scheduling.Application.Bookings.UpdateBooking;
 using Scheduling.Application.Catalog.CreateService;
 using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
+using Scheduling.Application.Catalog.UpdateService;
 using Scheduling.Infrastructure;
 using Scheduling.Infrastructure.Consumers;
 
@@ -40,6 +41,7 @@ public static class SchedulingModule
 
         services.AddScoped<GetServicesHandler>();
         services.AddScoped<CreateServiceHandler>();
+        services.AddScoped<UpdateServiceHandler>();
         services.AddScoped<DeleteServiceHandler>();
 
         services.TryAddSingleton(TimeProvider.System);

@@ -4,6 +4,7 @@ using Scheduling.Application.Catalog;
 using Scheduling.Application.Catalog.CreateService;
 using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
+using Scheduling.Application.Catalog.UpdateService;
 using Shared.Api.Errors;
 
 namespace Scheduling.Api.Controllers;
@@ -26,6 +27,18 @@ public class ServiceController : ControllerBase
         ServiceRequest request, [FromServices] CreateServiceHandler handler, CancellationToken cancellationToken)
     {
         return await handler.HandleAsync(request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Changes the name, category and prices. Left out, the category and prices stay as they are.
+    /// </summary>
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<ServiceResponseDto>> Update(
+        Guid id, ServiceRequest request, [FromServices] UpdateServiceHandler handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(id, request, cancellationToken);
+
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 
     [HttpDelete("{id:guid}")]
