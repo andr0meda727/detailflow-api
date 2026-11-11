@@ -16,6 +16,11 @@ using Scheduling.Application.Catalog.CreateService;
 using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
 using Scheduling.Application.Catalog.UpdateService;
+using Scheduling.Application.Planning.Bays.CreateBay;
+using Scheduling.Application.Planning.Bays.DeactivateBay;
+using Scheduling.Application.Planning.Bays.GetBays;
+using Scheduling.Application.Planning.Bays.UpdateBay;
+using Scheduling.Application.Planning.Schedule;
 using Scheduling.Application.Requests.Accept;
 using Scheduling.Application.Requests.Estimate;
 using Scheduling.Application.Requests.GetMyRequests;
@@ -50,6 +55,16 @@ public static class SchedulingModule
         services.AddScoped<CreateServiceHandler>();
         services.AddScoped<UpdateServiceHandler>();
         services.AddScoped<DeleteServiceHandler>();
+
+        services.AddScoped<GetBaysHandler>();
+        services.AddScoped<CreateBayHandler>();
+        services.AddScoped<UpdateBayHandler>();
+        services.AddScoped<DeactivateBayHandler>();
+
+        services.AddScoped<GetScheduleHandler>();
+        services.AddScoped<UpdateScheduleHandler>();
+        services.AddScoped<CloseDayHandler>();
+        services.AddScoped<ReopenDayHandler>();
 
         services.AddScoped<EstimateHandler>();
         services.AddScoped<SubmitBookingRequestHandler>();

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Scheduling.Application.Abstractions;
 using Scheduling.Domain.Bookings;
 using Scheduling.Domain.Catalog;
+using Scheduling.Domain.Planning;
 using Scheduling.Domain.Requests;
 using Shared.Infrastructure.Messaging.Outbox;
 using Shared.Infrastructure.Persistence;
@@ -22,11 +23,19 @@ public class SchedulingDbContext(DbContextOptions<SchedulingDbContext> options, 
 
     public DbSet<OnlineBookingRequest> BookingRequests => Set<OnlineBookingRequest>();
 
+    public DbSet<Bay> Bays => Set<Bay>();
+
+    public DbSet<StudioSchedule> Schedules => Set<StudioSchedule>();
+
     public IQueryable<Service> ServicesOfAnyStudio => Services.IgnoreQueryFilters([TenantFilter]);
 
     public IQueryable<Booking> BookingsOfAnyStudio => Bookings.IgnoreQueryFilters([TenantFilter]);
 
     public IQueryable<OnlineBookingRequest> BookingRequestsOfAnyStudio => BookingRequests.IgnoreQueryFilters([TenantFilter]);
+
+    public IQueryable<Bay> BaysOfAnyStudio => Bays.IgnoreQueryFilters([TenantFilter]);
+
+    public IQueryable<StudioSchedule> SchedulesOfAnyStudio => Schedules.IgnoreQueryFilters([TenantFilter]);
 
     // No "Active" filter on services: past bookings must still load deactivated ones.
     // Queries that offer services for new bookings filter on IsActive themselves.

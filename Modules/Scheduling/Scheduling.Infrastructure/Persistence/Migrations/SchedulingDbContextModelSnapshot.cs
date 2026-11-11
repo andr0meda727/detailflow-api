@@ -258,6 +258,113 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Scheduling.Domain.Planning.Bay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("bay_pkey");
+
+                    b.HasIndex(new[] { "StudioId" }, "IX_bay_studio_id");
+
+                    b.ToTable("bay", "scheduling");
+                });
+
+            modelBuilder.Entity("Scheduling.Domain.Planning.StudioSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("BufferMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("buffer_minutes");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("LargeMultiplier")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("large_multiplier");
+
+                    b.Property<decimal>("MediumMultiplier")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("medium_multiplier");
+
+                    b.Property<int>("MinLeadHours")
+                        .HasColumnType("integer")
+                        .HasColumnName("min_lead_hours");
+
+                    b.Property<int>("SlotStepMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("slot_step_minutes");
+
+                    b.Property<decimal>("SmallMultiplier")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("small_multiplier");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("XlMultiplier")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("xl_multiplier");
+
+                    b.HasKey("Id")
+                        .HasName("studio_schedule_pkey");
+
+                    b.HasIndex(new[] { "StudioId" }, "IX_studio_schedule_studio_id")
+                        .IsUnique();
+
+                    b.ToTable("studio_schedule", "scheduling");
+                });
+
             modelBuilder.Entity("Scheduling.Domain.Requests.OnlineBookingRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -476,6 +583,69 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("Scheduling.Domain.Planning.StudioSchedule", b =>
+                {
+                    b.OwnsMany("Scheduling.Domain.Planning.Closure", "Closures", b1 =>
+                        {
+                            b1.Property<Guid>("ScheduleId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("schedule_id");
+
+                            b1.Property<DateOnly>("Date")
+                                .HasColumnType("date")
+                                .HasColumnName("date");
+
+                            b1.Property<string>("Reason")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("reason");
+
+                            b1.HasKey("ScheduleId", "Date")
+                                .HasName("closure_pkey");
+
+                            b1.ToTable("closure", "scheduling");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ScheduleId")
+                                .HasConstraintName("closure_schedule_id_fkey");
+                        });
+
+                    b.OwnsMany("Scheduling.Domain.Planning.OpeningPeriod", "OpeningHours", b1 =>
+                        {
+                            b1.Property<Guid>("ScheduleId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("schedule_id");
+
+                            b1.Property<string>("Day")
+                                .HasColumnType("text")
+                                .HasColumnName("day");
+
+                            b1.Property<TimeOnly>("Opens")
+                                .HasColumnType("time without time zone")
+                                .HasColumnName("opens");
+
+                            b1.Property<TimeOnly>("Closes")
+                                .HasColumnType("time without time zone")
+                                .HasColumnName("closes");
+
+                            b1.HasKey("ScheduleId", "Day", "Opens")
+                                .HasName("opening_period_pkey");
+
+                            b1.ToTable("opening_period", "scheduling", t =>
+                                {
+                                    t.HasCheckConstraint("CK_opening_period_order", "closes > opens");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("ScheduleId")
+                                .HasConstraintName("opening_period_schedule_id_fkey");
+                        });
+
+                    b.Navigation("Closures");
+
+                    b.Navigation("OpeningHours");
                 });
 
             modelBuilder.Entity("Scheduling.Domain.Requests.OnlineBookingRequest", b =>

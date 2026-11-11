@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Scheduling.Domain.Bookings;
 using Scheduling.Domain.Catalog;
+using Scheduling.Domain.Planning;
 using Scheduling.Domain.Requests;
 using Shared.Application.Messaging;
 
@@ -20,6 +21,10 @@ public interface ISchedulingDbContext : IOutbox
 
     DbSet<OnlineBookingRequest> BookingRequests { get; }
 
+    DbSet<Bay> Bays { get; }
+
+    DbSet<StudioSchedule> Schedules { get; }
+
     // Without the tenant filter, for work done on a customer's behalf (no studio is resolved). Every query on these
     // must match a studio or a customer itself.
     IQueryable<Service> ServicesOfAnyStudio { get; }
@@ -27,6 +32,10 @@ public interface ISchedulingDbContext : IOutbox
     IQueryable<Booking> BookingsOfAnyStudio { get; }
 
     IQueryable<OnlineBookingRequest> BookingRequestsOfAnyStudio { get; }
+
+    IQueryable<Bay> BaysOfAnyStudio { get; }
+
+    IQueryable<StudioSchedule> SchedulesOfAnyStudio { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
