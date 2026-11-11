@@ -20,6 +20,7 @@ public sealed class UpdateBookingHandler(
         if (parties == null) return SchedulingErrors.UnknownClientOrVehicle;
 
         var currentBay = booking.BayId;
+        var wasCompleted = booking.StatusId == Domain.Bookings.BookingStatus.Completed;
         var edit = booking.Edit(
             parties.Client, parties.Vehicle, request.ScheduledAt, request.PriceInCents, request.Notes, request.ServiceIds);
         if (!edit.Success) return edit.Error!;
@@ -31,6 +32,7 @@ public sealed class UpdateBookingHandler(
         var placement = await PlaceAsync(booking, request, parties.Vehicle.Size, currentBay, cancellationToken);
         if (!placement.Success) return placement.Error!;
         booking.Place(placement.Value!.EndsAt, placement.Value.BayId);
+        db.EnqueueIfCompleted(booking, booking.StudioId, wasCompleted);
 
         var saved = await db.SaveChangesCheckedAsync(cancellationToken);
         if (!saved.Success) return saved.Error!;

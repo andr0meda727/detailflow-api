@@ -23,6 +23,7 @@ public static class SchedulingInfrastructureExtensions
 
         services.AddScoped<IBookingReportSource, BookingReportSource>();
         services.AddScoped<IServiceCatalogSource, ServiceCatalogSource>();
+        services.AddScoped<IUpcomingBookingsSource, UpcomingBookingsSource>();
 
         services.AddOutbox<SchedulingDbContext>();
 

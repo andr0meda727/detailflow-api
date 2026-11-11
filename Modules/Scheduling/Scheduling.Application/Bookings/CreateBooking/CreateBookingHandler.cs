@@ -31,6 +31,7 @@ public sealed class CreateBookingHandler(
             exceptBookingId: null, assignBay: !booking.IsFinished, cancellationToken);
         if (!placement.Success) return placement.Error!;
         booking.Place(placement.Value!.EndsAt, placement.Value.BayId);
+        db.EnqueueIfCompleted(booking, studioId, wasCompleted: false);
 
         db.Bookings.Add(booking);
         var saved = await db.SaveChangesCheckedAsync(cancellationToken);
