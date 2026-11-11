@@ -17,7 +17,7 @@ read that first. In Development the live OpenAPI schema is at `/openapi/v1.json`
   `/api/me/*`, `/api/public/*`, `/api/studios/my` and invitations never need it.
 - **Who may call** (column "Auth" below): `public` = no login; `user` = any signed-in account (no studio);
   `staff` = any member of the current studio; `owner` = the studio's owner (others get 403).
-- **Errors** are `application/problem+json` with `status`, `detail` (Polish, for display) and `code` (switch on it).
+- **Errors** are `application/problem+json` with `status`, `detail` (mostly Polish and fit to show, though a few older ones are English) and `code` (switch on it).
   Validation failures are 400 with `errors: { "<Field>": ["message", ...] }`; keys are the request's property paths
   as in C# (`Name`, `Vehicle.LicensePlate`, `Prices[0].Price`). 429 = rate limit (public and customer writes,
   120 requests/min per IP). 500 has no `code`.
@@ -202,6 +202,54 @@ Submitting a request: exactly one of `vehicleId` and `vehicle`; at most 20 servi
 most a year ahead. Errors: `STUDIO_NOT_FOUND` (not published), `CUSTOMER_PROFILE_REQUIRED`, `CUSTOMER_VEHICLE_NOT_FOUND`,
 `BOOKING_REQUEST_UNKNOWN_SERVICES`, `BOOKING_REQUEST_LIMIT` (3 pending per studio), and for studios that plan
 `OUTSIDE_OPENING_HOURS` and `BOOKING_REQUEST_TOO_SOON` (use the public availability slots to avoid them).
+
+## Examples
+
+An error, and a validation failure:
+
+```json
+{ "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404,
+  "detail": "Booking 5d1e… not found", "code": "BOOKING_NOT_FOUND" }
+
+{ "title": "One or more validation errors occurred.", "status": 400,
+  "errors": { "Name": ["Nazwa usługi jest wymagana."], "Prices[0].Price": ["Cena nie może być ujemna."] } }
+```
+
+A customer books from the map:
+
+```http
+GET /api/public/studios?minLat=50.0&maxLat=50.1&minLng=19.8&maxLng=20.1&vehicleSize=Large
+→ { "items": [{ "studioId": "3f2c…", "name": "Detail Kraków", "city": "Kraków", "latitude": 50.06,
+     "longitude": 19.94, "categories": ["ExteriorWash", "Interior"], "fromPrice": 89.00,
+     "averageRating": 4.7, "reviewCount": 12 }], "page": 1, "pageSize": 20, "totalCount": 1, "totalPages": 1 }
+
+GET /api/public/studios/3f2c…/availability?from=2026-11-16&to=2026-11-20&serviceIds=9a1e…&vehicleSize=Large
+→ { "planningEnabled": true, "durationMinutes": 90,
+    "slots": [{ "start": "2026-11-16T07:00:00Z", "end": "2026-11-16T08:30:00Z" }] }
+
+POST /api/me/booking-requests
+{ "studioId": "3f2c…", "serviceIds": ["9a1e…"], "vehicleId": "c0de…",
+  "preferredAt": "2026-11-16T07:00:00Z", "notes": "Psia sierść na tylnej kanapie" }
+→ 201 { "id": "77ab…", "status": "Pending", "estimatedPrice": 89.00, "hasUnpricedServices": false,
+        "booking": null, … }
+```
+
+Staff answer it:
+
+```http
+GET  /api/booking-requests?status=Pending
+GET  /api/booking-requests/77ab…/plan       → is the preferred time free, and on which bay
+POST /api/booking-requests/77ab…/accept     { "bayId": "b4y1…" }   or {} for the preferred time and best bay
+POST /api/booking-requests/77ab…/reject     { "reason": "Brak terminów w tym tygodniu" }
+```
+
+A staff booking (status "Utworzona"):
+
+```json
+POST /api/bookings
+{ "clientId": "…", "vehicleId": "…", "scheduledAt": "2026-11-16T08:00:00Z",
+  "statusId": "6aeadcad-a836-46fc-a445-3a3a832f49a4", "serviceIds": ["…"], "price": 249.00 }
+```
 
 ## Not in the API yet
 
