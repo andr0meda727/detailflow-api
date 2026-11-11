@@ -56,6 +56,32 @@ public static class TimeZones
     }
 
     /// <summary>
+    /// The UTC moment a local wall-clock time happens. A time that doesn't exist because the clocks jump forward maps to
+    /// the moment of the jump (02:30 on the spring change becomes 03:00); a time that happens twice when they go back
+    /// maps to the first.
+    /// </summary>
+    public static DateTime ToUtc(DateTime local, TimeZoneInfo zone)
+    {
+        local = DateTime.SpecifyKind(local, DateTimeKind.Unspecified);
+
+        if (zone.IsInvalidTime(local))
+        {
+            // Transitions fall on whole minutes, so the first valid minute after the gap is the jump itself
+            var firstValid = local;
+            while (zone.IsInvalidTime(firstValid)) firstValid = firstValid.AddMinutes(1);
+            return TimeZoneInfo.ConvertTimeToUtc(firstValid, zone);
+        }
+
+        if (zone.IsAmbiguousTime(local))
+        {
+            var earliest = zone.GetAmbiguousTimeOffsets(local).Max();
+            return DateTime.SpecifyKind(local - earliest, DateTimeKind.Utc);
+        }
+
+        return TimeZoneInfo.ConvertTimeToUtc(local, zone);
+    }
+
+    /// <summary>
     /// The UTC range covering the local days <paramref name="from"/> to <paramref name="to"/>, both included.
     /// The end is exclusive: compare with <c>&lt;</c>.
     /// </summary>
