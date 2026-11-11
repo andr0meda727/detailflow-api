@@ -1,6 +1,8 @@
 # API conventions
 
 ## Errors
+Endpoint by endpoint (bodies, responses, error codes): see [api-reference.md](api-reference.md).
+
 
 Failures are returned as RFC 7807 `application/problem+json`. Domain errors carry a stable `code` extension
 (for example `BOOKING_NOT_FOUND`) that the frontend should switch on, because `title` and `detail` are only
