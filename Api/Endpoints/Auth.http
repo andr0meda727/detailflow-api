@@ -1,5 +1,5 @@
-@projectUrl = https://spsquzkwqikbwdrrkpqy.supabase.co
-@anonKey = sb_publishable_0e54D14bUH3Hu2D_9IFlCg_eYZA86NZ
+# Run with the "dev" environment. projectUrl and anonKey come from http-client.env.json; your login
+# (ownerEmail, ownerPassword, studio_id, ...) from http-client.private.env.json, which git ignores.
 
 ### Logging
 
@@ -8,8 +8,8 @@ apikey: {{anonKey}}
 Content-Type: application/json
 
 {
-  "email": "kubawk003@wp.pl",
-  "password": "haslohaslo"
+  "email": "{{ownerEmail}}",
+  "password": "{{ownerPassword}}"
 }
 
 > {%
@@ -23,8 +23,8 @@ apikey: {{anonKey}}
 Content-Type: application/json
 
 {
-  "email": "kubawk003@wp.pl",
-  "password": "haslohaslo",
+  "email": "{{ownerEmail}}",
+  "password": "{{ownerPassword}}",
   "data": {
     "first_name": "Kuba",
     "last_name": "W"
@@ -37,6 +37,6 @@ Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 {
-  "email": "pracownik.jan@gmail.com",
+  "email": "{{employeeEmail}}",
   "role": 2
 }

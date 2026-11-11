@@ -10,9 +10,9 @@
 
     <ItemGroup>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-        <PackageReference Include="MassTransit" Version="8.1.3" />
+        <PackageReference Include="MassTransit" Version="8.5.12" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -22,8 +22,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core\Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+      <ProjectReference Include="..\Shared\Shared.Api\Shared.Api.csproj" />
+      <ProjectReference Include="..\Modules\Inventory\Inventory.Api\Inventory.Api.csproj" />
+      <ProjectReference Include="..\Modules\Crm\Crm.Api\Crm.Api.csproj" />
+      <ProjectReference Include="..\Modules\Scheduling\Scheduling.Api\Scheduling.Api.csproj" />
+      <ProjectReference Include="..\Modules\Identity\Identity.Api\Identity.Api.csproj" />
+      <ProjectReference Include="..\Modules\Notifications\Notifications.Api\Notifications.Api.csproj" />
+      <ProjectReference Include="..\Modules\Marketplace\Marketplace.Api\Marketplace.Api.csproj" />
+      <ProjectReference Include="..\Modules\Customers\Customers.Api\Customers.Api.csproj" />
     </ItemGroup>
 
 </Project>

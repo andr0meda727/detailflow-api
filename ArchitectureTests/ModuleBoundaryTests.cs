@@ -1,0 +1,164 @@
+using System.Reflection;
+using NetArchTest.Rules;
+
+namespace ArchitectureTests;
+
+/// <summary>
+/// Modules are isolated from the legacy Infrastructure project and from each other,
+/// and keep their own layers pointing inwards: Api → Infrastructure → Application → Domain.
+/// The only way into a module from outside is its *.Contracts project.
+/// </summary>
+[TestFixture]
+public class ModuleBoundaryTests
+{
+    // A module without business rules or data of its own (Notifications) has no Domain or Application layer
+    public sealed record Module(string Name, Assembly? Domain, Assembly? Application, Assembly Infrastructure, Assembly Api)
+    {
+        public Assembly[] All => new[] { Domain, Application, Infrastructure, Api }.OfType<Assembly>().ToArray();
+
+        // Namespaces other code must not touch; *.Contracts is deliberately left out
+        public string[] Internals => [$"{Name}.Domain", $"{Name}.Application", $"{Name}.Infrastructure", $"{Name}.Api"];
+
+        public override string ToString() => Name;
+    }
+
+    public static readonly Module[] Modules =
+    [
+        new("Inventory",
+            typeof(Inventory.Domain.InventoryItem).Assembly,
+            typeof(Inventory.Application.Abstractions.IInventoryDbContext).Assembly,
+            typeof(Inventory.Infrastructure.Persistence.InventoryDbContext).Assembly,
+            typeof(Inventory.Api.InventoryModule).Assembly),
+        new("Crm",
+            typeof(Crm.Domain.Client).Assembly,
+            typeof(Crm.Application.Abstractions.ICrmDbContext).Assembly,
+            typeof(Crm.Infrastructure.Persistence.CrmDbContext).Assembly,
+            typeof(Crm.Api.CrmModule).Assembly),
+        new("Scheduling",
+            typeof(Scheduling.Domain.Bookings.Booking).Assembly,
+            typeof(Scheduling.Application.Abstractions.ISchedulingDbContext).Assembly,
+            typeof(Scheduling.Infrastructure.Persistence.SchedulingDbContext).Assembly,
+            typeof(Scheduling.Api.SchedulingModule).Assembly),
+        new("Identity",
+            typeof(Identity.Domain.Studios.Studio).Assembly,
+            typeof(Identity.Application.Abstractions.IIdentityDbContext).Assembly,
+            typeof(Identity.Infrastructure.Persistence.IdentityDbContext).Assembly,
+            typeof(Identity.Api.IdentityModule).Assembly),
+        new("Notifications", null, null,
+            typeof(Notifications.Infrastructure.Reports.BookingsReportPdf).Assembly,
+            typeof(Notifications.Api.NotificationsModule).Assembly),
+        new("Marketplace",
+            typeof(Marketplace.Domain.StudioListing).Assembly,
+            typeof(Marketplace.Application.Abstractions.IMarketplaceDbContext).Assembly,
+            typeof(Marketplace.Infrastructure.Persistence.MarketplaceDbContext).Assembly,
+            typeof(Marketplace.Api.MarketplaceModule).Assembly),
+        new("Customers",
+            typeof(Customers.Domain.CustomerVehicle).Assembly,
+            typeof(Customers.Application.Abstractions.ICustomersDbContext).Assembly,
+            typeof(Customers.Infrastructure.Persistence.CustomersDbContext).Assembly,
+            typeof(Customers.Api.CustomersModule).Assembly)
+    ];
+
+    public static IEnumerable<Module> LayeredModules => Modules.Where(m => m.Domain != null);
+
+    private static readonly Assembly[] LegacyAssemblies =
+    [
+        typeof(Infrastructure.Data.ApplicationDbContext).Assembly
+    ];
+
+    private static readonly string[] LegacyNamespaces = ["Infrastructure", "Api"];
+
+    [TestCaseSource(nameof(Modules))]
+    public void Module_DoesNotDependOnLegacyProjects(Module module)
+    {
+        var result = Types.InAssemblies(module.All)
+            .ShouldNot().HaveDependencyOnAny(LegacyNamespaces)
+            .GetResult();
+
+        AssertSuccess(result, $"The {module} module must not use the legacy Infrastructure or the Api host");
+    }
+
+    [TestCaseSource(nameof(Modules))]
+    public void LegacyProjects_UseModuleOnlyThroughItsContracts(Module module)
+    {
+        var result = Types.InAssemblies(LegacyAssemblies)
+            .ShouldNot().HaveDependencyOnAny(module.Internals)
+            .GetResult();
+
+        AssertSuccess(result, $"The legacy Infrastructure may only use {module}.Contracts");
+    }
+
+    [TestCaseSource(nameof(Modules))]
+    public void Module_UsesOtherModulesOnlyThroughTheirContracts(Module module)
+    {
+        var otherInternals = Modules.Where(m => m != module).SelectMany(m => m.Internals).ToArray();
+
+        var result = Types.InAssemblies(module.All)
+            .ShouldNot().HaveDependencyOnAny(otherInternals)
+            .GetResult();
+
+        AssertSuccess(result, $"The {module} module may only use other modules' *.Contracts");
+    }
+
+    [TestCaseSource(nameof(LayeredModules))]
+    public void Domain_DependsOnNoOtherLayer(Module module)
+    {
+        var result = Types.InAssembly(module.Domain!)
+            .ShouldNot().HaveDependencyOnAny(
+                $"{module.Name}.Application", $"{module.Name}.Infrastructure", $"{module.Name}.Api",
+                "Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore")
+            .GetResult();
+
+        AssertSuccess(result, $"{module}.Domain must stay free of other layers and frameworks");
+    }
+
+    [TestCaseSource(nameof(LayeredModules))]
+    public void Application_DoesNotDependOnInfrastructureOrWeb(Module module)
+    {
+        var result = Types.InAssembly(module.Application!)
+            .ShouldNot().HaveDependencyOnAny(
+                $"{module.Name}.Infrastructure", $"{module.Name}.Api", "Microsoft.AspNetCore", "Npgsql")
+            .GetResult();
+
+        AssertSuccess(result, $"{module}.Application must not use ASP.NET Core, the database provider or outer layers");
+    }
+
+    [TestCaseSource(nameof(LayeredModules))]
+    public void Application_UsesOnlyEfCoreAbstractions(Module module)
+    {
+        // Handlers work with DbSet and LINQ (Microsoft.EntityFrameworkCore), but SQL and provider specifics
+        // stay in Infrastructure. Namespaces overlap, so check the referenced assemblies instead.
+        var referenced = module.Application!.GetReferencedAssemblies().Select(a => a.Name).ToList();
+
+        Assert.That(referenced, Has.None.EqualTo("Microsoft.EntityFrameworkCore.Relational"));
+        Assert.That(referenced, Has.None.StartsWith("Npgsql"));
+    }
+
+    private static readonly Assembly[] ContractAssemblies =
+    [
+        typeof(Crm.Contracts.IClientDirectory).Assembly,
+        typeof(Scheduling.Contracts.IBookingReportSource).Assembly,
+        typeof(Identity.Contracts.EmployeeInvited).Assembly,
+        typeof(Notifications.Contracts.GenerateBookingsReport).Assembly,
+        typeof(Customers.Contracts.ICustomerDirectory).Assembly,
+        typeof(Marketplace.Contracts.IPublicStudios).Assembly
+    ];
+
+    [TestCaseSource(nameof(ContractAssemblies))]
+    public void Contracts_DependOnNothing(Assembly contracts)
+    {
+        // Contracts are what another service would consume, so they stay plain C# types
+        var referenced = contracts.GetReferencedAssemblies()
+            .Select(a => a.Name!)
+            .Where(name => !name.StartsWith("System") && name != "netstandard" && name != "mscorlib")
+            .ToList();
+
+        Assert.That(referenced, Is.Empty);
+    }
+
+    private static void AssertSuccess(TestResult result, string rule)
+    {
+        Assert.That(result.IsSuccessful, Is.True,
+            $"{rule}. Offending types: {string.Join(", ", result.FailingTypeNames ?? [])}");
+    }
+}

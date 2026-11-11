@@ -1,14 +1,13 @@
 @Api_HostAddress = http://localhost:5174
-@projectUrl = https://spsquzkwqikbwdrrkpqy.supabase.co
-@anonKey = sb_publishable_0e54D14bUH3Hu2D_9IFlCg_eYZA86NZ
+# Personal values (inviteeEmail, studio_id, ...) come from http-client.private.env.json; run with "dev".
 
 ### Rejestracja nowego właściciela studia
 POST {{Api_HostAddress}}/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "zuziamajczyk@gmail.com",
-  "password": "Haslo1234!",
+  "email": "{{inviteeEmail}}",
+  "password": "{{inviteePassword}}",
   "firstName": "Jan",
   "lastName": "Kowalski",
   "studio": {
@@ -51,10 +50,10 @@ Content-Type: application/json
 POST {{Api_HostAddress}}/api/employees/invite
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
-X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+X-Studio-Id: {{studio_id}}
 
 {
-  "email": "zuziamajczyk@gmail.com",
+  "email": "{{inviteeEmail}}",
   "roleId": 2
 }
 
@@ -66,7 +65,7 @@ Authorization: Bearer {{auth_token}}
 #X-Studio-Id: jakies inne niz to powyzej
 
 {
-  "email": "zuziamajczyk@gmail.com",
+  "email": "{{inviteeEmail}}",
   "roleId": 3
 }
 
@@ -88,7 +87,7 @@ Authorization: Bearer {{auth_token}}
 X-Studio-Id: {{studio_id}}
 
 {
-  "email": "pracownik.jan@gmail.com",
+  "email": "{{employeeEmail}}",
   "roleId": 3
 }
 

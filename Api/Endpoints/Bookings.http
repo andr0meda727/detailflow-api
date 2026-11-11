@@ -5,7 +5,7 @@
 GET {{Api_HostAddress}}/api/bookings
 Authorization: Bearer {{auth_token}}
 Accept: application/json
-#X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+X-Studio-Id: {{studio_id}}
 
 ### GET Booking
 

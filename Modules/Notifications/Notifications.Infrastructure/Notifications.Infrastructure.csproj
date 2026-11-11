@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MassTransit" Version="8.5.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+        <PackageReference Include="QuestPDF" Version="2026.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Shared\Shared.Kernel\Shared.Kernel.csproj" />
+        <ProjectReference Include="..\Notifications.Contracts\Notifications.Contracts.csproj" />
+        <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+        <ProjectReference Include="..\..\Scheduling\Scheduling.Contracts\Scheduling.Contracts.csproj" />
+    </ItemGroup>
+
+</Project>

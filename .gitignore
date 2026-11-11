@@ -212,3 +212,5 @@ FakesAssemblies/
 *.sln.iml
 
 Infrastructure/appsettings.json
+# Personal values for the .http files (logins, studio IDs); the shared ones are in http-client.env.json
+http-client.private.env.json

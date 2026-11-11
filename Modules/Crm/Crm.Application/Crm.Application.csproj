@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.11.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Crm.Domain\Crm.Domain.csproj" />
+        <ProjectReference Include="..\Crm.Contracts\Crm.Contracts.csproj" />
+        <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
+    </ItemGroup>
+
+</Project>
