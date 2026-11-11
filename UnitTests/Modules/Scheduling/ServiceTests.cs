@@ -90,4 +90,27 @@ public class ServiceTests
 
         Assert.That(service.IsActive, Is.False);
     }
+
+    [Test]
+    public void Create_WithoutDuration_TakesAnHour()
+    {
+        Assert.That(Service.Create("Mycie").DurationMinutes, Is.EqualTo(60));
+    }
+
+    [Test]
+    public void Update_WithoutDuration_KeepsIt()
+    {
+        var service = Service.Create("Mycie", durationMinutes: 90);
+
+        service.Update("Mycie premium", ServiceCategory.ExteriorWash, []);
+
+        Assert.That(service.DurationMinutes, Is.EqualTo(90));
+    }
+
+    [TestCase(4)]
+    [TestCase(721)]
+    public void Create_RejectsDurationOutOfRange(int minutes)
+    {
+        Assert.That(() => Service.Create("Mycie", durationMinutes: minutes), Throws.InstanceOf<ArgumentOutOfRangeException>());
+    }
 }

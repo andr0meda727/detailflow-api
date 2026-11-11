@@ -12,7 +12,8 @@ public static class ServiceCatalogSnapshot
         services.Where(s => s.IsActive)
             .OrderBy(s => s.Name).ThenBy(s => s.Id)
             .Select(s => new CatalogService(s.Id, s.Name, s.Category.ToString(),
-                s.Prices.OrderBy(p => p.Size).Select(p => new CatalogPrice(p.Size.ToString(), p.AmountInCents)).ToList()))
+                s.Prices.OrderBy(p => p.Size).Select(p => new CatalogPrice(p.Size.ToString(), p.AmountInCents)).ToList(),
+                s.DurationMinutes))
             .ToList());
 
     /// <summary>

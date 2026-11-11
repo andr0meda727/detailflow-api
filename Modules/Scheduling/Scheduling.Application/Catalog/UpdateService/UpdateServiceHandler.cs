@@ -13,9 +13,9 @@ public sealed class UpdateServiceHandler(ISchedulingDbContext db, TimeProvider c
         var service = await db.Services.FirstOrDefaultAsync(s => s.Id == id && s.IsActive, cancellationToken);
         if (service == null) return SchedulingErrors.ServiceNotFound(id);
 
-        // Left out, the category and prices stay; sent, the price list is replaced as a whole ([] clears it)
+        // Left out, the category, prices and duration stay; sent, the price list is replaced as a whole ([] clears it)
         var prices = request.Prices == null ? service.Prices.ToList() : request.ToPrices();
-        service.Update(request.Name, request.Category ?? service.Category, prices);
+        service.Update(request.Name, request.Category ?? service.Category, prices, request.DurationMinutes);
         await db.EnqueueCatalogChangedAsync(service.StudioId, clock.GetUtcNow().UtcDateTime, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 

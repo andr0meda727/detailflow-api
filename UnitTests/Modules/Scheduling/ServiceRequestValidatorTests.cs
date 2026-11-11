@@ -76,4 +76,19 @@ public class ServiceRequestValidatorTests
 
         _validator.TestValidate(request).ShouldHaveValidationErrorFor("Prices[0].VehicleSize");
     }
+
+    [TestCase(5)]
+    [TestCase(720)]
+    public void Passes_DurationAtTheLimits(int minutes)
+    {
+        _validator.TestValidate(new ServiceRequest("Mycie", DurationMinutes: minutes)).ShouldNotHaveAnyValidationErrors();
+    }
+
+    [TestCase(0)]
+    [TestCase(721)]
+    public void Rejects_DurationOutOfRange(int minutes)
+    {
+        _validator.TestValidate(new ServiceRequest("Mycie", DurationMinutes: minutes))
+            .ShouldHaveValidationErrorFor(x => x.DurationMinutes);
+    }
 }

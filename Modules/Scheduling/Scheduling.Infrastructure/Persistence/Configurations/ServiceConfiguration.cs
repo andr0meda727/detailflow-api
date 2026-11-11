@@ -17,7 +17,10 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         // The comment is kept as it is in the database, so adopting the table changes nothing
         builder
             .ToTable("service", SchedulingDbContext.Schema, tb =>
-                tb.HasComment("Table contains services that studio can choose for booking purposes. Every studio is filled with default services (studio_id null). But there is option to add its own service, in this situation the studio_id is equal to id of the studio that add this service."));
+            {
+                tb.HasCheckConstraint("CK_service_duration_minutes", "duration_minutes BETWEEN 5 AND 720");
+                tb.HasComment("Table contains services that studio can choose for booking purposes. Every studio is filled with default services (studio_id null). But there is option to add its own service, in this situation the studio_id is equal to id of the studio that add this service.");
+            });
 
         // Every query is filtered by studio
         builder.HasIndex(e => e.StudioId, "IX_service_studio_id");
@@ -32,6 +35,12 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         builder.Property(e => e.IsActive)
             .HasDefaultValue(true)
             .HasColumnName("is_active");
+
+        // Existing services take an hour until the studio says otherwise
+        builder.Property(e => e.DurationMinutes)
+            .HasDefaultValue(Service.DefaultDurationMinutes)
+            .HasSentinel(0)
+            .HasColumnName("duration_minutes");
 
         builder.Property(e => e.CreatedAt)
             .HasDefaultValueSql("now()")

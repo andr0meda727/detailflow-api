@@ -12,6 +12,11 @@ namespace Scheduling.Domain.Catalog;
 /// </summary>
 public class Service : IAuditableEntity, ITenantEntity
 {
+    // How long a service takes when nobody said otherwise, and the bounds a studio can set
+    public const int DefaultDurationMinutes = 60;
+    public const int MinDurationMinutes = 5;
+    public const int MaxDurationMinutes = 720;
+
     private readonly List<ServicePrice> _prices = [];
 
     // For EF Core
@@ -27,6 +32,9 @@ public class Service : IAuditableEntity, ITenantEntity
 
     public bool IsActive { get; private set; }
 
+    // How long the work takes on a Medium car; the studio's schedule scales it for other sizes
+    public int DurationMinutes { get; private set; } = DefaultDurationMinutes;
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
@@ -34,18 +42,22 @@ public class Service : IAuditableEntity, ITenantEntity
     public IReadOnlyCollection<ServicePrice> Prices => _prices;
 
     public static Service Create(
-        string name, ServiceCategory category = ServiceCategory.Other, IReadOnlyCollection<ServicePrice>? prices = null)
+        string name, ServiceCategory category = ServiceCategory.Other, IReadOnlyCollection<ServicePrice>? prices = null,
+        int durationMinutes = DefaultDurationMinutes)
     {
         var service = new Service { Id = Guid.NewGuid(), IsActive = true };
-        service.Update(name, category, prices ?? []);
+        service.Update(name, category, prices ?? [], durationMinutes);
         return service;
     }
 
     /// <summary>
-    /// Replaces the name, category and the whole price list.
+    /// Replaces the name, category and the whole price list, and the duration when one is given.
     /// </summary>
-    public void Update(string name, ServiceCategory category, IReadOnlyCollection<ServicePrice> prices)
+    public void Update(
+        string name, ServiceCategory category, IReadOnlyCollection<ServicePrice> prices, int? durationMinutes = null)
     {
+        if (durationMinutes is < MinDurationMinutes or > MaxDurationMinutes)
+            throw new ArgumentOutOfRangeException(nameof(durationMinutes), durationMinutes, "Duration is out of range.");
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         if (!Enum.IsDefined(category)) throw new ArgumentOutOfRangeException(nameof(category), category, "Unknown category.");
         if (prices.Any(p => !Enum.IsDefined(p.Size) || p.AmountInCents < 0))
@@ -55,6 +67,7 @@ public class Service : IAuditableEntity, ITenantEntity
 
         Name = name.Trim();
         Category = category;
+        DurationMinutes = durationMinutes ?? DurationMinutes;
         _prices.Clear();
         _prices.AddRange(prices);
     }

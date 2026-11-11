@@ -7,7 +7,11 @@ namespace Scheduling.Contracts;
 /// </summary>
 public sealed record ServiceCatalogChanged(Guid StudioId, DateTime ChangedAt, IReadOnlyList<CatalogService> Services);
 
-public sealed record CatalogService(Guid ServiceId, string Name, string Category, IReadOnlyList<CatalogPrice> Prices);
+/// <summary>
+/// <paramref name="DurationMinutes"/> is the time for a Medium car; snapshots sent before durations existed read as an hour.
+/// </summary>
+public sealed record CatalogService(
+    Guid ServiceId, string Name, string Category, IReadOnlyList<CatalogPrice> Prices, int DurationMinutes = 60);
 
 /// <summary>
 /// The price of a service for one vehicle size ("Small", "Medium", "Large", "XL"), in cents.

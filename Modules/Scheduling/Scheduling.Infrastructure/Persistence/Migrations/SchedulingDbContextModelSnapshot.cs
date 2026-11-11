@@ -211,6 +211,12 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<int>("DurationMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(60)
+                        .HasColumnName("duration_minutes");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -240,6 +246,8 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                     b.ToTable("service", "scheduling", t =>
                         {
                             t.HasComment("Table contains services that studio can choose for booking purposes. Every studio is filled with default services (studio_id null). But there is option to add its own service, in this situation the studio_id is equal to id of the studio that add this service.");
+
+                            t.HasCheckConstraint("CK_service_duration_minutes", "duration_minutes BETWEEN 5 AND 720");
                         });
                 });
 

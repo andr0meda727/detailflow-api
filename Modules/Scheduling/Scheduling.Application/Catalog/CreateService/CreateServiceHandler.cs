@@ -10,7 +10,9 @@ public sealed class CreateServiceHandler(ISchedulingDbContext db, ITenantContext
     public async Task<ServiceResponseDto> HandleAsync(ServiceRequest request, CancellationToken cancellationToken)
     {
         var studioId = tenant.StudioId ?? throw new InvalidOperationException("Creating a service needs a resolved studio.");
-        var service = Service.Create(request.Name, request.Category ?? ServiceCategory.Other, request.ToPrices());
+        var service = Service.Create(
+            request.Name, request.Category ?? ServiceCategory.Other, request.ToPrices(),
+            request.DurationMinutes ?? Service.DefaultDurationMinutes);
 
         db.Services.Add(service);
         await db.EnqueueCatalogChangedAsync(studioId, clock.GetUtcNow().UtcDateTime, cancellationToken);
