@@ -43,6 +43,40 @@ public class BookingTests
     }
 
     [Test]
+    public void Create_LastsAnHour_UntilPlaced()
+    {
+        var booking = NewBooking();
+
+        Assert.That(booking.EndsAt - booking.ScheduledAt, Is.EqualTo(TimeSpan.FromHours(1)));
+        Assert.That(booking.BayId, Is.Null);
+    }
+
+    [Test]
+    public void Place_SetsTheEndAndBay_ButNeverAnEndBeforeTheStart()
+    {
+        var booking = NewBooking();
+        var bay = Guid.NewGuid();
+
+        booking.Place(booking.ScheduledAt.AddMinutes(150), bay);
+
+        Assert.That(booking.Range.Length, Is.EqualTo(TimeSpan.FromMinutes(150)));
+        Assert.That(booking.BayId, Is.EqualTo(bay));
+        Assert.That(() => booking.Place(booking.ScheduledAt, bay), Throws.InstanceOf<ArgumentOutOfRangeException>());
+    }
+
+    [Test]
+    public void Edit_MovingTheBooking_KeepsItsLength()
+    {
+        var booking = NewBooking();
+        booking.Place(booking.ScheduledAt.AddMinutes(90), Guid.NewGuid());
+
+        booking.Edit(Client, Vehicle, Now.AddDays(3), 25000, null, [Guid.NewGuid()]);
+
+        Assert.That(booking.ScheduledAt, Is.EqualTo(Now.AddDays(3)));
+        Assert.That(booking.EndsAt, Is.EqualTo(Now.AddDays(3).AddMinutes(90)));
+    }
+
+    [Test]
     public void Create_RequiresAService()
     {
         Assert.That(() => Booking.Create(Client, Vehicle, Now, 0, null, [], null), Throws.ArgumentException);

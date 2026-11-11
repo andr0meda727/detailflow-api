@@ -31,6 +31,10 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<Guid?>("BayId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bay_id");
+
                     b.Property<string>("ClientEmail")
                         .HasColumnType("text")
                         .HasColumnName("client_email");
@@ -66,6 +70,10 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CustomerUserId")
                         .HasColumnType("uuid")
                         .HasColumnName("customer_user_id");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text")
@@ -131,10 +139,16 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("VehicleId");
 
+                    b.HasIndex("BayId", "ScheduledAt")
+                        .HasDatabaseName("booking_bay_id_scheduled_at_idx");
+
                     b.HasIndex("StudioId", "ScheduledAt")
                         .HasDatabaseName("booking_studio_id_scheduled_at_idx");
 
-                    b.ToTable("booking", "scheduling");
+                    b.ToTable("booking", "scheduling", t =>
+                        {
+                            t.HasCheckConstraint("CK_booking_ends_after_start", "ends_at > scheduled_at");
+                        });
                 });
 
             modelBuilder.Entity("Scheduling.Domain.Bookings.BookingServiceLine", b =>
@@ -524,12 +538,20 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Scheduling.Domain.Bookings.Booking", b =>
                 {
+                    b.HasOne("Scheduling.Domain.Planning.Bay", "Bay")
+                        .WithMany()
+                        .HasForeignKey("BayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("booking_bay_id_fkey");
+
                     b.HasOne("Scheduling.Domain.Bookings.BookingStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("booking_status_id_fkey");
+
+                    b.Navigation("Bay");
 
                     b.Navigation("Status");
                 });

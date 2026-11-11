@@ -4,6 +4,7 @@ using Scheduling.Domain.Catalog;
 using Scheduling.Domain.Planning;
 using Scheduling.Domain.Requests;
 using Shared.Application.Messaging;
+using Shared.Kernel.Results;
 
 namespace Scheduling.Application.Abstractions;
 
@@ -38,4 +39,10 @@ public interface ISchedulingDbContext : IOutbox
     IQueryable<StudioSchedule> SchedulesOfAnyStudio { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves, turning the database's refusal of two overlapping bookings on one bay into
+    /// <see cref="SchedulingErrors.BayTaken"/>. Use it wherever a booking's time or bay changes.
+    /// </summary>
+    Task<Result> SaveChangesCheckedAsync(CancellationToken cancellationToken = default);
 }

@@ -49,6 +49,12 @@ public class BookingRequestValidator : AbstractValidator<BookingRequest>
             .Must(at => at <= clock.GetUtcNow().UtcDateTime.Add(MaxFutureBooking))
             .WithMessage("Rezerwacja nie może być zaplanowana na więcej niż 2 lata do przodu.");
 
+        // Bays are tenant-filtered, so another studio's bay is unknown here
+        RuleFor(x => x.BayId)
+            .MustAsync(async (bayId, ct) => await _db.Bays.AnyAsync(b => b.Id == bayId && b.IsActive, ct))
+            .WithMessage("Wybrane stanowisko nie istnieje lub jest wyłączone.")
+            .When(x => x.BayId.HasValue);
+
         RuleFor(x => x.VehicleId)
             .NotEmpty().WithMessage("Musisz podać ID pojazdu.")
             .MustAsync(BelongToClientAsync)

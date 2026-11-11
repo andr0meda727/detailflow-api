@@ -1,3 +1,4 @@
+using Scheduling.Domain.Planning;
 using Shared.Kernel.Auditing;
 using Shared.Kernel.Results;
 using Shared.Kernel.Tenancy;
@@ -10,6 +11,9 @@ namespace Scheduling.Domain.Bookings;
 /// </summary>
 public class Booking : IAuditableEntity, ITenantEntity
 {
+    // How long a booking lasts until the planner places it (and how long older bookings were assumed to take)
+    public static readonly TimeSpan DefaultLength = TimeSpan.FromHours(1);
+
     private readonly List<BookingServiceLine> _services = [];
 
     // For EF Core
@@ -40,6 +44,17 @@ public class Booking : IAuditableEntity, ITenantEntity
     public VehicleSize VehicleSize { get; private set; } = VehicleSize.Medium;
 
     public DateTime ScheduledAt { get; private set; }
+
+    // When the car leaves the bay: worked out from the services and the car's size, never sent by a client
+    public DateTime EndsAt { get; private set; }
+
+    // The bay the car stands on; null while the studio doesn't plan (no bays or hours) and for older bookings.
+    // The database keeps two open bookings from overlapping on one bay.
+    public Guid? BayId { get; private set; }
+
+    public Bay? Bay { get; private set; }
+
+    public TimeRange Range => new(ScheduledAt, EndsAt);
 
     // Set when the booking is finished, by completion or by cancellation
     public DateTime? CompletedAt { get; private set; }
@@ -88,6 +103,17 @@ public class Booking : IAuditableEntity, ITenantEntity
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Sets how long the visit takes and where. Called after creating or editing, once the planner has decided.
+    /// </summary>
+    public void Place(DateTime endsAt, Guid? bayId)
+    {
+        if (endsAt <= ScheduledAt) throw new ArgumentOutOfRangeException(nameof(endsAt), endsAt, "A visit ends after it starts.");
+
+        EndsAt = endsAt;
+        BayId = bayId;
+    }
+
     public Result Complete(DateTime now) => Finish(BookingStatus.Completed, now);
 
     public Result Cancel(DateTime now) => Finish(BookingStatus.Cancelled, now);
@@ -132,7 +158,10 @@ public class Booking : IAuditableEntity, ITenantEntity
         VehicleModel = vehicle.Model;
         VehicleSize = vehicle.Size;
 
+        // Moving the booking keeps its length until it is placed again
+        var length = EndsAt > ScheduledAt ? EndsAt - ScheduledAt : DefaultLength;
         ScheduledAt = scheduledAt;
+        EndsAt = scheduledAt + length;
         TotalPrice = priceInCents;
         Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
 

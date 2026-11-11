@@ -9,6 +9,7 @@ internal static class BookingQueries
     public static IQueryable<Booking> WithDetails(this IQueryable<Booking> bookings) =>
         bookings
             .Include(b => b.Status)
+            .Include(b => b.Bay)
             .Include(b => b.Services).ThenInclude(line => line.Service);
 
     // Reloads what the response shows (status name, service names) after a change

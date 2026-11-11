@@ -1,4 +1,6 @@
 using Crm.Contracts;
+using Identity.Contracts;
+using Scheduling.Application.Planning;
 using IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
@@ -53,6 +55,14 @@ public class SchedulingHandlerTests
                 new VehicleSummary(_seed.StudioA.VehicleId, _seed.StudioA.ClientId, "WA12345", null, null)));
     }
 
+    // Identity is another module: every studio here is in Warsaw
+    private static BookingPlanner Planner(SchedulingDbContext db)
+    {
+        var studios = Substitute.For<IStudioDirectory>();
+        studios.FindTimeZoneAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns("Europe/Warsaw");
+        return new BookingPlanner(db, studios);
+    }
+
     private TenantContext Tenant()
     {
         var tenant = new TenantContext();
@@ -76,7 +86,7 @@ public class SchedulingHandlerTests
     {
         var tenant = Tenant();
         await using var db = PostgresFixture.CreateSchedulingDbContext(tenant);
-        var result = await new CreateBookingHandler(db, _directory, tenant, _clock)
+        var result = await new CreateBookingHandler(db, _directory, tenant, _clock, Planner(db))
             .HandleAsync(request, Ct);
         return result.Value!;
     }
@@ -113,7 +123,7 @@ public class SchedulingHandlerTests
         var created = await CreateAsync(Request(3));
 
         await using var db = Db();
-        var updated = await new UpdateBookingHandler(db, _directory, _clock)
+        var updated = await new UpdateBookingHandler(db, _directory, _clock, Planner(db))
             .HandleAsync(created.Id, Request(5, extra.Id), Ct);
 
         Assert.That(updated.Value!.Services, Is.EqualTo(new[] { "Ceramika" }));
@@ -129,7 +139,7 @@ public class SchedulingHandlerTests
 
         await using var db2 = Db();
         var complete = await new CompleteBookingHandler(db2, _clock).HandleAsync(created.Id, Ct);
-        var update = await new UpdateBookingHandler(db2, _directory, _clock).HandleAsync(created.Id, Request(4), Ct);
+        var update = await new UpdateBookingHandler(db2, _directory, _clock, Planner(db2)).HandleAsync(created.Id, Request(4), Ct);
 
         Assert.That(complete.ErrorCode, Is.EqualTo("BOOKING_ALREADY_FINISHED"));
         Assert.That(update.ErrorCode, Is.EqualTo("BOOKING_ALREADY_FINISHED"));

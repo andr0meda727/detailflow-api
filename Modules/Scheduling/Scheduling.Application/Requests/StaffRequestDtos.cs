@@ -4,9 +4,9 @@ namespace Scheduling.Application.Requests;
 
 /// <summary>
 /// Accepting a request, optionally at another time or a final price (złoty) than the customer's preferred time and
-/// the estimate.
+/// the estimate, and on a chosen bay (left out, the best-fitting free one).
 /// </summary>
-public sealed record AcceptBookingRequest(DateTime? ScheduledAt = null, decimal? Price = null);
+public sealed record AcceptBookingRequest(DateTime? ScheduledAt = null, decimal? Price = null, Guid? BayId = null);
 
 public sealed record RejectBookingRequest(string? Reason = null);
 

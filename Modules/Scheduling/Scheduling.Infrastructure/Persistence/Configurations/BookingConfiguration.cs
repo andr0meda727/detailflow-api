@@ -54,6 +54,23 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasColumnName("vehicle_size");
 
         builder.Property(e => e.ScheduledAt).HasColumnName("scheduled_at");
+        builder.Property(e => e.EndsAt).HasColumnName("ends_at");
+        builder.Property(e => e.BayId).HasColumnName("bay_id");
+
+        builder.ToTable(tb => tb.HasCheckConstraint("CK_booking_ends_after_start", "ends_at > scheduled_at"));
+
+        // The planner reads a bay's bookings by time; the exclusion constraint (raw SQL in AddBayExclusion) has its own index
+        builder.HasIndex(e => new { e.BayId, e.ScheduledAt }).HasDatabaseName("booking_bay_id_scheduled_at_idx");
+
+        // Bays live in this module, so this one is a real foreign key; bays are only ever deactivated
+        builder
+            .HasOne(e => e.Bay)
+            .WithMany()
+            .HasForeignKey(e => e.BayId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("booking_bay_id_fkey");
+
+        builder.Ignore(e => e.Range);
         builder.Property(e => e.CompletedAt).HasColumnName("completed_at");
         builder.Property(e => e.StatusId).HasColumnName("status_id");
         builder.Property(e => e.TotalPrice).HasColumnName("total_price");
