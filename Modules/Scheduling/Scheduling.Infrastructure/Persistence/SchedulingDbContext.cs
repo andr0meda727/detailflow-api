@@ -50,25 +50,59 @@ public class SchedulingDbContext(DbContextOptions<SchedulingDbContext> options, 
         modelBuilder.AddOutbox();
     }
 
-    // Named in the AddBayExclusion migration
+    // Named in the AddBookingPlacement migration
     public const string BayOverlapConstraint = "booking_no_bay_overlap";
 
+    /// <summary>
+    /// Saves bookings so that writers for one bay go one at a time. Without that, transactions inserting overlapping
+    /// rows at the same moment each wait on the other's uncommitted row and Postgres breaks the tie as a deadlock
+    /// instead of reporting the overlap. With a transaction-scoped advisory lock per bay (taken in a fixed order, so
+    /// the locks can't deadlock either) the later writer sees the committed booking and gets a clean exclusion
+    /// violation, which becomes BAY_TAKEN.
+    /// </summary>
     public async Task<Result> SaveChangesCheckedAsync(CancellationToken cancellationToken = default)
     {
+        var bays = ChangeTracker.Entries<Booking>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified && e.Entity.BayId != null)
+            .Select(e => e.Entity.BayId!.Value)
+            .Distinct().Order().ToList();
+
         try
         {
+            if (bays.Count == 0 || Database.CurrentTransaction != null)
+            {
+                await SaveChangesAsync(cancellationToken);
+                return Result.Ok();
+            }
+
+            await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+            foreach (var bay in bays)
+            {
+                var key = $"scheduling.bay:{bay}";
+                await Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtextextended({key}, 0))", cancellationToken);
+            }
+
             await SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result.Ok();
         }
-        catch (DbUpdateException e) when (e.InnerException is PostgresException
-                                          {
-                                              SqlState: PostgresErrorCodes.ExclusionViolation, ConstraintName: BayOverlapConstraint
-                                          })
+        catch (Exception e) when (IsBayOverlap(e))
         {
             // Lost a race for the bay: the planner saw it free, but another booking was saved first
             ChangeTracker.Clear();
             return SchedulingErrors.BayTaken;
         }
+    }
+
+    private static bool IsBayOverlap(Exception? e)
+    {
+        for (; e != null; e = e.InnerException)
+        {
+            if (e is PostgresException { SqlState: PostgresErrorCodes.ExclusionViolation, ConstraintName: BayOverlapConstraint })
+                return true;
+        }
+
+        return false;
     }
 
     public void Enqueue<TEvent>(TEvent integrationEvent) where TEvent : class =>

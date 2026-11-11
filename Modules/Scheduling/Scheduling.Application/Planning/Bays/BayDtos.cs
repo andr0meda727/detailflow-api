@@ -15,10 +15,10 @@ public class BayRequestValidator : AbstractValidator<BayRequest>
     public BayRequestValidator()
     {
         RuleFor(x => x.Name)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Nazwa stanowiska jest wymagana.")
             .Must(name => name.Trim().Length <= Bay.MaxNameLength)
-            .WithMessage($"Nazwa stanowiska nie może przekraczać {Bay.MaxNameLength} znaków.")
-            .When(x => !string.IsNullOrWhiteSpace(x.Name));
+            .WithMessage($"Nazwa stanowiska nie może przekraczać {Bay.MaxNameLength} znaków.");
     }
 }
 
