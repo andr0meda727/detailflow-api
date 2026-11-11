@@ -23,6 +23,203 @@ namespace Inventory.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Inventory.Domain.Consumption.BookingConsumption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("VehicleSize")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_size");
+
+                    b.HasKey("Id")
+                        .HasName("booking_consumption_pkey");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique()
+                        .HasDatabaseName("booking_consumption_booking_id_key");
+
+                    b.ToTable("booking_consumption", "inventory");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.ConsumptionCalibration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("AbsolutePercentageErrorSum")
+                        .HasPrecision(14, 6)
+                        .HasColumnType("numeric(14,6)")
+                        .HasColumnName("ape_sum");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("Factor")
+                        .HasPrecision(8, 4)
+                        .HasColumnType("numeric(8,4)")
+                        .HasColumnName("factor");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sample_count");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("service_id");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("consumption_calibration_pkey");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("StudioId", "ServiceId", "ItemId")
+                        .IsUnique()
+                        .HasDatabaseName("consumption_calibration_studio_service_item_key");
+
+                    b.ToTable("consumption_calibration", "inventory");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.MaterialSizeFactors", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("Large")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("large");
+
+                    b.Property<decimal>("Medium")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("medium");
+
+                    b.Property<decimal>("Small")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("small");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("Xl")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("numeric(4,2)")
+                        .HasColumnName("xl");
+
+                    b.HasKey("Id")
+                        .HasName("material_size_factors_pkey");
+
+                    b.HasIndex("StudioId")
+                        .IsUnique()
+                        .HasDatabaseName("material_size_factors_studio_id_key");
+
+                    b.ToTable("material_size_factors", "inventory");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.ServiceRecipe", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("service_id");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("service_recipe_pkey");
+
+                    b.HasIndex("StudioId", "ServiceId")
+                        .IsUnique()
+                        .HasDatabaseName("service_recipe_studio_id_service_id_key");
+
+                    b.ToTable("service_recipe", "inventory");
+                });
+
             modelBuilder.Entity("Inventory.Domain.InventoryCategory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -120,6 +317,163 @@ namespace Inventory.Infrastructure.Persistence.Migrations
                     b.ToTable("inventory", "inventory");
                 });
 
+            modelBuilder.Entity("Inventory.Domain.Stock.StockMovement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("note");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(12, 3)
+                        .HasColumnType("numeric(12,3)")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("stock_movement_pkey");
+
+                    b.HasIndex("ItemId", "CreatedAt")
+                        .HasDatabaseName("stock_movement_item_id_created_at_idx");
+
+                    b.HasIndex("StudioId", "Type", "CreatedAt")
+                        .HasDatabaseName("stock_movement_studio_type_created_at_idx");
+
+                    b.ToTable("stock_movement", "inventory");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.BookingConsumption", b =>
+                {
+                    b.OwnsMany("Inventory.Domain.Consumption.ConsumptionLine", "Lines", b1 =>
+                        {
+                            b1.Property<Guid>("ConsumptionId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("consumption_id");
+
+                            b1.Property<Guid>("ServiceId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("service_id");
+
+                            b1.Property<Guid>("ItemId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("item_id");
+
+                            b1.Property<decimal?>("ActualQuantity")
+                                .HasPrecision(12, 3)
+                                .HasColumnType("numeric(12,3)")
+                                .HasColumnName("actual_quantity");
+
+                            b1.Property<decimal>("BaseQuantity")
+                                .HasPrecision(12, 3)
+                                .HasColumnType("numeric(12,3)")
+                                .HasColumnName("base_quantity");
+
+                            b1.Property<decimal>("EstimatedQuantity")
+                                .HasPrecision(12, 3)
+                                .HasColumnType("numeric(12,3)")
+                                .HasColumnName("estimated_quantity");
+
+                            b1.HasKey("ConsumptionId", "ServiceId", "ItemId")
+                                .HasName("booking_consumption_line_pkey");
+
+                            b1.ToTable("booking_consumption_line", "inventory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ConsumptionId")
+                                .HasConstraintName("booking_consumption_line_consumption_id_fkey");
+                        });
+
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.ConsumptionCalibration", b =>
+                {
+                    b.HasOne("Inventory.Domain.InventoryItem", null)
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("consumption_calibration_item_id_fkey");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.Consumption.ServiceRecipe", b =>
+                {
+                    b.OwnsMany("Inventory.Domain.Consumption.RecipeLine", "Lines", b1 =>
+                        {
+                            b1.Property<Guid>("RecipeId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("recipe_id");
+
+                            b1.Property<Guid>("ItemId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("item_id");
+
+                            b1.Property<decimal>("QuantityForMedium")
+                                .HasPrecision(12, 3)
+                                .HasColumnType("numeric(12,3)")
+                                .HasColumnName("quantity_for_medium");
+
+                            b1.HasKey("RecipeId", "ItemId")
+                                .HasName("service_recipe_line_pkey");
+
+                            b1.HasIndex("ItemId");
+
+                            b1.ToTable("service_recipe_line", "inventory", t =>
+                                {
+                                    t.HasCheckConstraint("CK_service_recipe_line_quantity", "quantity_for_medium > 0");
+                                });
+
+                            b1.HasOne("Inventory.Domain.InventoryItem", null)
+                                .WithMany()
+                                .HasForeignKey("ItemId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired()
+                                .HasConstraintName("service_recipe_line_item_id_fkey");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RecipeId")
+                                .HasConstraintName("service_recipe_line_recipe_id_fkey");
+                        });
+
+                    b.Navigation("Lines");
+                });
+
             modelBuilder.Entity("Inventory.Domain.InventoryItem", b =>
                 {
                     b.HasOne("Inventory.Domain.InventoryCategory", "Category")
@@ -131,9 +485,24 @@ namespace Inventory.Infrastructure.Persistence.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("Inventory.Domain.Stock.StockMovement", b =>
+                {
+                    b.HasOne("Inventory.Domain.InventoryItem", null)
+                        .WithMany("Movements")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("stock_movement_item_id_fkey");
+                });
+
             modelBuilder.Entity("Inventory.Domain.InventoryCategory", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Inventory.Domain.InventoryItem", b =>
+                {
+                    b.Navigation("Movements");
                 });
 #pragma warning restore 612, 618
         }

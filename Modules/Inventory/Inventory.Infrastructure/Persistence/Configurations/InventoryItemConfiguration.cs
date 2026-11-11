@@ -51,6 +51,9 @@ public class InventoryItemConfiguration : IEntityTypeConfiguration<InventoryItem
             .HasDefaultValueSql("now()")
             .HasColumnName("updated_at");
 
+        // Movements are added through the item and never loaded with it
+        builder.Navigation(e => e.Movements).HasField("_movements");
+
         builder
             .HasOne(d => d.Category)
             .WithMany(p => p.Items)
