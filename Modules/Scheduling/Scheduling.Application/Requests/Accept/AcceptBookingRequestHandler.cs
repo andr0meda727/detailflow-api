@@ -34,7 +34,10 @@ public sealed class AcceptBookingRequestHandler(
 
         var booking = Booking.Create(
             new BookingClient(parties.Client.Id, parties.Client.Name, parties.Client.Phone, parties.Client.Email),
-            new BookingVehicle(parties.Vehicle.Id, parties.Vehicle.LicensePlate, parties.Vehicle.Brand, parties.Vehicle.Model),
+            // The size the customer gave is the one the price was worked out for
+            new BookingVehicle(
+                parties.Vehicle.Id, parties.Vehicle.LicensePlate, parties.Vehicle.Brand, parties.Vehicle.Model,
+                request.VehicleSize),
             scheduledAt, priceInCents, request.Notes, request.Services.Select(s => s.ServiceId).ToList(),
             createdBy: tenant.UserId, customerUserId: request.CustomerUserId);
         db.Bookings.Add(booking);

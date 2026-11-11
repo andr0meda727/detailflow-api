@@ -1,5 +1,6 @@
 using Crm.Contracts;
 using Scheduling.Domain.Bookings;
+using Shared.Kernel.Vehicles;
 
 namespace Scheduling.Application.Bookings;
 
@@ -16,6 +17,8 @@ internal static class BookingPartiesLookup
 
         return new FoundParties(
             new BookingClient(parties.Client.Id, parties.Client.Name, parties.Client.Phone, parties.Client.Email),
-            new BookingVehicle(parties.Vehicle.Id, parties.Vehicle.LicensePlate, parties.Vehicle.Brand, parties.Vehicle.Model));
+            new BookingVehicle(
+                parties.Vehicle.Id, parties.Vehicle.LicensePlate, parties.Vehicle.Brand, parties.Vehicle.Model,
+                VehicleSizes.Parse(parties.Vehicle.Size)));
     }
 }

@@ -1,3 +1,4 @@
+using Shared.Kernel.Vehicles;
 using Scheduling.Domain.Bookings;
 
 namespace Unit.Modules.Scheduling;
@@ -28,6 +29,17 @@ public class BookingTests
             Assert.That(booking.TotalPrice, Is.EqualTo(25000));
             Assert.That(booking.Notes, Is.EqualTo("Woskowanie"));
         });
+    }
+
+    [Test]
+    public void Create_CopiesTheVehicleSize_MediumWhenNotGiven()
+    {
+        var van = Vehicle with { Size = VehicleSize.XL };
+
+        var forVan = Booking.Create(Client, van, Now, 0, null, [Guid.NewGuid()], null);
+
+        Assert.That(forVan.VehicleSize, Is.EqualTo(VehicleSize.XL));
+        Assert.That(NewBooking().VehicleSize, Is.EqualTo(VehicleSize.Medium));
     }
 
     [Test]

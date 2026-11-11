@@ -241,6 +241,7 @@ public class BookingRequestEndpointTests
         Assert.That(booking.GetProperty("client").GetProperty("name").GetString(), Is.EqualTo("Anna Nowak"));
         Assert.That(booking.GetProperty("totalPrice").GetDecimal(), Is.EqualTo(450m));
         Assert.That(booking.GetProperty("scheduledAt").GetDateTime(), Is.EqualTo(agreedTime));
+        Assert.That(booking.GetProperty("vehicle").GetProperty("size").GetString(), Is.EqualTo("Large"));
 
         // ...and the customer's history shows it
         var mine = await customer.GetFromJsonAsync<JsonElement>("/api/me/booking-requests");

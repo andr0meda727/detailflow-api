@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Scheduling.Domain.Bookings;
+using Shared.Kernel.Vehicles;
 
 namespace Scheduling.Infrastructure.Persistence.Configurations;
 
@@ -44,6 +45,13 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(e => e.VehicleLicensePlate).HasColumnName("vehicle_license_plate");
         builder.Property(e => e.VehicleBrand).HasColumnName("vehicle_brand");
         builder.Property(e => e.VehicleModel).HasColumnName("vehicle_model");
+
+        // By name, like the CRM vehicle; bookings from before sizes existed are Medium
+        builder.Property(e => e.VehicleSize)
+            .HasConversion<string>()
+            .HasDefaultValue(VehicleSize.Medium)
+            .HasSentinel((VehicleSize)0)
+            .HasColumnName("vehicle_size");
 
         builder.Property(e => e.ScheduledAt).HasColumnName("scheduled_at");
         builder.Property(e => e.CompletedAt).HasColumnName("completed_at");

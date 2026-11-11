@@ -3,6 +3,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Scheduling.Infrastructure.Persistence;
 using Shared.Infrastructure.Persistence;
+using Shared.Kernel.Vehicles;
 
 namespace Scheduling.Infrastructure.Consumers;
 
@@ -30,6 +31,7 @@ public class BookingCopiesConsumer(SchedulingDbContext db)
     public async Task Consume(ConsumeContext<VehicleDetailsChanged> consumeContext)
     {
         var message = consumeContext.Message;
+        var size = VehicleSizes.Parse(message.Size);
 
         // A vehicle handed over to another client keeps its past bookings with the old client
         await db.Bookings
@@ -39,6 +41,7 @@ public class BookingCopiesConsumer(SchedulingDbContext db)
                 .SetProperty(b => b.VehicleLicensePlate, message.LicensePlate)
                 .SetProperty(b => b.VehicleBrand, message.Brand)
                 .SetProperty(b => b.VehicleModel, message.Model)
+                .SetProperty(b => b.VehicleSize, size)
                 .SetProperty(b => b.UpdatedAt, DateTime.UtcNow), consumeContext.CancellationToken);
     }
 }

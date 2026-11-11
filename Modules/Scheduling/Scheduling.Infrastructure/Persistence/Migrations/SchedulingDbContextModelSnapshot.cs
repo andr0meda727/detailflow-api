@@ -110,6 +110,13 @@ namespace Scheduling.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("vehicle_model");
 
+                    b.Property<string>("VehicleSize")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Medium")
+                        .HasColumnName("vehicle_size");
+
                     b.HasKey("Id")
                         .HasName("booking_pkey");
 

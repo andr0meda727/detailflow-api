@@ -1,6 +1,7 @@
 using Shared.Kernel.Auditing;
 using Shared.Kernel.Results;
 using Shared.Kernel.Tenancy;
+using Shared.Kernel.Vehicles;
 
 namespace Scheduling.Domain.Bookings;
 
@@ -35,6 +36,8 @@ public class Booking : IAuditableEntity, ITenantEntity
     public string? VehicleBrand { get; private set; }
 
     public string? VehicleModel { get; private set; }
+
+    public VehicleSize VehicleSize { get; private set; } = VehicleSize.Medium;
 
     public DateTime ScheduledAt { get; private set; }
 
@@ -127,6 +130,7 @@ public class Booking : IAuditableEntity, ITenantEntity
         VehicleLicensePlate = vehicle.LicensePlate;
         VehicleBrand = vehicle.Brand;
         VehicleModel = vehicle.Model;
+        VehicleSize = vehicle.Size;
 
         ScheduledAt = scheduledAt;
         TotalPrice = priceInCents;

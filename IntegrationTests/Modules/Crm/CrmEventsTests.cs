@@ -72,12 +72,13 @@ public class CrmEventsTests
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
 
         var response = await client.PutAsJsonAsync($"/api/vehicle/{_seed.StudioA.VehicleId}",
-            new { clientId = _seed.StudioA.ClientId, licensePlate = "WA 999", brand = "Toyota", model = "Corolla" });
+            new { clientId = _seed.StudioA.ClientId, licensePlate = "WA 999", brand = "Toyota", model = "Corolla", size = "Large" });
         response.EnsureSuccessStatusCode();
 
         var booking = await WaitForBookingAsync(_seed.StudioA.StudioId, _seed.StudioA.BookingId, b => b.VehicleLicensePlate == "WA 999");
         Assert.That(booking.VehicleLicensePlate, Is.EqualTo("WA 999"));
         Assert.That(booking.VehicleBrand, Is.EqualTo("Toyota"));
+        Assert.That(booking.VehicleSize, Is.EqualTo(Shared.Kernel.Vehicles.VehicleSize.Large));
     }
 
     [Test]
