@@ -28,6 +28,7 @@ using Scheduling.Application.Requests.Accept;
 using Scheduling.Application.Requests.Estimate;
 using Scheduling.Application.Requests.GetMyRequests;
 using Scheduling.Application.Requests.GetStudioRequests;
+using Scheduling.Application.Requests.Plan;
 using Scheduling.Application.Requests.Reject;
 using Scheduling.Application.Requests.Submit;
 using Scheduling.Application.Requests.Withdraw;
@@ -80,6 +81,7 @@ public static class SchedulingModule
         services.AddScoped<WithdrawBookingRequestHandler>();
         services.AddScoped<GetStudioBookingRequestsHandler>();
         services.AddScoped<AcceptBookingRequestHandler>();
+        services.AddScoped<PlanBookingRequestHandler>();
         services.AddScoped<RejectBookingRequestHandler>();
 
         services.TryAddSingleton(TimeProvider.System);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Scheduling.Application.Requests;
 using Scheduling.Application.Requests.Accept;
 using Scheduling.Application.Requests.GetStudioRequests;
+using Scheduling.Application.Requests.Plan;
 using Scheduling.Application.Requests.Reject;
 using Scheduling.Domain.Requests;
 using Shared.Api.Errors;
@@ -27,6 +28,19 @@ public class BookingRequestsController : ControllerBase
         [FromServices] GetStudioBookingRequestsHandler handler, CancellationToken cancellationToken)
     {
         return await handler.HandleAsync(status, paging, cancellationToken);
+    }
+
+    /// <summary>
+    /// Helps answer a request: whether the preferred time fits and on which bay, the closest times that do, and other
+    /// pending requests for the same time. Changes nothing.
+    /// </summary>
+    [HttpGet("{id:guid}/plan")]
+    public async Task<ActionResult<RequestPlanDto>> Plan(
+        Guid id, [FromServices] PlanBookingRequestHandler handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(id, cancellationToken);
+
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
 
     /// <summary>

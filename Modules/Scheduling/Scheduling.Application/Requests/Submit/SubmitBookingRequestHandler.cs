@@ -2,6 +2,8 @@ using Customers.Contracts;
 using Marketplace.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Scheduling.Application.Abstractions;
+using Scheduling.Application.Planning;
+using Scheduling.Domain.Planning;
 using Scheduling.Contracts;
 using Scheduling.Domain.Requests;
 using Shared.Kernel.Results;
@@ -11,7 +13,8 @@ using Shared.Kernel.Vehicles;
 namespace Scheduling.Application.Requests.Submit;
 
 public sealed class SubmitBookingRequestHandler(
-    ISchedulingDbContext db, ITenantContext tenant, IPublicStudios publicStudios, ICustomerDirectory customers)
+    ISchedulingDbContext db, ITenantContext tenant, IPublicStudios publicStudios, ICustomerDirectory customers,
+    BookingPlanner planner, TimeProvider clock)
 {
     /// <summary>
     /// Sends the signed-in customer's request to a published studio. The prices are this studio's for the car's size,
@@ -49,6 +52,9 @@ public sealed class SubmitBookingRequestHandler(
         var services = await db.PriceAsync(studio.StudioId, request.ServiceIds, vehicle.Size, cancellationToken);
         if (services == null) return CustomerRequestErrors.UnknownServices;
 
+        var timing = await CheckTimingAsync(studio.StudioId, request.PreferredAt, request.ServiceIds, vehicle, cancellationToken);
+        if (!timing.Success) return timing.Error!;
+
         var bookingRequest = OnlineBookingRequest.Submit(
             studio.StudioId, studio.Name, new RequestCustomer(userId, profile.Name, profile.Phone, customerEmail),
             vehicle, services, request.PreferredAt, request.Notes);
@@ -61,5 +67,24 @@ public sealed class SubmitBookingRequestHandler(
         await db.SaveChangesAsync(cancellationToken);
 
         return BookingRequestDto.From(bookingRequest);
+    }
+
+    // A studio that plans only takes requests the whole visit fits in its opening hours and no sooner than its lead
+    // time. Whether a bay is free isn't checked: the studio decides, and other requests don't hold bays.
+    private async Task<Result> CheckTimingAsync(
+        Guid studioId, DateTime preferredAt, IReadOnlyCollection<Guid> serviceIds, RequestVehicle vehicle,
+        CancellationToken cancellationToken)
+    {
+        var plan = await planner.LoadAsync(studioId, cancellationToken);
+        if (!plan.Enabled) return Result.Ok();
+
+        if (preferredAt < clock.GetUtcNow().UtcDateTime.AddHours(plan.Schedule.MinLeadHours)) return CustomerRequestErrors.TooSoon;
+
+        var duration = await planner.DurationAsync(plan, serviceIds, vehicle.Size, cancellationToken);
+        var visit = new TimeRange(preferredAt, preferredAt + duration);
+        var open = SlotPlanner.OpeningRanges(
+            plan.Schedule, plan.Zone, BookingPlanner.LocalDay(plan, visit.Start), BookingPlanner.LocalDay(plan, visit.End));
+
+        return open.Any(range => range.Contains(visit)) ? Result.Ok() : CustomerRequestErrors.OutsideOpeningHours;
     }
 }

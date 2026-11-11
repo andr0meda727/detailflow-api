@@ -19,6 +19,13 @@ public static class CustomerRequestErrors
     public static readonly Error VehicleNotFound =
         Error.NotFound("CUSTOMER_VEHICLE_NOT_FOUND", "Nie znaleziono pojazdu w Twoim garażu.");
 
+    // Only for studios that plan; the others take any time and confirm it themselves
+    public static readonly Error OutsideOpeningHours = Error.Validation(
+        "OUTSIDE_OPENING_HOURS", "Studio jest wtedy zamknięte albo wizyta nie zmieści się przed zamknięciem. Wybierz jeden z wolnych terminów.");
+
+    public static readonly Error TooSoon = Error.Validation(
+        "BOOKING_REQUEST_TOO_SOON", "To studio przyjmuje prośby z większym wyprzedzeniem. Wybierz późniejszy termin.");
+
     public static readonly Error TooManyPending = Error.Conflict(
         "BOOKING_REQUEST_LIMIT",
         $"Masz już {SubmitLimits.MaxPendingPerStudio} oczekujące prośby w tym studiu. Poczekaj na odpowiedź.");
