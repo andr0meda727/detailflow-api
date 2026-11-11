@@ -17,6 +17,8 @@ using Scheduling.Application.Catalog.DeleteService;
 using Scheduling.Application.Catalog.GetServices;
 using Scheduling.Application.Catalog.UpdateService;
 using Scheduling.Application.Planning;
+using Scheduling.Application.Planning.Availability;
+using Scheduling.Application.Planning.DayBoard;
 using Scheduling.Application.Planning.Bays.CreateBay;
 using Scheduling.Application.Planning.Bays.DeactivateBay;
 using Scheduling.Application.Planning.Bays.GetBays;
@@ -58,6 +60,9 @@ public static class SchedulingModule
         services.AddScoped<DeleteServiceHandler>();
 
         services.AddScoped<BookingPlanner>();
+        services.AddScoped<GetStaffAvailabilityHandler>();
+        services.AddScoped<GetPublicAvailabilityHandler>();
+        services.AddScoped<GetDayBoardHandler>();
 
         services.AddScoped<GetBaysHandler>();
         services.AddScoped<CreateBayHandler>();

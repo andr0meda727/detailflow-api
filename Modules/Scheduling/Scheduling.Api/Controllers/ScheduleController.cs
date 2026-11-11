@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Scheduling.Application.Planning.DayBoard;
 using Scheduling.Application.Planning.Schedule;
 using Shared.Api.Authorization;
 using Shared.Api.Errors;
@@ -32,6 +33,16 @@ public class ScheduleController : ControllerBase
         var result = await handler.HandleAsync(request, cancellationToken);
 
         return result.Success ? result.Value! : this.ToProblem(result.Error!);
+    }
+
+    /// <summary>
+    /// One local day: each bay's bookings and free gaps, how busy it is, and the requests waiting for that day.
+    /// </summary>
+    [HttpGet("day")]
+    public async Task<ActionResult<DayBoardDto>> Day(
+        [FromQuery] DateOnly date, [FromServices] GetDayBoardHandler handler, CancellationToken cancellationToken)
+    {
+        return await handler.HandleAsync(date, cancellationToken);
     }
 
     [HttpPost("closures")]
