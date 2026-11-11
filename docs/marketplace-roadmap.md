@@ -5,8 +5,9 @@ The goal is a Booksy-like customer side next to the studio back office:
 - They pick services, get an approximate price for their car and send a booking request, which the studio accepts.
 - They can keep an account with their cars and past bookings, and rate a studio after a visit.
 
-Each step ships on its own. Opening hours and free-slot calculation are not needed yet: the studio confirms
-each request, so the customer only suggests a time.
+Each step ships on its own. The studio confirms each request, so the customer only suggests a time; a studio that
+plans (bays and opening hours, see "Planning" in `api-conventions.md`) shows its free times on its page, keeps
+requests inside its hours and gets a planning view to answer them.
 
 ## 1. Service categories and prices per vehicle size (done)
 - Services have a category from a fixed list (`Scheduling.Contracts.ServiceCategory`) and an optional price per
@@ -67,11 +68,13 @@ each request, so the customer only suggests a time.
   - accepted and rejected go to the customer, with times in the studio's zone.
 
 ## 5. Reviews (Marketplace)
-- Scheduling publishes `BookingCompleted(StudioId, BookingId, CustomerUserId?)`. Marketplace records that the customer may review that booking.
+- Scheduling already publishes `BookingCompleted(StudioId, BookingId, CustomerUserId?, VehicleSize, ServiceIds,
+  CompletedAt)` (Inventory uses it for materials). Marketplace consumes it too and records that the customer may review
+  that booking.
 - `POST /api/me/reviews` takes `{ bookingId, rating 1–5, comment }`. It's allowed once per completed booking, only
   by that customer.
 - The listing keeps its average rating and review count. Reviews are shown paged on the studio page.
 
 ## Later
-Opening hours and instant booking, photos (Supabase Storage), PostGIS "nearest first", studio replies to
+Instant booking (a free slot booked without confirmation), staff schedules and skills, photos (Supabase Storage), PostGIS "nearest first", studio replies to
 reviews, SMS.

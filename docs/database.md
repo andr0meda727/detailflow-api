@@ -96,6 +96,21 @@ module's data keeps its own copy and updates it from integration events. For exa
 the client's name/phone/email and the vehicle's plate/brand/model, updated by Scheduling's `BookingCopiesConsumer` when CRM
 publishes `ClientDetailsChanged` / `VehicleDetailsChanged`.
 
+## Planning and stock constraints
+
+- `scheduling.booking` has `ends_at` and a nullable `bay_id` (a real foreign key to `scheduling.bay`, inside the
+  module). The exclusion constraint `booking_no_bay_overlap` (`EXCLUDE USING gist (bay_id WITH =,
+  tstzrange(scheduled_at, ends_at) WITH &&)` for bookings with a bay that aren't cancelled) makes double-booking a
+  bay impossible. It needs the `btree_gist` extension, which the `AddBookingPlacement` migration creates.
+  Booking saves that touch a bay first take `pg_advisory_xact_lock` on that bay, so racing writers queue instead of
+  deadlocking on each other's uncommitted rows.
+- `AddBookingPlacement` gives existing bookings an end from their services (an hour each, at least an hour) and no
+  bay, so they never block anything.
+- `inventory.stock_movement` is append-only; `inventory.inventory.stock` is its running total.
+  `AddStockLedgerAndConsumption` records each item's stock at that moment as an `Initial` movement.
+- `inventory.booking_consumption.booking_id` is unique: it is what keeps a repeated `BookingCompleted` from deducting
+  twice.
+
 ## Messaging tables
 
 The message bus runs on MassTransit's PostgreSQL transport in the same database:
@@ -131,6 +146,8 @@ dotnet ef migrations script -p Modules/Marketplace/Marketplace.Infrastructure -s
 dotnet ef migrations script -p Modules/Customers/Customers.Infrastructure -s Api -c CustomersDbContext -o 8-customers.sql
 ```
 
+   The Scheduling script runs `CREATE EXTENSION IF NOT EXISTS btree_gist`. On Supabase the extension is available;
+   if the script's user may not create it, enable `btree_gist` under Database → Extensions first.
 4. Deploy the new API version. On start it creates the `transport` schema for the message bus.
 5. Check: sign up a test account (the profile row must appear in `identity."user"`), open a studio's bookings,
    rename a client and see the booking show the new name.

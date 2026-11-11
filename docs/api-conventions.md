@@ -84,7 +84,10 @@ pages and doesn't suit infinite scroll.
     Only `name` is required: a service without the rest is `Other` with no prices.
   - `PUT /api/service/{id}` takes the same body. Left out, `category` and `prices` stay as they are; a sent `prices`
     list replaces the old one (`[]` clears it).
-- CRM vehicles have a `size` (default `Medium`). Left out on edit, it stays as it is.
+- A service also has `durationMinutes` (5–720, default 60): how long it takes on a Medium car. Left out on edit, it
+  stays. Other sizes are scaled by the studio's planning multipliers (see Planning).
+- CRM vehicles have a `size` (default `Medium`). Left out on edit, it stays as it is. Bookings keep a copy of it
+  (`vehicle.size` in the booking response).
 
 ## Public endpoints (customer map)
 
@@ -129,6 +132,8 @@ Customer (signed in, `/api/me`, no studio needed):
   The name and phone come from `/api/me/profile`, the email from the account. Prices are always the studio's own, worked
   out on the server. Errors: `STUDIO_NOT_FOUND` (not published), `CUSTOMER_PROFILE_REQUIRED`, `CUSTOMER_VEHICLE_NOT_FOUND`,
   `BOOKING_REQUEST_UNKNOWN_SERVICES`, `BOOKING_REQUEST_LIMIT` (three pending per studio). Rate-limited like the map.
+  At a studio that plans, the whole visit must fit in its opening hours (`OUTSIDE_OPENING_HOURS`) and start after its
+  lead time (`BOOKING_REQUEST_TOO_SOON`); offer the times from the public availability endpoint.
 - `GET /api/me/booking-requests` (paged, newest first): the customer's history at every studio. Each item has `status`
   (`Pending`, `Accepted`, `Rejected`, `Withdrawn`), `rejectionReason`, and for accepted ones `booking` (its current
   `scheduledAt`, `status`, `totalPrice`).
@@ -136,9 +141,79 @@ Customer (signed in, `/api/me`, no studio needed):
 
 Studio staff (normal studio context):
 - `GET /api/booking-requests?status=Pending` (paged; without `status`, pending first, then newest).
-- `POST /api/booking-requests/{id}/accept` `{ "scheduledAt"?, "price"? }`: creates a normal booking (preferred time and
+- `GET /api/booking-requests/{id}/plan` (studios that plan): whether the preferred time fits and on which bay, the five
+  closest times that do, and other pending requests for the same time. See Planning.
+- `POST /api/booking-requests/{id}/accept` `{ "scheduledAt"?, "price"?, "bayId"? }`: creates a normal booking (preferred time and
   estimate unless given) for the CRM client and car matched to the customer (by account, then phone, else created).
+  In a studio that plans, the car goes on `bayId` or the best-fitting free bay; when none is free it is 409
+  `NO_BAY_AVAILABLE` (or `BAY_TAKEN` for a chosen bay) and the request stays pending.
 - `POST /api/booking-requests/{id}/reject` `{ "reason"? }`.
 - Answering twice is `BOOKING_REQUEST_ALREADY_DECIDED`; another studio's request is `BOOKING_REQUEST_NOT_FOUND`.
 
 Emails: the studio's owners get each new request; the customer gets the answer. Times are in the studio's time zone.
+
+## Planning (bays, opening hours, free times)
+
+A studio **plans** once it has opening hours and at least one active bay (`planningEnabled` in the responses). Until
+then bookings work as before: they get an end time but no bay, and nothing is checked.
+
+Setup (owner writes, staff read):
+- `GET/POST /api/bays`, `PUT /api/bays/{id}` `{ "name": "Stanowisko 1" }`, `DELETE /api/bays/{id}` (deactivates; refused
+  with `BAY_HAS_UPCOMING_BOOKINGS` while open bookings are still to come on it). At most 20 active bays.
+- `GET/PUT /api/schedule`
+  `{ "openingHours": [{ "day": "Monday", "opens": "08:00:00", "closes": "16:00:00" }], "bufferMinutes": 15,
+  "slotStepMinutes": 15, "minLeadHours": 12, "durationMultipliers": { "small": 0.85, "medium": 1, "large": 1.25, "xl": 1.5 } }`.
+  Hours are the studio's local time; several periods a day make a break; overlaps are `OVERLAPPING_OPENING_PERIODS`.
+  The buffer is cleanup time kept free around every visit on a bay; start times sit on the `slotStepMinutes` grid
+  (15, 30 or 60); `minLeadHours` only applies to customers. An empty `openingHours` switches planning off.
+- `POST /api/schedule/closures` `{ "date": "2026-12-24", "reason": "Wigilia" }`, `DELETE /api/schedule/closures/{date}`.
+
+How long a visit takes: the services' `durationMinutes` added up, times the multiplier for the car's size, rounded up
+to the grid. A booking's `endsAt` is always worked out this way, never sent.
+
+Bookings (`POST/PUT /api/bookings` take an optional `bayId`; the response has `endsAt` and `bay`):
+- A chosen bay is taken if it is free, buffer included, whatever the hours (staff may book outside them).
+- Otherwise the planner picks the best-fitting free bay within opening hours, or any bay free at that time; with none
+  free it is 409 `NO_BAY_AVAILABLE`. An edit keeps the car on its bay while that still works.
+- Two open bookings can never overlap on one bay, even when requests race: the database refuses it and the API
+  answers 409 `BAY_TAKEN`. Cancelling frees the bay.
+
+Free times (`from`/`to` are local days, at most 14; times in responses are UTC):
+- `GET /api/availability?from=2026-11-16&to=2026-11-20&serviceIds=..&serviceIds=..&vehicleSize=Large` (staff):
+  `durationMinutes` and `slots` of `{ start, end, suggestedBayId, suggestedBayName, freeBays }` from now on.
+- `GET /api/public/studios/{studioId}/availability?...` (no login, published studios, rate-limited): the same `slots`
+  as `{ start, end }` only, after the studio's lead time. Unknown or another studio's service: `SERVICE_NOT_FOUND`.
+- `GET /api/schedule/day?date=2026-11-16`: per bay its bookings, free gaps and `utilisationPercent` (booked share of
+  the open time), the studio's overall utilisation, `unassigned` bookings (no bay) and the day's pending requests.
+
+How the planner chooses: per bay, free time is the opening hours minus its bookings widened by the buffer; every grid
+start where the whole visit fits is a candidate. At each start the **best-fit** bay wins: the one the visit leaves the
+least unusable gap on (a gap shorter than the studio's quickest service on its smallest car), then the least leftover
+time, so long free stretches stay whole for long jobs. Around a preferred time (the request plan) slots are ranked by
+minutes away from it plus half a minute per wasted minute.
+
+## Inventory: stock ledger and what visits use
+
+- Stock only changes through movements: `Initial`, `Purchase`, `Adjustment` (stocktake), `Consumption` and
+  `Correction`. An item's `stock` is their sum and may go below zero when visits used more than was recorded.
+  - `POST /api/inventory/{id}/movements` `{ "kind": "Purchase", "quantity": 5, "note": "Faktura 12/11" }` adds a
+    delivery; `{ "kind": "Stocktake", "quantity": 4.5 }` sets the counted stock. Quantities have at most three decimals.
+  - `GET /api/inventory/{id}/movements` (paged, newest first) is the item's history.
+  - `PUT /api/inventory/{id}` with a different `stock` is recorded as a stocktake.
+- What services use:
+  - `GET/PUT /api/inventory/recipes/{serviceId}` `{ "lines": [{ "itemId": "..", "quantityForMedium": 0.2 }] }` (owner
+    writes): the materials of one service on a Medium car.
+  - `GET/PUT /api/inventory/size-factors` `{ "small": 0.75, "medium": 1, "large": 1.3, "xl": 1.6 }`: how much more material
+    each size takes. They are separate from the time multipliers.
+- When a booking is completed, Scheduling publishes `BookingCompleted` and Inventory takes the estimate off stock:
+  norm × size factor × what the studio has learned. It happens once per booking, a moment after the request (on the bus).
+  - `GET /api/inventory/consumptions/{bookingId}` shows per service and material the `baseQuantity` (norm for the size),
+    `estimatedQuantity` (deducted) and `actualQuantity`. It is 404 `CONSUMPTION_NOT_FOUND` until recorded.
+  - `PUT /api/inventory/consumptions/{bookingId}` `{ "lines": [{ "serviceId", "itemId", "actualQuantity": 0.3 }] }`
+    records what the visit really used. Stock moves by the difference. The first actual amount of each line teaches
+    the estimate (exponential smoothing, applied after three visits); later edits only fix stock.
+  - `GET /api/inventory/consumptions/accuracy`: per service and material the learned `factor`, `samples` and the mean
+    absolute percentage error of the corrected estimates.
+- `GET /api/inventory/forecast`: per item its `averageDailyUse` (last 30 days), `daysLeft`, `plannedUse` by the open
+  bookings of the next two weeks, `stockAfterPlanned` and `runsOutAt` (the start of the first booked visit stock won't
+  cover).
