@@ -4,14 +4,14 @@
 GET {{Api_HostAddress}}/api/employees
 Authorization: Bearer {{auth_token}}
 Accept: application/json
-X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+X-Studio-Id: {{studio_id}}
 
 
 ### PATCH Employee role
 PATCH {{Api_HostAddress}}/api/employees/role
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
-X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+X-Studio-Id: {{studio_id}}
 
 {
   "userId": "4a4b87ef-3ac7-4dca-bf00-9be362d2c8d6",
@@ -21,4 +21,4 @@ X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
 ### DELETE Employee (soft delete)
 DELETE {{Api_HostAddress}}/api/employees/4a4b87ef-3ac7-4dca-bf00-9be362d2c8d6
 Authorization: Bearer {{auth_token}}
-X-Studio-Id: 65399519-4d06-4e7e-8489-54c23ae54a50
+X-Studio-Id: {{studio_id}}
