@@ -152,6 +152,18 @@ Studio staff (normal studio context):
 
 Emails: the studio's owners get each new request; the customer gets the answer. Times are in the studio's time zone.
 
+## Reviews
+
+- A customer can review a visit once staff complete a booking that came from their request (bookings staff entered
+  have no customer account). It becomes reviewable a moment after completion (on the bus), for 90 days.
+- `GET /api/me/reviews/pending`: the caller's visits still to review (`bookingId`, `studioId`, `studioName`,
+  `completedAt`, `reviewableUntil`).
+- `POST /api/me/reviews` `{ "bookingId", "rating": 1-5, "comment"? }` → 201 with `authorName` ("Anna N." from the
+  profile). Errors: `REVIEWABLE_VISIT_NOT_FOUND` (not their visit, not completed, or no customer),
+  `REVIEW_ALREADY_EXISTS`, `REVIEW_PERIOD_OVER`, `CUSTOMER_PROFILE_REQUIRED`.
+- `GET /api/public/studios/{studioId}/reviews` (no login, paged, newest first). The studio page and map pins carry
+  `averageRating` (one decimal, null before the first review) and `reviewCount`.
+
 ## Planning (bays, opening hours, free times)
 
 A studio **plans** once it has opening hours and at least one active bay (`planningEnabled` in the responses). Until

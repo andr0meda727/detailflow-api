@@ -67,13 +67,14 @@ requests inside its hours and gets a planning view to answer them.
   - a new request goes to the studio's staff (via `IStudioDirectory`);
   - accepted and rejected go to the customer, with times in the studio's zone.
 
-## 5. Reviews (Marketplace)
-- Scheduling already publishes `BookingCompleted(StudioId, BookingId, CustomerUserId?, VehicleSize, ServiceIds,
-  CompletedAt)` (Inventory uses it for materials). Marketplace consumes it too and records that the customer may review
-  that booking.
-- `POST /api/me/reviews` takes `{ bookingId, rating 1–5, comment }`. It's allowed once per completed booking, only
-  by that customer.
-- The listing keeps its average rating and review count. Reviews are shown paged on the studio page.
+## 5. Reviews (Marketplace) (done)
+- Scheduling publishes `BookingCompleted(StudioId, BookingId, CustomerUserId?, VehicleSize, ServiceIds, CompletedAt)`
+  (Inventory uses it for materials). Marketplace's `ReviewableVisitConsumer` records a `ReviewableVisit` for visits
+  booked from a customer account, keyed by booking, so redelivery is harmless.
+- `POST /api/me/reviews` takes `{ bookingId, rating 1–5, comment }`: once per completed booking, only by that customer,
+  within 90 days. The author shows as first name and initial.
+- The average rating and review count are computed from the reviews when read (indexed by studio), so they are never
+  out of step and concurrent reviews can't lose an update. Reviews are shown paged on the studio page.
 
 ## Later
 Instant booking (a free slot booked without confirmation), staff schedules and skills, photos (Supabase Storage), PostGIS "nearest first", studio replies to
