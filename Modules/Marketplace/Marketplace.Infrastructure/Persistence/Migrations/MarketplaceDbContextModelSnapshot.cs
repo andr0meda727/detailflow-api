@@ -23,6 +23,106 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Marketplace.Domain.Reviews.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("author_name");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("review_pkey");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique()
+                        .HasDatabaseName("review_booking_id_key");
+
+                    b.HasIndex("StudioId", "CreatedAt")
+                        .HasDatabaseName("review_studio_id_created_at_idx");
+
+                    b.ToTable("review", "marketplace", t =>
+                        {
+                            t.HasCheckConstraint("CK_review_rating", "rating BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("Marketplace.Domain.Reviews.ReviewableVisit", b =>
+                {
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("CustomerUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_user_id");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("studio_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("BookingId")
+                        .HasName("reviewable_visit_pkey");
+
+                    b.HasIndex("CustomerUserId", "CompletedAt")
+                        .HasDatabaseName("reviewable_visit_customer_completed_idx");
+
+                    b.ToTable("reviewable_visit", "marketplace");
+                });
+
             modelBuilder.Entity("Marketplace.Domain.StudioListing", b =>
                 {
                     b.Property<Guid>("StudioId")
@@ -103,6 +203,16 @@ namespace Marketplace.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_studio_listing_longitude", "longitude BETWEEN -180 AND 180");
                         });
+                });
+
+            modelBuilder.Entity("Marketplace.Domain.Reviews.Review", b =>
+                {
+                    b.HasOne("Marketplace.Domain.Reviews.ReviewableVisit", null)
+                        .WithOne()
+                        .HasForeignKey("Marketplace.Domain.Reviews.Review", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("review_booking_id_fkey");
                 });
 
             modelBuilder.Entity("Marketplace.Domain.StudioListing", b =>

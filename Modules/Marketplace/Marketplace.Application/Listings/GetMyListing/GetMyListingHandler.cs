@@ -15,6 +15,8 @@ public sealed class GetMyListingHandler(IMarketplaceDbContext db, ITenantContext
         // Listings aren't tenant-filtered, so the caller's studio is matched here
         var listing = await db.Listings.AsNoTracking().FirstOrDefaultAsync(l => l.StudioId == studioId, cancellationToken);
 
-        return listing == null ? ListingErrors.NotFound : ListingDto.From(listing);
+        if (listing == null) return ListingErrors.NotFound;
+
+        return ListingDto.From(listing, await Reviews.RatingQueries.RatingAsync(db, studioId, cancellationToken));
     }
 }

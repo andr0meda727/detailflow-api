@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Marketplace.Contracts\Marketplace.Contracts.csproj" />
+        <ProjectReference Include="..\..\Customers\Customers.Contracts\Customers.Contracts.csproj" />
         <ProjectReference Include="..\Marketplace.Domain\Marketplace.Domain.csproj" />
         <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
     </ItemGroup>

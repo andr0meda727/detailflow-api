@@ -1,5 +1,6 @@
 using Marketplace.Application.Abstractions;
 using Marketplace.Domain;
+using Marketplace.Domain.Reviews;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Persistence;
 using Shared.Kernel.Tenancy;
@@ -14,6 +15,13 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
     public const string Schema = "marketplace";
 
     public DbSet<StudioListing> Listings => Set<StudioListing>();
+
+    public DbSet<ReviewableVisit> ReviewableVisits => Set<ReviewableVisit>();
+
+    public DbSet<Review> Reviews => Set<Review>();
+
+    // The primary key that makes recording a reviewable visit idempotent
+    public const string ReviewableVisitKey = "reviewable_visit_pkey";
 
     protected override void ConfigureModel(ModelBuilder modelBuilder)
     {

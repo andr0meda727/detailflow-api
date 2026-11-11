@@ -1,5 +1,6 @@
 using Marketplace.Application.Abstractions;
 using Marketplace.Application.Listings;
+using Marketplace.Application.Reviews;
 using Marketplace.Domain;
 using Microsoft.EntityFrameworkCore;
 using Shared.Kernel.Results;
@@ -16,6 +17,8 @@ public sealed class GetPublicStudioHandler(IMarketplaceDbContext db)
         var listing = await db.Listings.AsNoTracking()
             .FirstOrDefaultAsync(l => l.StudioId == studioId && l.IsPublished, cancellationToken);
 
-        return listing == null ? ListingErrors.NotFound : ListingDto.From(listing);
+        if (listing == null) return ListingErrors.NotFound;
+
+        return ListingDto.From(listing, await db.RatingAsync(studioId, cancellationToken));
     }
 }

@@ -1,4 +1,5 @@
 using Marketplace.Domain;
+using Marketplace.Domain.Reviews;
 using Microsoft.EntityFrameworkCore;
 
 namespace Marketplace.Application.Abstractions;
@@ -10,6 +11,11 @@ namespace Marketplace.Application.Abstractions;
 public interface IMarketplaceDbContext
 {
     DbSet<StudioListing> Listings { get; }
+
+    // Reviews are public too; customer endpoints match the caller's user ID themselves
+    DbSet<ReviewableVisit> ReviewableVisits { get; }
+
+    DbSet<Review> Reviews { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

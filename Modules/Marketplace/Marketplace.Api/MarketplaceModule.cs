@@ -6,6 +6,7 @@ using Marketplace.Application.Listings;
 using Marketplace.Application.Listings.GetMyListing;
 using Marketplace.Application.Listings.PublishListing;
 using Marketplace.Application.Listings.SaveListing;
+using Marketplace.Application.Reviews;
 using Marketplace.Application.Search.GetPublicStudio;
 using Marketplace.Application.Search.SearchStudios;
 using Marketplace.Contracts;
@@ -33,6 +34,9 @@ public static class MarketplaceModule
         services.AddScoped<PublishListingHandler>();
         services.AddScoped<SearchStudiosHandler>();
         services.AddScoped<GetPublicStudioHandler>();
+        services.AddScoped<SubmitReviewHandler>();
+        services.AddScoped<GetReviewableVisitsHandler>();
+        services.AddScoped<GetStudioReviewsHandler>();
 
         services.AddValidatorsFromAssemblyContaining<ListingRequestValidator>();
 

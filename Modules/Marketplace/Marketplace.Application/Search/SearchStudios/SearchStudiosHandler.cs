@@ -1,5 +1,6 @@
 using FluentValidation;
 using Marketplace.Application.Abstractions;
+using Marketplace.Application.Reviews;
 using Marketplace.Domain;
 using Microsoft.EntityFrameworkCore;
 using Scheduling.Contracts;
@@ -19,15 +20,17 @@ public sealed record StudioSearchRequest(
 
 /// <summary>
 /// One pin on the map. <see cref="FromPrice"/> is the cheapest price for the chosen vehicle size (within the chosen
-/// category), in złoty; null when no size was chosen or the studio quotes it on request.
+/// category), in złoty; null when no size was chosen or the studio quotes it on request. <see cref="AverageRating"/> is
+/// null until the studio has a review.
 /// </summary>
 public sealed record StudioPinDto(
     Guid StudioId, string Name, string City, double Latitude, double Longitude,
-    List<ServiceCategory> Categories, decimal? FromPrice)
+    List<ServiceCategory> Categories, decimal? FromPrice, double? AverageRating = null, int ReviewCount = 0)
 {
-    public static StudioPinDto From(StudioListing listing, StudioSearchRequest request) => new(
+    public static StudioPinDto From(StudioListing listing, StudioSearchRequest request, RatingSummary rating) => new(
         listing.StudioId, listing.Name, listing.City, listing.Latitude, listing.Longitude, listing.Categories.ToList(),
-        request.VehicleSize is { } size && listing.FromPrice(size, request.Category) is { } cents ? cents / 100m : null);
+        request.VehicleSize is { } size && listing.FromPrice(size, request.Category) is { } cents ? cents / 100m : null,
+        rating.AverageRating, rating.ReviewCount);
 }
 
 public sealed class SearchStudiosHandler(IMarketplaceDbContext db)
@@ -52,7 +55,10 @@ public sealed class SearchStudiosHandler(IMarketplaceDbContext db)
             .OrderBy(l => l.Name).ThenBy(l => l.StudioId)
             .ToPagedResponseAsync(page, cancellationToken);
 
-        return listings.Map(l => StudioPinDto.From(l, request));
+        // One grouped query for the page's ratings
+        var ratings = await db.RatingsAsync(listings.Items.Select(l => l.StudioId).ToList(), cancellationToken);
+
+        return listings.Map(l => StudioPinDto.From(l, request, ratings.GetValueOrDefault(l.StudioId) ?? RatingSummary.None));
     }
 }
 

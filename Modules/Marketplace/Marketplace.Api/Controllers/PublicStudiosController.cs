@@ -1,4 +1,5 @@
 using Marketplace.Application.Listings;
+using Marketplace.Application.Reviews;
 using Marketplace.Application.Search.GetPublicStudio;
 using Marketplace.Application.Search.SearchStudios;
 using Microsoft.AspNetCore.Authorization;
@@ -39,6 +40,19 @@ public class PublicStudiosController : ControllerBase
         Guid studioId, [FromServices] GetPublicStudioHandler handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(studioId, cancellationToken);
+
+        return result.Success ? result.Value! : this.ToProblem(result.Error!);
+    }
+
+    /// <summary>
+    /// A published studio's reviews, newest first.
+    /// </summary>
+    [HttpGet("{studioId:guid}/reviews")]
+    public async Task<ActionResult<PagedResponse<ReviewDto>>> Reviews(
+        Guid studioId, [FromQuery] PageRequest paging, [FromServices] GetStudioReviewsHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(studioId, paging, cancellationToken);
 
         return result.Success ? result.Value! : this.ToProblem(result.Error!);
     }
