@@ -77,6 +77,14 @@ To page another list this way: bind `[FromQuery] CursorRequest paging` (not name
 decode `paging.Cursor` with `TimeCursor.TryDecode`, keep the rows after it (moment desc, then id desc), order the same
 way and call `ToCursorResponseAsync`.
 
+## Caching
+
+The public studio endpoints (`GET /api/public/studios`, `/{id}` and `/{id}/reviews`) are output-cached on the server
+for up to 60 seconds, keyed by the full URL and shared by every caller. A cached answer carries an `Age` header. Any
+write in the Marketplace module (a listing edit, publishing, a review, a price change arriving from Scheduling) empties
+the cache, so changes made through the API show at once. Errors are never cached, and availability is not cached at all.
+Nothing tenant-scoped is cached on the server.
+
 ## Dates and times
 
 - **Moments are UTC.** Responses carry ISO 8601 with `Z` (`"2026-10-03T08:00:00Z"`), and requests must send the same

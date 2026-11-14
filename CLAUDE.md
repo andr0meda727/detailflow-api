@@ -128,7 +128,9 @@ A new module gets added to `ModuleBoundaryTests.Modules`, so every rule applies 
   not per studio: `CustomersDbContext` has an `Owner` filter on `ICustomerOwned` (`UserId == ITenantContext.UserId`),
   failing closed like the tenant filter. Shared input rules live in `Shared.Application.Validation`. Marketplace listings are public, cross-studio data: not `ITenantEntity`, so owner
   endpoints match `ITenantContext.StudioId` themselves. Public endpoints use `[AllowAnonymous]`, `[AllowWithoutStudio]`
-  and `[EnableRateLimiting(RateLimits.Public)]`. The host trusts `X-Forwarded-For` only from private addresses.
+  and `[EnableRateLimiting(RateLimits.Public)]`. `PublicStudiosController` is output-cached (`PublicCatalogCachePolicy`,
+  60 s, shared by all callers); `PublicCatalogEvictionInterceptor` empties it after every `MarketplaceDbContext` save, so
+  public answers must be built only from Marketplace's own tables. Never output-cache tenant data. The host trusts `X-Forwarded-For` only from private addresses.
   `VehicleSize` lives in `Shared.Kernel.Vehicles` and travels between modules by name; don't add a second one.
 - Planning (Scheduling, `Domain/Planning`): a studio plans once it has opening hours and an active bay. `SlotPlanner`
   is pure (unit-tested); `BookingPlanner` loads its input through the `*OfAnyStudio` sets. A booking's `EndsAt` is
