@@ -116,7 +116,7 @@ A new module gets added to `ModuleBoundaryTests.Modules`, so every rule applies 
     handlers are tested against real Postgres in `IntegrationTests`, not with a mocked DbContext.
 - Profile rows in `identity."user"` come from Supabase's `handle_new_user()` trigger on `auth.users`, not from this code.
   Its SQL names the table, so moving that table must rewrite the function (see `AdoptIdentityTables`).
-- Production still needs the pending upgrade in `docs/database.md` ("Upgrading production"). The Supabase MCP is
+- Production (Supabase) is migrated up to date (2026-11-14); new migrations go out as in `docs/database.md`. The Supabase MCP is
   read-only unless the user switches it; ask before any write.
 - The customer marketplace (map search, customer accounts, booking requests, reviews) follows
   `docs/marketplace-roadmap.md`; steps 1 (service categories, prices per `VehicleSize`), 2 (Marketplace listings,
