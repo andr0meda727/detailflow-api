@@ -55,8 +55,27 @@ Small lookup lists (services, inventory categories, employees) are not paged; th
    `Shared.Application.Pagination`.
 3. Map entities to DTOs with `PagedResponse<T>.Map`.
 
-The public marketplace search will use cursor (keyset) pagination instead, since offset gets slow on deep
-pages and doesn't suit infinite scroll.
+The public map search stays on offset paging: it only returns the studios inside the visible map area, so the list
+is short and moving the map starts a new search from page 1.
+
+### Cursor (keyset) paging
+
+A studio's public reviews are a "show more" list that grows at the top. With offsets, a review written while someone
+reads would push one they already saw onto the next page, so this list pages by cursor instead:
+
+```
+GET /api/public/studios/{id}/reviews?limit=20
+→ { "items": [ ... ], "nextCursor": "NjM4OTk..." }
+GET /api/public/studios/{id}/reviews?limit=20&cursor=NjM4OTk...
+→ { "items": [ ... ], "nextCursor": null }
+```
+
+The cursor is opaque (base64url of the last row's `createdAt` and id). There is no `totalCount` and no jumping to a
+page; the studio's `reviewCount` gives the total. A malformed cursor returns `400` with `INVALID_CURSOR`.
+
+To page another list this way: bind `[FromQuery] CursorRequest paging` (not named `cursor`, for the same prefix reason),
+decode `paging.Cursor` with `TimeCursor.TryDecode`, keep the rows after it (moment desc, then id desc), order the same
+way and call `ToCursorResponseAsync`.
 
 ## Dates and times
 

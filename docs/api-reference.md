@@ -22,6 +22,8 @@ read that first. In Development the live OpenAPI schema is at `/openapi/v1.json`
   as in C# (`Name`, `Vehicle.LicensePlate`, `Prices[0].Price`). 429 = rate limit (public and customer writes,
   120 requests/min per IP). 500 has no `code`.
 - **Paged lists** take `?page=1&pageSize=20` (max 100) and return `{ items, page, pageSize, totalCount, totalPages }`.
+- **Cursor lists** (a studio's reviews) take `?limit=20` (max 100) and return `{ items, nextCursor }`. For the next
+  slice send `?cursor=<nextCursor>`; `nextCursor` is null on the last one. A malformed cursor is `400 INVALID_CURSOR`.
 
 Lookup values the API doesn't list:
 
@@ -179,7 +181,7 @@ services: [{ id, name, category, prices: [{ vehicleSize, price }] }], averageRat
 |---|---|---|
 | `GET /api/public/studios?minLat&maxLat&minLng&maxLng&category=&vehicleSize=&page=` | public | paged `{ studioId, name, city, latitude, longitude, categories, fromPrice, averageRating, reviewCount }` |
 | `GET /api/public/studios/{studioId}` | public | `Listing`. `LISTING_NOT_FOUND` |
-| `GET /api/public/studios/{studioId}/reviews?page=` | public | paged `{ id, authorName, rating, comment, createdAt }` |
+| `GET /api/public/studios/{studioId}/reviews?limit=&cursor=` | public | cursor list of `{ id, authorName, rating, comment, createdAt }`, newest first. `LISTING_NOT_FOUND`, `INVALID_CURSOR` |
 | `GET /api/public/studios/{studioId}/availability?from&to&serviceIds&vehicleSize` | public | `{ planningEnabled, durationMinutes, slots: [{ start, end }] }`. `STUDIO_NOT_FOUND`, `SERVICE_NOT_FOUND` |
 | `POST /api/public/studios/{studioId}/estimate` | public | `{ serviceIds, vehicleSize }` → `{ services: [{ serviceId, name, price }], total, hasUnpricedServices }`. `STUDIO_NOT_FOUND`, `BOOKING_REQUEST_UNKNOWN_SERVICES` |
 

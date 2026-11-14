@@ -45,11 +45,12 @@ public class PublicStudiosController : ControllerBase
     }
 
     /// <summary>
-    /// A published studio's reviews, newest first.
+    /// A published studio's reviews, newest first: <c>?limit=</c>, then <c>?cursor=</c> with the previous
+    /// <c>nextCursor</c> until it is null.
     /// </summary>
     [HttpGet("{studioId:guid}/reviews")]
-    public async Task<ActionResult<PagedResponse<ReviewDto>>> Reviews(
-        Guid studioId, [FromQuery] PageRequest paging, [FromServices] GetStudioReviewsHandler handler,
+    public async Task<ActionResult<CursorResponse<ReviewDto>>> Reviews(
+        Guid studioId, [FromQuery] CursorRequest paging, [FromServices] GetStudioReviewsHandler handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(studioId, paging, cancellationToken);
