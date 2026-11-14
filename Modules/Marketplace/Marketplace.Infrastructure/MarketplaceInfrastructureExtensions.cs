@@ -10,10 +10,14 @@ public static class MarketplaceInfrastructureExtensions
 {
     public static IServiceCollection AddMarketplaceInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<MarketplaceDbContext>(options =>
+        // Needs an IPublicCatalogCache, which the Api layer registers
+        services.AddSingleton<PublicCatalogEvictionInterceptor>();
+
+        services.AddDbContext<MarketplaceDbContext>((sp, options) =>
             options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection"),
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", MarketplaceDbContext.Schema)));
+                    configuration.GetConnectionString("DefaultConnection"),
+                    npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", MarketplaceDbContext.Schema))
+                .AddInterceptors(sp.GetRequiredService<PublicCatalogEvictionInterceptor>()));
 
         services.AddScoped<IMarketplaceDbContext>(sp => sp.GetRequiredService<MarketplaceDbContext>());
 

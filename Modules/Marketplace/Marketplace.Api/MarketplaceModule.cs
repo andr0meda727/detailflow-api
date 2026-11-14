@@ -1,6 +1,8 @@
 using System.Reflection;
 using FluentValidation;
+using Marketplace.Api.Caching;
 using Marketplace.Api.Controllers;
+using Marketplace.Application.Abstractions;
 using Marketplace.Application.Directory;
 using Marketplace.Application.Listings;
 using Marketplace.Application.Listings.GetMyListing;
@@ -42,6 +44,10 @@ public static class MarketplaceModule
 
         // Other modules ask which studios are public through this
         services.AddScoped<IPublicStudios, PublicStudios>();
+
+        // The public endpoints' answers are cached; every Marketplace write empties the cache (the host calls UseOutputCache)
+        services.AddOutputCache(options => options.AddPolicy(PublicCatalogCachePolicy.Name, new PublicCatalogCachePolicy()));
+        services.AddSingleton<IPublicCatalogCache, OutputPublicCatalogCache>();
 
         services.AddMarketplaceInfrastructure(configuration);
 
