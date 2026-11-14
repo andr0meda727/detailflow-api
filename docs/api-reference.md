@@ -9,12 +9,14 @@ read that first. In Development the live OpenAPI schema is at `/openapi/v1.json`
 - **JSON is camelCase**, enums are strings (`"Interior"`, `"Large"`, `"Pending"`), money is złoty as a number with at
   most two decimals (`349.99`), moments are UTC ISO 8601 (`"2026-11-20T08:00:00Z"`), days are `"yyyy-MM-dd"`, times of
   day `"08:00:00"`.
-- **Sign-in is Supabase.** Send the session's access token: `Authorization: Bearer <access_token>`. Customers sign up
-  with `supabase.auth.signUp`; studio owners register with `POST /api/auth/register` and then sign in with Supabase.
+- **Sign-in is Supabase.** Send the session's access token: `Authorization: Bearer <access_token>`. Everyone signs up
+  with `supabase.auth.signUp` (pass `first_name` and `last_name` in `options.data`; they fill the profile). A studio
+  owner then signs in and opens a studio with `POST /api/studios`; an owner may open several (one per location).
+  `POST /api/auth/register` (account and studio in one call) still works but is being retired.
 - **Studio context.** Staff endpoints work in one studio. With one membership it is chosen automatically; a member of
   several studios sends `X-Studio-Id: <studioId>` (from `GET /api/studios/my`). Without it: 400 `STUDIO_REQUIRED`;
   a studio the user isn't in: 403 `STUDIO_ACCESS_DENIED`; a token without a profile row: 401 `USER_PROFILE_NOT_FOUND`.
-  `/api/me/*`, `/api/public/*`, `/api/studios/my` and invitations never need it.
+  `/api/me/*`, `/api/public/*`, `/api/studios/my`, `POST /api/studios` and invitations never need it.
 - **Who may call** (column "Auth" below): `public` = no login; `user` = any signed-in account (no studio);
   `staff` = any member of the current studio; `owner` = the studio's owner (others get 403).
 - **Errors** are `application/problem+json` with `status`, `detail` (mostly Polish and fit to show, though a few older ones are English) and `code` (switch on it).
@@ -48,6 +50,7 @@ spaces, at most 15; brand and model at most 50; NIP 10 digits with a valid check
 | Method and path | Auth | Body → response |
 |---|---|---|
 | `POST /api/auth/register` | public | `{ email, password, firstName, lastName, studio: { name, phone?, email?, address?, timeZone? } }` → 200 `{ message }`. Password ≥ 8 with a capital and a digit. `EMAIL_TAKEN` |
+| `POST /api/studios` | user | `{ name, phone?, email?, address?, timeZone? }` → 201 `{ studioId, name, role: "Owner", address, timeZone }`; the caller becomes its owner. Works without a studio (onboarding) and for owners adding a location. At most 10 owned studios: `STUDIO_LIMIT_REACHED` |
 | `GET /api/studios/my` | user | `[{ studioId, name, role, address, timeZone }]` (`role` = "Owner", "Manager", "Employee") |
 | `PUT /api/studios/time-zone` | owner | `{ timeZone: "Europe/Warsaw" }` → 204. `INVALID_TIME_ZONE` |
 | `GET /api/employees` | owner | `[{ userId, email, firstName, lastName, roleId, roleName }]` |
