@@ -127,10 +127,15 @@ to publish is retried; after 10 attempts it stays in `outbox_message` with `last
 Consumer failures are retried three times, then the message moves to the endpoint's `_error` queue in the
 `transport` schema.
 
-## Upgrading production (pending)
+## Upgrading production (done 2026-11-14)
 
-Production was last migrated with `InitialSync`, so everything since the Baseline is still to be applied. Once the
-tables move, the deployed app no longer matches the schema: apply the SQL and deploy the new version together.
+Production is up to date: on 2026-11-14 the steps below ran as one transaction through the Supabase MCP (reconcile
+script, then every migration up to `AddReviews` / `CreateCustomers`), after a rehearsal on a local copy of the live
+schema. Two leftover accounts without a profile and three studios without members were deleted in the same
+transaction. Later migrations are applied the usual way ("Applying migrations to Supabase" above).
+
+The procedure is kept for reference. Production had last been migrated with `InitialSync`; once the tables moved,
+an app built before the modules no longer matched the schema, so the SQL and the new version go out together.
 
 1. Take a backup: `pg_dump --format=custom --file=detailflow-before-modules.dump "<direct connection string>"`.
 2. Run `docs/sql/01-reconcile-live-schema-with-baseline.sql` (fixes the hand-built schema, records the Baseline).
