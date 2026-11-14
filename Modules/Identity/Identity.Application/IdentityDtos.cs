@@ -1,5 +1,6 @@
 using FluentValidation;
 using Identity.Domain.Studios;
+using Shared.Application.Validation;
 using Shared.Kernel.Time;
 
 namespace Identity.Application;
@@ -37,6 +38,10 @@ public sealed record ChangeEmployeeRoleRequest(Guid UserId, long RoleId);
 public sealed record UserStudioDto(Guid StudioId, string Name, string Role, string? Address, string TimeZone);
 
 public sealed record ChangeStudioTimeZoneRequest(string TimeZone);
+
+// TimeZone is an IANA name, e.g. "Europe/Warsaw"; Europe/Warsaw when left out
+public sealed record CreateStudioRequest(
+    string Name, string? Phone = null, string? Email = null, string? Address = null, string? TimeZone = null);
 
 public sealed record StudioEmployeeDto(
     Guid UserId, string Email, string? FirstName, string? LastName, long RoleId, string RoleName);
@@ -93,6 +98,32 @@ public class InviteEmployeeRequestValidator : AbstractValidator<InviteEmployeeRe
             .Must(Roles.IsAssignable).WithMessage(
                 "Możesz zaprosić użytkownika tylko na rolę Pracownika lub Managera. " +
                 "Nie można bezpośrednio przyznać roli Właściciela.");
+    }
+}
+
+public class CreateStudioRequestValidator : AbstractValidator<CreateStudioRequest>
+{
+    public CreateStudioRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Nazwa studia jest wymagana.")
+            .MaximumLength(100).WithMessage("Nazwa studia nie może przekraczać 100 znaków.");
+
+        RuleFor(x => x.Phone)
+            .ValidPhone()
+            .When(x => !string.IsNullOrWhiteSpace(x.Phone));
+
+        RuleFor(x => x.Email)
+            .EmailAddress().WithMessage("Podany adres e-mail jest nieprawidłowy.")
+            .MaximumLength(254).WithMessage("Adres e-mail jest zbyt długi.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Email));
+
+        RuleFor(x => x.Address)
+            .MaximumLength(200).WithMessage("Adres nie może przekraczać 200 znaków.");
+
+        RuleFor(x => x.TimeZone)
+            .Must(TimeZones.IsValid).WithMessage("Nieznana strefa czasowa. Podaj nazwę IANA, np. Europe/Warsaw.")
+            .When(x => x.TimeZone != null);
     }
 }
 

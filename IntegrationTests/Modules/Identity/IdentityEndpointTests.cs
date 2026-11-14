@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Identity.Application.Studios.CreateStudio;
 using Identity.Domain.Studios;
 using Identity.Domain.Users;
 using IntegrationTests.Api;
@@ -243,5 +244,90 @@ public class IdentityEndpointTests
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Conflict));
         Assert.That(await ProblemCodeAsync(response), Is.EqualTo("EMAIL_TAKEN"));
+    }
+
+    // A signed-up account (profile row) that works in no studio yet
+    private static async Task<Guid> CreateUserWithoutStudioAsync()
+    {
+        var userId = Guid.NewGuid();
+        await using var db = PostgresFixture.CreateIdentityDbContext(new TenantContext());
+        db.Users.Add(new User(userId, $"{userId:N}@test.pl", "Adam", "Nowak"));
+        await db.SaveChangesAsync();
+        return userId;
+    }
+
+    [Test]
+    public async Task CreateStudio_WithoutAStudio_MakesTheCallerItsOwner()
+    {
+        using var client = _factory.CreateClientFor(await CreateUserWithoutStudioAsync());
+
+        var response = await client.PostAsJsonAsync("/api/studios", new
+        {
+            name = "  Nowe Studio ", phone = "500 600 700", timeZone = "Europe/Lisbon"
+        });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+        var created = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var studios = await client.GetFromJsonAsync<JsonElement>("/api/studios/my");
+        Assert.That(studios.GetArrayLength(), Is.EqualTo(1));
+        Assert.That(studios[0].GetProperty("studioId").GetGuid(), Is.EqualTo(created.GetProperty("studioId").GetGuid()));
+        Assert.That(studios[0].GetProperty("name").GetString(), Is.EqualTo("Nowe Studio"));
+        Assert.That(studios[0].GetProperty("role").GetString(), Is.EqualTo("Owner"));
+        Assert.That(studios[0].GetProperty("timeZone").GetString(), Is.EqualTo("Europe/Lisbon"));
+    }
+
+    [Test]
+    public async Task CreateStudio_AnOwnerCanOpenAnotherLocation()
+    {
+        using var client = _factory.CreateClientFor(await CreateUserWithoutStudioAsync());
+
+        await client.PostAsJsonAsync("/api/studios", new { name = "Studio Centrum" });
+        var second = await client.PostAsJsonAsync("/api/studios", new { name = "Studio Mokotów" });
+
+        Assert.That(second.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+        var studios = await client.GetFromJsonAsync<JsonElement>("/api/studios/my");
+        Assert.That(studios.EnumerateArray().Select(s => s.GetProperty("name").GetString()),
+            Is.EqualTo(new[] { "Studio Centrum", "Studio Mokotów" }));
+        Assert.That(studios.EnumerateArray().Select(s => s.GetProperty("role").GetString()), Is.All.EqualTo("Owner"));
+    }
+
+    [Test]
+    public async Task CreateStudio_StopsAtTheLimitOfOwnedStudios()
+    {
+        var userId = await CreateUserWithoutStudioAsync();
+        await using (var db = PostgresFixture.CreateIdentityDbContext(new TenantContext()))
+        {
+            for (var i = 0; i < CreateStudioHandler.MaxOwnedStudios; i++)
+            {
+                db.Studios.Add(Studio.Register($"Studio {i}", null, null, null, userId));
+            }
+            await db.SaveChangesAsync();
+        }
+        using var client = _factory.CreateClientFor(userId);
+
+        var response = await client.PostAsJsonAsync("/api/studios", new { name = "Jedno za dużo" });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Conflict));
+        Assert.That(await ProblemCodeAsync(response), Is.EqualTo("STUDIO_LIMIT_REACHED"));
+    }
+
+    [Test]
+    public async Task CreateStudio_RejectsInvalidInput()
+    {
+        using var client = _factory.CreateClientFor(await CreateUserWithoutStudioAsync());
+
+        var response = await client.PostAsJsonAsync("/api/studios", new { name = "", phone = "123", timeZone = "Mars/Base" });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        var errors = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("errors");
+        Assert.That(errors.EnumerateObject().Select(e => e.Name), Is.EquivalentTo(new[] { "Name", "Phone", "TimeZone" }));
+    }
+
+    [Test]
+    public async Task CreateStudio_RequiresSigningIn()
+    {
+        var response = await _factory.CreateClient().PostAsJsonAsync("/api/studios", new { name = "Studio" });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
     }
 }
