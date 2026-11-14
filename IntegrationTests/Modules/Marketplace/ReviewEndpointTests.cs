@@ -4,6 +4,7 @@ using System.Text.Json;
 using Identity.Domain.Users;
 using IntegrationTests.Api;
 using IntegrationTests.Infrastructure;
+using Marketplace.Domain.Reviews;
 using Scheduling.Application.Bookings;
 using Scheduling.Domain.Bookings;
 using Shared.Infrastructure.Tenancy;
@@ -171,6 +172,63 @@ public class ReviewEndpointTests
         var response = await customer.PostAsJsonAsync("/api/me/reviews", new { bookingId = Guid.NewGuid(), rating = 6 });
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    [Test]
+    public async Task Reviews_PageByCursor_NewestFirst_WithoutRepeatsWhenOneArrivesInBetween()
+    {
+        // Three saved in one instant (ties broken by id), then two later
+        var seeded = new List<Guid>();
+        await SeedReviewsAsync(3, seeded);
+        await SeedReviewsAsync(2, seeded);
+
+        using var anonymous = _factory.CreateClient();
+        var url = $"/api/public/studios/{_seed.StudioA.StudioId}/reviews?limit=2";
+        var seen = new List<(Guid Id, DateTime CreatedAt)>();
+        string? cursor = null;
+        var slices = 0;
+        do
+        {
+            var slice = await anonymous.GetFromJsonAsync<JsonElement>(cursor == null ? url : $"{url}&cursor={cursor}");
+            var items = slice.GetProperty("items").EnumerateArray().ToList();
+            Assert.That(items, Has.Count.LessThanOrEqualTo(2));
+            seen.AddRange(items.Select(r => (r.GetProperty("id").GetGuid(), r.GetProperty("createdAt").GetDateTime())));
+            cursor = slice.GetProperty("nextCursor").GetString();
+
+            // A review written after the first slice lands above it and doesn't shift the ones still to come
+            if (slices++ == 0) await SeedReviewsAsync(1, []);
+        } while (cursor != null);
+
+        Assert.That(seen.Select(r => r.Id), Is.Unique);
+        Assert.That(seen.Select(r => r.Id), Is.SupersetOf(seeded));
+        Assert.That(seen.Select(r => r.CreatedAt), Is.Ordered.Descending);
+    }
+
+    [Test]
+    public async Task Reviews_RejectABadCursor()
+    {
+        using var anonymous = _factory.CreateClient();
+
+        var response = await anonymous.GetAsync($"/api/public/studios/{_seed.StudioA.StudioId}/reviews?cursor=garbage");
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(await ProblemCodeAsync(response), Is.EqualTo("INVALID_CURSOR"));
+    }
+
+    // Reviews of Studio A written straight into the database, all in one SaveChanges (so with one CreatedAt)
+    private async Task SeedReviewsAsync(int count, List<Guid> ids)
+    {
+        await using var db = PostgresFixture.CreateMarketplaceDbContext(new TenantContext());
+        for (var i = 0; i < count; i++)
+        {
+            var visit = ReviewableVisit.Record(Guid.NewGuid(), _seed.StudioA.StudioId, Guid.NewGuid(), DateTime.UtcNow);
+            var review = visit.WriteReview(5, $"Seeded {i}", "Test Klient", DateTime.UtcNow).Value!;
+            db.ReviewableVisits.Add(visit);
+            db.Reviews.Add(review);
+            ids.Add(review.Id);
+        }
+
+        await db.SaveChangesAsync();
     }
 
     [Test]

@@ -131,18 +131,33 @@ public sealed class GetReviewableVisitsHandler(IMarketplaceDbContext db, ITenant
 public sealed class GetStudioReviewsHandler(IMarketplaceDbContext db)
 {
     /// <summary>
-    /// A published studio's reviews, newest first.
+    /// A published studio's reviews, newest first, a slice at a time ("show more"). Paged by cursor rather than offset,
+    /// because new reviews arrive at the top: with offsets, one written while the customer reads would push a review
+    /// they already saw onto the next page.
     /// </summary>
-    public async Task<Result<PagedResponse<ReviewDto>>> HandleAsync(
-        Guid studioId, PageRequest page, CancellationToken cancellationToken)
+    public async Task<Result<CursorResponse<ReviewDto>>> HandleAsync(
+        Guid studioId, CursorRequest paging, CancellationToken cancellationToken)
     {
+        TimeCursor? after = null;
+        if (paging.Cursor != null)
+        {
+            if (!TimeCursor.TryDecode(paging.Cursor, out var cursor)) return TimeCursor.Invalid;
+            after = cursor;
+        }
+
         if (!await db.Listings.AnyAsync(l => l.StudioId == studioId && l.IsPublished, cancellationToken))
             return ListingErrors.NotFound;
 
-        var reviews = await db.Reviews.AsNoTracking()
-            .Where(r => r.StudioId == studioId)
-            .OrderByDescending(r => r.CreatedAt).ThenBy(r => r.Id)
-            .ToPagedResponseAsync(page, cancellationToken);
+        var query = db.Reviews.AsNoTracking().Where(r => r.StudioId == studioId);
+
+        // Rows strictly after the cursor in (CreatedAt desc, Id desc) order; the id breaks ties between reviews
+        // saved in the same instant
+        if (after is { At: var at, Id: var id })
+            query = query.Where(r => r.CreatedAt < at || (r.CreatedAt == at && r.Id.CompareTo(id) < 0));
+
+        var reviews = await query
+            .OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.Id)
+            .ToCursorResponseAsync(paging.Limit, r => new TimeCursor(r.CreatedAt, r.Id).Encode(), cancellationToken);
 
         return reviews.Map(ReviewDto.From);
     }

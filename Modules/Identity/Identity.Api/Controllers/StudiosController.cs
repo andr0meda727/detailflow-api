@@ -1,5 +1,6 @@
 using Identity.Application;
 using Identity.Application.Studios.ChangeStudioTimeZone;
+using Identity.Application.Studios.CreateStudio;
 using Identity.Application.Studios.GetMyStudios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,25 @@ public class StudiosController : ControllerBase
         if (tenant.UserId is not { } userId) return Unauthorized();
 
         return await handler.HandleAsync(userId, cancellationToken);
+    }
+
+    /// <summary>
+    /// Opens a new studio with the caller as its owner. Works without a studio (onboarding right after sign-up) and
+    /// for owners adding another location.
+    /// </summary>
+    [HttpPost]
+    [AllowWithoutStudio]
+    public async Task<ActionResult<UserStudioDto>> Create(
+        CreateStudioRequest request, [FromServices] ITenantContext tenant, [FromServices] CreateStudioHandler handler,
+        CancellationToken cancellationToken)
+    {
+        if (tenant.UserId is not { } userId) return Unauthorized();
+
+        var result = await handler.HandleAsync(userId, request, cancellationToken);
+
+        return result.Success
+            ? Created("/api/studios/my", result.Value)
+            : this.ToProblem(result.Error!);
     }
 
     /// <summary>

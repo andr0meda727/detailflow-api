@@ -116,7 +116,7 @@ A new module gets added to `ModuleBoundaryTests.Modules`, so every rule applies 
     handlers are tested against real Postgres in `IntegrationTests`, not with a mocked DbContext.
 - Profile rows in `identity."user"` come from Supabase's `handle_new_user()` trigger on `auth.users`, not from this code.
   Its SQL names the table, so moving that table must rewrite the function (see `AdoptIdentityTables`).
-- Production still needs the pending upgrade in `docs/database.md` ("Upgrading production"). The Supabase MCP is
+- Production (Supabase) is migrated up to date (2026-11-14); new migrations go out as in `docs/database.md`. The Supabase MCP is
   read-only unless the user switches it; ask before any write.
 - The customer marketplace (map search, customer accounts, booking requests, reviews) follows
   `docs/marketplace-roadmap.md`; steps 1 (service categories, prices per `VehicleSize`), 2 (Marketplace listings,
@@ -128,7 +128,9 @@ A new module gets added to `ModuleBoundaryTests.Modules`, so every rule applies 
   not per studio: `CustomersDbContext` has an `Owner` filter on `ICustomerOwned` (`UserId == ITenantContext.UserId`),
   failing closed like the tenant filter. Shared input rules live in `Shared.Application.Validation`. Marketplace listings are public, cross-studio data: not `ITenantEntity`, so owner
   endpoints match `ITenantContext.StudioId` themselves. Public endpoints use `[AllowAnonymous]`, `[AllowWithoutStudio]`
-  and `[EnableRateLimiting(RateLimits.Public)]`. The host trusts `X-Forwarded-For` only from private addresses.
+  and `[EnableRateLimiting(RateLimits.Public)]`. `PublicStudiosController` is output-cached (`PublicCatalogCachePolicy`,
+  60 s, shared by all callers); `PublicCatalogEvictionInterceptor` empties it after every `MarketplaceDbContext` save, so
+  public answers must be built only from Marketplace's own tables. Never output-cache tenant data. The host trusts `X-Forwarded-For` only from private addresses.
   `VehicleSize` lives in `Shared.Kernel.Vehicles` and travels between modules by name; don't add a second one.
 - Planning (Scheduling, `Domain/Planning`): a studio plans once it has opening hours and an active bay. `SlotPlanner`
   is pure (unit-tested); `BookingPlanner` loads its input through the `*OfAnyStudio` sets. A booking's `EndsAt` is

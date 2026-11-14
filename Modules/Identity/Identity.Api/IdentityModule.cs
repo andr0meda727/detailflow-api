@@ -13,6 +13,7 @@ using Identity.Application.Invitations.AcceptInvitation;
 using Identity.Application.Invitations.DeclineInvitation;
 using Identity.Application.Invitations.GetInvitation;
 using Identity.Application.Studios.ChangeStudioTimeZone;
+using Identity.Application.Studios.CreateStudio;
 using Identity.Application.Studios.GetMyStudios;
 using Identity.Application.Studios.RegisterOwner;
 using Identity.Application.Tenancy;
@@ -49,6 +50,7 @@ public static class IdentityModule
 
         services.AddScoped<RegisterOwnerHandler>();
         services.AddScoped<GetMyStudiosHandler>();
+        services.AddScoped<CreateStudioHandler>();
         services.AddScoped<ChangeStudioTimeZoneHandler>();
         services.AddScoped<InviteEmployeeHandler>();
         services.AddScoped<GetEmployeesHandler>();

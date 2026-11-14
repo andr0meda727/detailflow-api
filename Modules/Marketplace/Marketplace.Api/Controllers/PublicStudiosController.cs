@@ -2,8 +2,10 @@ using Marketplace.Application.Listings;
 using Marketplace.Application.Reviews;
 using Marketplace.Application.Search.GetPublicStudio;
 using Marketplace.Application.Search.SearchStudios;
+using Marketplace.Api.Caching;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using Shared.Api.Errors;
 using Shared.Api.RateLimiting;
@@ -14,13 +16,15 @@ namespace Marketplace.Api.Controllers;
 
 /// <summary>
 /// The customer map: anyone can search published studios, without signing in. Signed-in callers (customers, or
-/// staff of several studios) never need to choose a studio here, and requests are rate-limited per IP.
+/// staff of several studios) never need to choose a studio here, and requests are rate-limited per IP. Answers are
+/// cached for up to a minute and dropped on any Marketplace change (<see cref="PublicCatalogCachePolicy"/>).
 /// </summary>
 [ApiController]
 [Route("api/public/studios")]
 [AllowAnonymous]
 [AllowWithoutStudio]
 [EnableRateLimiting(RateLimits.Public)]
+[OutputCache(PolicyName = PublicCatalogCachePolicy.Name)]
 public class PublicStudiosController : ControllerBase
 {
     /// <summary>
@@ -45,11 +49,12 @@ public class PublicStudiosController : ControllerBase
     }
 
     /// <summary>
-    /// A published studio's reviews, newest first.
+    /// A published studio's reviews, newest first: <c>?limit=</c>, then <c>?cursor=</c> with the previous
+    /// <c>nextCursor</c> until it is null.
     /// </summary>
     [HttpGet("{studioId:guid}/reviews")]
-    public async Task<ActionResult<PagedResponse<ReviewDto>>> Reviews(
-        Guid studioId, [FromQuery] PageRequest paging, [FromServices] GetStudioReviewsHandler handler,
+    public async Task<ActionResult<CursorResponse<ReviewDto>>> Reviews(
+        Guid studioId, [FromQuery] CursorRequest paging, [FromServices] GetStudioReviewsHandler handler,
         CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(studioId, paging, cancellationToken);

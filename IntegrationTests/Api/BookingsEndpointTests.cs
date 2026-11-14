@@ -72,6 +72,21 @@ public class BookingsEndpointTests
     }
 
     [Test]
+    public async Task ValidationErrors_AreKeyedByTheRequestsPropertyPaths()
+    {
+        using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);
+
+        // The frontend maps these keys onto form fields, as docs/api-reference.md describes
+        var response = await client.PostAsJsonAsync("/api/service",
+            new { name = "", prices = new[] { new { vehicleSize = "Large", price = -1m } } });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        var errors = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("errors");
+        var keys = errors.EnumerateObject().Select(e => e.Name).ToList();
+        Assert.That(keys, Is.EquivalentTo(new[] { "Name", "Prices[0].Price" }));
+    }
+
+    [Test]
     public async Task List_WithTooLargePageSize_ReturnsValidationProblem()
     {
         using var client = _factory.CreateClientFor(_seed.StudioA.OwnerUserId);

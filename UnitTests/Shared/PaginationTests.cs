@@ -1,4 +1,6 @@
+using System.Buffers.Text;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 using Shared.Kernel.Pagination;
 
 namespace Unit.Shared;
@@ -55,5 +57,69 @@ public class PaginationTests
         Assert.That(mapped, Has.Property(nameof(mapped.Page)).EqualTo(2)
             .And.Property(nameof(mapped.PageSize)).EqualTo(2)
             .And.Property(nameof(mapped.TotalCount)).EqualTo(5));
+    }
+
+    [Test]
+    public void CursorRequest_DefaultsToTwenty()
+    {
+        Assert.That(new CursorRequest().Limit, Is.EqualTo(CursorRequest.DefaultLimit));
+    }
+
+    [TestCase(0)]
+    [TestCase(CursorRequest.MaxLimit + 1)]
+    public void CursorRequest_RejectsOutOfRangeLimits(int limit)
+    {
+        var request = new CursorRequest { Limit = limit };
+
+        var valid = Validator.TryValidateObject(request, new ValidationContext(request), [], validateAllProperties: true);
+
+        Assert.That(valid, Is.False);
+    }
+
+    [Test]
+    public void TimeCursor_RoundTrips()
+    {
+        var cursor = new TimeCursor(new DateTime(2026, 11, 14, 9, 30, 15, 123, 456, DateTimeKind.Utc), Guid.NewGuid());
+
+        Assert.That(TimeCursor.TryDecode(cursor.Encode(), out var decoded), Is.True);
+        Assert.That(decoded, Is.EqualTo(cursor));
+        Assert.That(decoded.At.Kind, Is.EqualTo(DateTimeKind.Utc));
+    }
+
+    [Test]
+    public void TimeCursor_IsUrlSafe()
+    {
+        var encoded = new TimeCursor(DateTime.UtcNow, Guid.NewGuid()).Encode();
+
+        Assert.That(encoded, Does.Match("^[A-Za-z0-9_-]+$"));
+    }
+
+    [TestCase("")]
+    [TestCase("not base64!")]
+    public void TimeCursor_RejectsGarbage(string value)
+    {
+        Assert.That(TimeCursor.TryDecode(value, out _), Is.False);
+    }
+
+    [TestCase("123")]
+    [TestCase("-1:0123456789abcdef0123456789abcdef")]
+    [TestCase("99999999999999999999:0123456789abcdef0123456789abcdef")]
+    [TestCase("3155378976000000000:0123456789abcdef0123456789abcdef")] // DateTime.MaxValue.Ticks + 1
+    [TestCase("638000000000000000:not-a-guid")]
+    [TestCase("638000000000000000:0123456789abcdef0123456789abcdef:x")]
+    public void TimeCursor_RejectsMalformedContent(string text)
+    {
+        var encoded = Base64Url.EncodeToString(Encoding.UTF8.GetBytes(text));
+
+        Assert.That(TimeCursor.TryDecode(encoded, out _), Is.False);
+    }
+
+    [Test]
+    public void CursorResponse_Map_KeepsTheNextCursor()
+    {
+        var mapped = new CursorResponse<int>([1, 2], "abc").Map(i => i.ToString());
+
+        Assert.That(mapped.Items, Is.EqualTo(new[] { "1", "2" }));
+        Assert.That(mapped.NextCursor, Is.EqualTo("abc"));
     }
 }

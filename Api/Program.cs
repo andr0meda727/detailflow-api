@@ -92,6 +92,9 @@ app.UseCors("Frontend");
 
 app.UseRateLimiter();
 
+// After the rate limiter, so cached answers still count; before authentication, so a hit skips the profile lookup
+app.UseOutputCache();
+
 app.UseAuthentication();
 
 // Needs the routed endpoint (for [AllowWithoutStudio]) and the authenticated user
